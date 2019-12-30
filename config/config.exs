@@ -10,6 +10,13 @@ use Mix.Config
 config :recognizer,
   ecto_repos: [Recognizer.Repo]
 
+config :recognizer, Recognizer.Repo,
+  database: "rolodex",
+  hostname: "localhost",
+  password: "system76",
+  port: 3306,
+  username: "root"
+
 # Configures the endpoint
 config :recognizer, RecognizerWeb.Endpoint,
   url: [host: "localhost"],

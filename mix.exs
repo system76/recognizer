@@ -33,15 +33,15 @@ defmodule Recognizer.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:ecto_sql, "~> 3.1", override: true},
+      {:ecto_sql, "~> 3.1"},
       {:gettext, "~> 0.11"},
-      {:guardian_db, "~> 2.0"},
+      {:guardian, "~> 2.0"},
       {:jason, "~> 1.0"},
+      {:myxql, "~> 0.2"},
       {:phoenix, "~> 1.4.11"},
       {:phoenix_ecto, "~> 4.0"},
       {:phoenix_pubsub, "~> 1.1"},
       {:plug_cowboy, "~> 2.0"},
-      {:postgrex, ">= 0.0.0"},
       {:ex_machina, "~> 2.3", only: :test}
     ]
   end

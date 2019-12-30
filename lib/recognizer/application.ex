@@ -12,8 +12,6 @@ defmodule Recognizer.Application do
       Recognizer.Repo,
       # Start the endpoint when the application starts
       RecognizerWeb.Endpoint
-      # Starts a worker by calling: Recognizer.Worker.start_link(arg)
-      # {Recognizer.Worker, arg},
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
