@@ -1,19 +1,29 @@
+<p align="center">
+  <img width="250" height="219" src="https://user-images.githubusercontent.com/73386/71603660-25697100-2b1b-11ea-8b04-dad3b0b7bae5.png">
+</p>
+
 # Recognizer
 
-To start your Phoenix server:
+Recognizer is a standalone service designed to provide the functionality of both an authentication service and a user account service.
 
-  * Install dependencies with `mix deps.get`
-  * Create and migrate your database with `mix ecto.setup`
-  * Start Phoenix endpoint with `mix phx.server`
+### Running tests
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+For convince a `docker-compose.yml` file has been included to manage the MySQL instance during testing. Before we run our test suite, we need to stand up our MySQL instance:
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+```shell
+$ docker-compose up
+```
 
-## Learn more
+Now we're ready to run our tests:
 
-  * Official website: http://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Mailing list: http://groups.google.com/group/phoenix-talk
-  * Source: https://github.com/phoenixframework/phoenix
+```shell
+$ mix test
+Finished in 0.2 seconds
+11 tests, 0 failures
+```
+
+### License
+
+The Recognizer source code is released under a Apache 2.0 License.
+
+See [LICENSE](https://github.com/doomspork/recognizer/blob/master/LICENSE) for more information.
