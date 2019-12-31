@@ -3,22 +3,18 @@ defmodule Recognizer.Auth do
   Authentication functionality
   """
 
-  alias Recognizer.{Accounts, Audiences, Guardian}
-  alias Recognizer.Schemas.{Audience, User}
-
-  defdelegate decode_and_verify(token), to: Guardian
+  alias Recognizer.{Accounts, Guardian}
+  alias Recognizer.Schemas.User
 
   @doc """
   Exposes the Guardian token refresh functionality
   """
-  @spec exchange(String.t(), String.t()) :: {:ok, String.t(), String.t()} | :error
-  def exchange(refresh_token, audience_token) do
-    with %Audience{id: aud} <- Audiences.by_token(audience_token),
-         {:ok, {_old_access_token, _old_claims}, {access_token, _claims}} <-
-           Guardian.exchange(refresh_token, "refresh", "access", aud: aud) do
+  @spec exchange(String.t(), non_neg_integer()) ::
+          {:ok, String.t(), String.t()} | {:error, String.t()}
+  def exchange(refresh_token, audience_id) do
+    with {:ok, {_old_access_token, _old_claims}, {access_token, _claims}} <-
+           Guardian.exchange(refresh_token, "refresh", "access", aud: audience_id) do
       {:ok, access_token, refresh_token}
-    else
-      _ -> :error
     end
   end
 
@@ -35,15 +31,14 @@ defmodule Recognizer.Auth do
   @doc """
   Login in a user by looking them up via email, compares password hashes, creating and signing a new JWT when valid.
   """
-  @spec login(String.t(), String.t(), String.t()) :: {:ok, String.t(), String.t()} | :error
-  def login(email, password, audience_token) do
-    with %Audience{id: aud} <- Audiences.by_token(audience_token),
-         %User{password_hash: expected_hash} = user <- Accounts.get_by(email: email),
+  @spec login(String.t(), String.t(), non_neg_integer()) :: {:ok, String.t(), String.t()} | :error
+  def login(email, password, audience_id) do
+    with %User{password_hash: expected_hash} = user <- Accounts.get_by(email: email),
          hashed_password <- hash_password(password),
          true <- Plug.Crypto.secure_compare(expected_hash, hashed_password) do
-      generate_signed_token(user, aud)
+      generate_signed_token(user, audience_id)
     else
-      _ -> :error
+      _ -> {:error, "authentication failed"}
     end
   end
 

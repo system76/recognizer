@@ -1,9 +1,10 @@
-defmodule Recognizer.AuthView do
+defmodule RecognizerWeb.AuthView do
   use RecognizerWeb, :view
 
-  def render("login.json", %{access_token: token}) do
-  end
-
-  def render("verify.json", _) do
+  def render("tokens.json", %{access_token: access, refresh_token: refresh}) do
+    %{
+      access_token: access,
+      refresh_token: refresh
+    }
   end
 end
