@@ -7,6 +7,12 @@ defmodule Recognizer.Accounts do
 
   alias Recognizer.{Repo, Schemas.User}
 
+  def create(attrs) do
+    %User{}
+    |> User.changeset(attrs)
+    |> Repo.insert()
+  end
+
   @doc """
   Look up a user via email and populate their roles
   """
@@ -20,6 +26,12 @@ defmodule Recognizer.Accounts do
     query
     |> query_predicates(predicates)
     |> Repo.one()
+  end
+
+  def update(user, attrs) do
+    user
+    |> User.changeset(attrs)
+    |> Repo.update()
   end
 
   defp query_predicates(query, predicates) when is_list(predicates) do

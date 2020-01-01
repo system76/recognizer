@@ -11,9 +11,9 @@ config :recognizer,
   ecto_repos: [Recognizer.Repo]
 
 config :recognizer, Recognizer.Repo,
-  database: "rolodex",
+  database: "recognizer",
   hostname: "localhost",
-  password: "system76",
+  password: "recognizer",
   port: 3306,
   username: "root"
 
