@@ -22,8 +22,10 @@ defmodule RecognizerWeb.AuthControllerTest do
       {:ok, old_access_token, refresh_token} = Auth.login(email, "password", audience_id)
 
       assert %{
-               "access_token" => new_access_token,
-               "refresh_token" => ^refresh_token
+               "data" => %{
+                 "access_token" => new_access_token,
+                 "refresh_token" => ^refresh_token
+               }
              } =
                conn
                |> put_req_header("x-recognizer-token", audience_token)
@@ -60,8 +62,10 @@ defmodule RecognizerWeb.AuthControllerTest do
       json_body = Jason.encode!(%{data: %{email: email, password: "password"}})
 
       assert %{
-               "access_token" => access_token,
-               "refresh_token" => refresh_token
+               "data" => %{
+                 "access_token" => access_token,
+                 "refresh_token" => refresh_token
+               }
              } =
                conn
                |> put_req_header("x-recognizer-token", audience_token)

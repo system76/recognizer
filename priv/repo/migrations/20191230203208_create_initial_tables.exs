@@ -5,14 +5,6 @@ defmodule Recognizer.Repo.Migrations.CreateInitialTables do
     create table(:audiences) do
       add :name, :string, null: false
       add :token, :string, null: false
-      add :avatar_filename, :string
-      add :company_name, :string
-      add :email, :string
-      add :first_name, :string
-      add :last_name, :string
-      add :password_hash, :string
-      add :type, :string
-      add :username, :string
 
       timestamps()
     end
@@ -25,7 +17,9 @@ defmodule Recognizer.Repo.Migrations.CreateInitialTables do
       add :email, :string, null: false
       add :first_name, :string
       add :last_name, :string
+      add :newsletter, :boolean, default: true
       add :password_hash, :string, null: false
+      add :phone_number, :string
       add :type, :string
       add :username, :string
 

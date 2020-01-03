@@ -11,9 +11,16 @@ defmodule RecognizerWeb.Router do
   end
 
   scope "/", RecognizerWeb do
+    pipe_through [:api]
+
+    post "/accounts", AccountController, :create
+  end
+
+  scope "/", RecognizerWeb do
     pipe_through [:api, :auth]
 
-    get "/me", UsersController, :me
+    get "/me", AccountController, :show
+    patch "/me", AccountController, :update
   end
 
   scope "/auth", RecognizerWeb do

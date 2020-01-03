@@ -33,6 +33,7 @@ defmodule Recognizer.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:argon2_elixir, "~> 2.1"},
       {:ecto_sql, "~> 3.1"},
       {:gettext, "~> 0.11"},
       {:guardian, "~> 2.0"},
@@ -42,7 +43,8 @@ defmodule Recognizer.MixProject do
       {:phoenix_ecto, "~> 4.0"},
       {:phoenix_pubsub, "~> 1.1"},
       {:plug_cowboy, "~> 2.0"},
-      {:ex_machina, "~> 2.3", only: :test}
+      {:ex_machina, "~> 2.3", only: :test},
+      {:credo, "~> 1.1", only: [:dev, :test]}
     ]
   end
 

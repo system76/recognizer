@@ -1,4 +1,8 @@
 defmodule RecognizerWeb.Plugs.VerifyJSONFormat do
+  @moduledoc """
+  Verfiy JSON payloads are nested under a `data` key
+  """
+
   import Plug.Conn
 
   alias RecognizerWeb.ErrorView

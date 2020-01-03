@@ -1,4 +1,5 @@
 defmodule Recognizer.Factories do
+  @moduledoc false
   use ExMachina.Ecto, repo: Recognizer.Repo
 
   alias Recognizer.Schemas.{Audience, Role, User}
@@ -25,6 +26,7 @@ defmodule Recognizer.Factories do
       company_name: "Test Company",
       first_name: "Test",
       last_name: "User",
+      phone_number: sequence(:phone_number, &"+1(111)111-111#{&1}"),
       type: "individual",
       username: "Tester"
     }
