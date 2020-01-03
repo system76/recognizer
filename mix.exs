@@ -10,7 +10,8 @@ defmodule Recognizer.MixProject do
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      releases: releases()
     ]
   end
 
@@ -44,7 +45,17 @@ defmodule Recognizer.MixProject do
       {:phoenix_pubsub, "~> 1.1"},
       {:plug_cowboy, "~> 2.0"},
       {:ex_machina, "~> 2.3", only: :test},
-      {:credo, "~> 1.1", only: [:dev, :test]}
+      {:credo, "~> 1.1", only: :dev},
+      {:sobelow, "~> 0.8", only: :dev}
+    ]
+  end
+
+  defp releases do
+    [
+      build: [
+        include_executables_for: [:unix],
+        applications: [recognizer: :permanent, runtime_tools: :permanent]
+      ]
     ]
   end
 
