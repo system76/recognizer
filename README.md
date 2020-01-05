@@ -26,6 +26,6 @@ Finished in 0.2 seconds
 
 ### License
 
-The Recognizer source code is released under a Apache 2.0 License by @system76
+The Recognizer source code is released under a Apache 2.0 License by [@System76](https://github.com/system76).
 
 See [LICENSE](https://github.com/doomspork/recognizer/blob/master/LICENSE) for more information.

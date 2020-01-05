@@ -14,6 +14,8 @@ defmodule RecognizerWeb.Router do
     pipe_through [:api]
 
     post "/accounts", AccountController, :create
+
+    get "/healthcheck", HealthCheckController, :index
   end
 
   scope "/", RecognizerWeb do
