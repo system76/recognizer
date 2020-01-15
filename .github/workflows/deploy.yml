@@ -5,7 +5,6 @@ on:
     branches:
       - master
       - staging
-      - ecr
 
 jobs:
   Lint:
@@ -85,10 +84,6 @@ jobs:
             echo "::set-env name=AWS_ACCESS_KEY_ID::${{ secrets.PRODUCTION_ACCESS_KEY }}"
             echo "::set-env name=AWS_SECRET_ACCESS_KEY::${{ secrets.PRODUCTION_ACCESS_SECRET }}"
           elif [ $GITHUB_REF == "refs/heads/staging" ]; then
-            echo "::set-env name=IMAGE_URL::${{ secrets.STAGING_ECR_URL }}"
-            echo "::set-env name=AWS_ACCESS_KEY_ID::${{ secrets.STAGING_ACCESS_KEY }}"
-            echo "::set-env name=AWS_SECRET_ACCESS_KEY::${{ secrets.STAGING_ACCESS_SECRET }}"
-          elif [ $GITHUB_REF == "refs/heads/ecr" ]; then
             echo "::set-env name=IMAGE_URL::${{ secrets.STAGING_ECR_URL }}"
             echo "::set-env name=AWS_ACCESS_KEY_ID::${{ secrets.STAGING_ACCESS_KEY }}"
             echo "::set-env name=AWS_SECRET_ACCESS_KEY::${{ secrets.STAGING_ACCESS_SECRET }}"
