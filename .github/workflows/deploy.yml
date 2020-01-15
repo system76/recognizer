@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - staging
+      - ecr
 
 jobs:
   Lint:
@@ -64,7 +65,7 @@ jobs:
           REDIS_HOST: redis
           REDIS_PORT: ${{ job.services.redis.ports[6379] }}
 
-  Build:
+  Deploy:
     runs-on: ubuntu-latest
     needs:
       - Lint
@@ -90,6 +91,9 @@ jobs:
             export REPO_NAMESPACE=${{ secrets.STAGING_ECR_URL }}
             export AWS_ACCESS_KEY_ID=${{ secrets.STAGING_ACCESS_KEY }}
             export AWS_SECRET_ACCESS_KEY=${{ secrets.STAGING_ACCESS_SECRET }}
+          elif [ $GITHUB_REF == "refs/heads/ecr" ]; then
+            export REPO_NAMESPACE=${{ secrets.STAGING_ECR_URL }}
+            export AWS_ACCESS_KEY_ID=${{ secrets.STAGING_ACCESS_KEY }}
+            export AWS_SECRET_ACCESS_KEY=${{ secrets.STAGING_ACCESS_SECRET }}
           fi
-
           make push
