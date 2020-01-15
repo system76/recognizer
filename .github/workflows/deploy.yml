@@ -81,15 +81,15 @@ jobs:
       - name: Environment
         run: |
           if [ $GITHUB_REF == "refs/heads/master" ]; then
-            echo "::set-env name=REPO_NAMESPACE::${{ secrets.PRODUCTION_ECR_URL }}"
+            echo "::set-env name=IMAGE_URL::${{ secrets.PRODUCTION_ECR_URL }}"
             echo "::set-env name=AWS_ACCESS_KEY_ID::${{ secrets.PRODUCTION_ACCESS_KEY }}"
             echo "::set-env name=AWS_SECRET_ACCESS_KEY::${{ secrets.PRODUCTION_ACCESS_SECRET }}"
           elif [ $GITHUB_REF == "refs/heads/staging" ]; then
-            echo "::set-env name=REPO_NAMESPACE::${{ secrets.STAGING_ECR_URL }}"
+            echo "::set-env name=IMAGE_URL::${{ secrets.STAGING_ECR_URL }}"
             echo "::set-env name=AWS_ACCESS_KEY_ID::${{ secrets.STAGING_ACCESS_KEY }}"
             echo "::set-env name=AWS_SECRET_ACCESS_KEY::${{ secrets.STAGING_ACCESS_SECRET }}"
           elif [ $GITHUB_REF == "refs/heads/ecr" ]; then
-            echo "::set-env name=REPO_NAMESPACE::${{ secrets.STAGING_ECR_URL }}"
+            echo "::set-env name=IMAGE_URL::${{ secrets.STAGING_ECR_URL }}"
             echo "::set-env name=AWS_ACCESS_KEY_ID::${{ secrets.STAGING_ACCESS_KEY }}"
             echo "::set-env name=AWS_SECRET_ACCESS_KEY::${{ secrets.STAGING_ACCESS_SECRET }}"
           fi
