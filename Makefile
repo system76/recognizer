@@ -39,7 +39,7 @@ test:
 # Push images to repo
 .PHONY: push
 push:
-	$$(aws ecr get-login --no-include-email); \
+	$$(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION); \
 		docker push $(REPO_NAMESPACE)/$(IMAGE_NAME):latest; \
 		docker push $(REPO_NAMESPACE)/$(IMAGE_NAME):$(VCS_REF); \
 		docker push $(REPO_NAMESPACE)/$(IMAGE_NAME):$(VERSION);
