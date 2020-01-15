@@ -1,7 +1,6 @@
 #!/usr/bin/make -f
 
 SHELL                   := /usr/bin/env bash
-SECRET_KEY_BASE         ?= notagoodsecret
 REPO_NAMESPACE          ?= system76
 AWS_DEFAULT_REGION      ?= us-west-2
 IMAGE_NAME              ?= recognizer
@@ -17,12 +16,11 @@ default: build
 # Build the docker image
 .PHONY: build
 build:
-	sudo docker build \
+	docker build \
 		--build-arg BASE_IMAGE=$(BASE_IMAGE) \
 		--build-arg BUILD_DATE=$(BUILD_DATE) \
 		--build-arg VCS_REF=$(VCS_REF) \
 		--build-arg VERSION=$(VERSION) \
-		--build-arg SECRET_KEY_BASE=$(SECRET_KEY_BASE) \
 		--tag $(REPO_NAMESPACE)/$(IMAGE_NAME):latest \
 		--tag $(REPO_NAMESPACE)/$(IMAGE_NAME):$(VCS_REF) \
 		--tag $(REPO_NAMESPACE)/$(IMAGE_NAME):$(VERSION) \

@@ -22,7 +22,6 @@ COPY . /usr/local/src/recognizer/
 # https://vsupalov.com/docker-arg-vs-env/
 ARG MIX_ENV=prod
 ARG APP_NAME=recognizer
-ARG SECRET_KEY_BASE
 
 # Use `set -xe;` to enable debugging and exit on error
 # More verbose but that is often beneficial for builds
@@ -38,12 +37,13 @@ FROM alpine:3.9 as release
 
 RUN set -xe; \
     apk add --update  --no-cache --virtual .runtime-deps \
-        ca-certificates \ 
+        ca-certificates \
         libmcrypt \
-        tzdata; 
+        ncurses-libs \
+        tzdata;
 
 # Create a `recognizer` group & user
-# I've been told before it's generally a good practice to reserve ids < 1000 for the system 
+# I've been told before it's generally a good practice to reserve ids < 1000 for the system
 RUN set -xe; \
     addgroup -g 1000 -S recognizer; \
     adduser -u 1000 -S -h /recognizer -s /bin/sh -G recognizer recognizer;
@@ -57,8 +57,6 @@ COPY --chown=recognizer:recognizer --from=build /usr/local/src/recognizer/_build
 ARG VCS_REF
 ARG BUILD_DATE
 ARG VERSION
-
-ARG SECRET_KEY_BASE
 
 # `Maintainer` has been deprecated in favor of Labels / Metadata
 # https://docs.docker.com/engine/reference/builder/#maintainer-deprecated
@@ -76,8 +74,6 @@ ENV \
     VERSION="${VERSION}" \
     MIX_APP="recognizer" \
     MIX_ENV="prod" \
-    PORT="4000" \
-    REPLACE_OS_VARS="true" \
     SHELL="/bin/bash"
 
 # Drop down to our unprivileged `recognizer` user
@@ -85,7 +81,7 @@ USER recognizer
 
 WORKDIR /recognizer
 
-EXPOSE 4000
+EXPOSE 80
 
 ENTRYPOINT ["/recognizer/bin/recognizer"]
 
