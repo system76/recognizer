@@ -73,7 +73,7 @@ jobs:
 
     steps:
       - name: Dependencies
-        run: apt install -y awscli
+        run: sudo apt install -y awscli
 
       - name: Checkout
         uses: actions/checkout@v1
