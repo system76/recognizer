@@ -6,7 +6,7 @@ config :recognizer, RecognizerWeb.Endpoint,
     :inet6,
     port:
       System.get_env()
-      |> Map.get("PORT", "4000")
+      |> Map.get("PORT", "80")
       |> String.to_integer()
   ],
   secret_key_base: System.get_env("SECRET_KEY_BASE"),

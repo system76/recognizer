@@ -13,7 +13,13 @@ import Config
 config :recognizer, RecognizerWeb.Endpoint,
   url: [host: "example.com", port: 80],
   cache_static_manifest: "priv/static/cache_manifest.json",
-  http: [:inet6, port: String.to_integer(System.get_env("PORT") || "4000")]
+  http: [
+    :inet6,
+    port:
+      System.get_env()
+      |> Map.get("PORT", "4000")
+      |> String.to_integer()
+  ]
 
 # Do not print debug messages in production
 config :logger, level: :warn
