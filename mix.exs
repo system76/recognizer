@@ -52,7 +52,7 @@ defmodule Recognizer.MixProject do
 
   defp releases do
     [
-      build: [
+      recognizer: [
         include_executables_for: [:unix],
         applications: [recognizer: :permanent, runtime_tools: :permanent]
       ]
