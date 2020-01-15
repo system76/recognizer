@@ -2,7 +2,7 @@
 
 SHELL                   := /usr/bin/env bash
 REPO_NAMESPACE          ?= system76
-AWS_DEFAULT_REGION      ?= us-west-2
+AWS_DEFAULT_REGION      ?= us-east-2
 IMAGE_NAME              ?= recognizer
 BASE_IMAGE              ?= alpine:3.10
 VERSION                 := $(shell git describe --tags --abbrev=0 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null)
@@ -39,13 +39,10 @@ test:
 # Push images to repo
 .PHONY: push
 push:
-	export AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID_PERSONAL); \
-		export AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY_PERSONAL); \
-		export AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION); \
-		$$(aws ecr get-login --no-include-email --region $$AWS_DEFAULT_REGION); \
-		docker push  $(REPO_NAMESPACE)/$(IMAGE_NAME):latest; \
-		docker push  $(REPO_NAMESPACE)/$(IMAGE_NAME):$(VCS_REF); \
-		docker push  $(REPO_NAMESPACE)/$(IMAGE_NAME):$(VERSION);
+	$$(aws ecr get-login --no-include-email --region $$AWS_DEFAULT_REGION); \
+		docker push $(REPO_NAMESPACE)/$(IMAGE_NAME):latest; \
+		docker push $(REPO_NAMESPACE)/$(IMAGE_NAME):$(VCS_REF); \
+		docker push $(REPO_NAMESPACE)/$(IMAGE_NAME):$(VERSION);
 
 # Remove existing images
 .PHONY: clean
