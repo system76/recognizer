@@ -9,8 +9,12 @@ defmodule RecognizerWeb.AuthViewTest do
 
     assert %{
              data: %{
-               access_token: ^access_token,
-               refresh_token: ^refresh_token
+               attributes: %{
+                 access_token: ^access_token,
+                 refresh_token: ^refresh_token
+               },
+               id: ^access_token,
+               type: "auth"
              }
            } =
              render(RecognizerWeb.AuthView, "tokens.json",
