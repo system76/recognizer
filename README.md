@@ -32,7 +32,7 @@ Finished in 0.2 seconds
 
 While the final build artifact is a Docker image we do use `mix release` to build a release binary for use within the final image. The process of creating new releases has been simplified by the included Makefile.
 
-In order to take advantage of our Makefile we need to install Docker, the AWS CLI client, and ensure our AWS credentials are accessible at `AWS_ACCESS_KEY_ID` and  `AWS_SECRET_ACCESS_KEY`. Once our build environment has been setup we're ready to build and push new releases with the appropriately named make commands:
+In order to take advantage of our Makefile we need to install Docker, the AWS CLI client, and ensure our AWS credentials are accessible at `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`. Once our build environment has been setup we're ready to build and push new releases with the appropriately named make commands:
 
 ```shell
 make build # Build a new image
@@ -41,6 +41,6 @@ make push # Push the image to AWS ECR
 
 ## License
 
-The Recognizer source code is released under a Apache 2.0 License by [@System76](https://github.com/system76).
+The Recognizer source code is released under GPL3 by [@System76](https://github.com/system76).
 
 See [LICENSE](https://github.com/doomspork/recognizer/blob/master/LICENSE) for more information.
