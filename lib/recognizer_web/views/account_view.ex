@@ -2,7 +2,7 @@ defmodule RecognizerWeb.AccountView do
   use RecognizerWeb, :view
 
   def render("show.json", %{user: user}) do
-    data =
+    attributes =
       Map.take(user, [
         :avatar_filename,
         :company_name,
@@ -14,6 +14,12 @@ defmodule RecognizerWeb.AccountView do
         :username
       ])
 
-    %{data: data}
+    %{
+      data: %{
+        attributes: attributes,
+        id: user.id,
+        type: "user"
+      }
+    }
   end
 end

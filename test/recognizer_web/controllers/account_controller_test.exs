@@ -18,7 +18,13 @@ defmodule RecognizerWeb.AccountControllerTest do
         |> Map.put("password", "p@ssw0Rd!")
         |> Map.put("password_confirmation", "p@ssw0Rd!")
 
-      %{"data" => %{"email" => ^email, "first_name" => ^first_name}} =
+      %{
+        "data" => %{
+          "attributes" => %{"email" => ^email, "first_name" => ^first_name},
+          "id" => _,
+          "type" => "user"
+        }
+      } =
         conn
         |> post("/accounts", Jason.encode!(%{data: body}))
         |> json_response(201)
@@ -29,7 +35,15 @@ defmodule RecognizerWeb.AccountControllerTest do
     test "returns a 200 and the requested resource for authenticated requests", %{conn: conn} do
       %{email: email, first_name: first, last_name: last} = user = insert(:user)
 
-      assert %{"data" => %{"email" => ^email, "first_name" => ^first, "last_name" => ^last}} =
+      assert %{
+               "data" => %{
+                 "attributes" => %{
+                   "email" => ^email,
+                   "first_name" => ^first,
+                   "last_name" => ^last
+                 }
+               }
+             } =
                conn
                |> login(user)
                |> get("/me")
@@ -51,7 +65,7 @@ defmodule RecognizerWeb.AccountControllerTest do
         first_name: "Changed"
       }
 
-      assert %{"data" => %{"first_name" => "Changed"}} =
+      assert %{"data" => %{"attributes" => %{"first_name" => "Changed"}}} =
                conn
                |> login(user)
                |> patch("/me", Jason.encode!(%{data: updates}))
