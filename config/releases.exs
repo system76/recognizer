@@ -8,7 +8,7 @@ recognizer_config =
 config :recognizer, RecognizerWeb.Endpoint,
   url: [
     host: System.get_env("DOMAIN"),
-    port: "PORT" |> System.get_env("80") |> String.to_integer()
+    port: "PORT" |> System.get_env("443") |> String.to_integer()
   ],
   secret_key_base: recognizer_config["SECRET_KEY_BASE"]
 
