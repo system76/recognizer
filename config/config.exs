@@ -5,24 +5,18 @@
 # is restricted to this project.
 
 # General application configuration
-import Config
+use Mix.Config
 
 config :recognizer,
   ecto_repos: [Recognizer.Repo]
 
-config :recognizer, Recognizer.Repo,
-  database: "recognizer",
-  hostname: "localhost",
-  password: "recognizer",
-  port: 3306,
-  username: "root"
-
 # Configures the endpoint
 config :recognizer, RecognizerWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "C7MH9uVWoO/pu6bzVE96pGcQwR2PmgRe3EzYpjBa4tCnsjVt7EEEgzmrS3PdPZLn",
-  render_errors: [view: RecognizerWeb.ErrorView, accepts: ~w(json)],
-  pubsub: [name: Recognizer.PubSub, adapter: Phoenix.PubSub.PG2]
+  secret_key_base: "4cGrxuvdfSWGcw6jHdTnvck8s/UngaQiuUeVTPvhWQYakM2mznVijXGtZ+lHI9He",
+  render_errors: [view: RecognizerWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: Recognizer.PubSub,
+  live_view: [signing_salt: "cESAxhqm"]
 
 # Configures Elixir's Logger
 config :logger, :console,

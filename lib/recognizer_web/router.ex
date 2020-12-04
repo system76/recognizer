@@ -10,6 +10,20 @@ defmodule RecognizerWeb.Router do
     plug RecognizerWeb.Plugs.AuthenticationPipeline
   end
 
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_flash
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+  end
+
+  scope "/", RecognizerWeb do
+    pipe_through :browser
+
+    get "/", PageController, :index
+  end
+
   scope "/", RecognizerWeb do
     get "/health", HealthCheckController, :index
   end

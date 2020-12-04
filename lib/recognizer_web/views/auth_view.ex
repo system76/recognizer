@@ -3,14 +3,8 @@ defmodule RecognizerWeb.AuthView do
 
   def render("tokens.json", %{access_token: access, refresh_token: refresh}) do
     %{
-      data: %{
-        attributes: %{
-          access_token: access,
-          refresh_token: refresh
-        },
-        id: access,
-        type: "auth"
-      }
+      access_token: access,
+      refresh_token: refresh
     }
   end
 end
