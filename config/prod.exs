@@ -1,15 +1,10 @@
 import Config
 
 config :recognizer, RecognizerWeb.Endpoint,
+  check_origin: false,
   force_ssl: [hstl: true],
-  url: [host: "example.com", port: 80],
-  http: [
-    :inet6,
-    port:
-      System.get_env()
-      |> Map.get("PORT", "4000")
-      |> String.to_integer()
-  ]
+  http: [:inet6, port: 8080]
+  server: true
 
 config :logger, level: :warn
 
