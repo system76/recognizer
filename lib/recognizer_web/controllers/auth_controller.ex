@@ -6,7 +6,7 @@ defmodule RecognizerWeb.AuthController do
 
   action_fallback FallbackController
 
-  def exchange(conn, %{"data" => %{"token" => refresh_token}}) do
+  def exchange(conn, %{"token" => refresh_token}) do
     audience_id = conn.assigns[:audience_id]
 
     with {:ok, access, refresh} <- Auth.exchange(refresh_token, audience_id) do
@@ -14,7 +14,7 @@ defmodule RecognizerWeb.AuthController do
     end
   end
 
-  def login(conn, %{"data" => %{"email" => email, "password" => password}}) do
+  def login(conn, %{"email" => email, "password" => password}) do
     audience_id = conn.assigns[:audience_id]
 
     with {:ok, access, refresh} <- Auth.login(email, password, audience_id) do

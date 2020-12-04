@@ -35,17 +35,21 @@ defmodule Recognizer.MixProject do
   defp deps do
     [
       {:argon2_elixir, "~> 2.1"},
-      {:ecto_sql, "~> 3.1"},
+      {:ecto_sql, "~> 3.4"},
       {:gettext, "~> 0.11"},
       {:guardian, "~> 2.0"},
       {:jason, "~> 1.0"},
       {:myxql, "~> 0.2"},
-      {:phoenix, "~> 1.4.11"},
-      {:phoenix_ecto, "~> 4.0"},
-      {:phoenix_pubsub, "~> 1.1"},
+      {:phoenix, "~> 1.5.3"},
+      {:phoenix_ecto, "~> 4.1"},
+      {:phoenix_html, "~> 2.11"},
+      {:phoenix_live_dashboard, "~> 0.2.0"},
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:plug_cowboy, "~> 2.0"},
-      {:ex_machina, "~> 2.3", only: :test},
+      {:telemetry_metrics, "~> 0.4"},
+      {:telemetry_poller, "~> 0.4"},
       {:credo, "~> 1.1", only: :dev},
+      {:ex_machina, "~> 2.3", only: :test},
       {:sobelow, "~> 0.8", only: :dev}
     ]
   end
@@ -67,9 +71,10 @@ defmodule Recognizer.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
+      setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
   end
 end

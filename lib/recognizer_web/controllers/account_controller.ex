@@ -6,13 +6,13 @@ defmodule RecognizerWeb.AccountController do
 
   action_fallback FallbackController
 
-  def create(conn, %{"data" => attrs}) do
+  def create(conn, attrs) do
     with {:ok, new_user} <- Accounts.create(attrs) do
       render_new_user(conn, new_user)
     end
   end
 
-  def update(conn, %{"data" => attrs}) do
+  def update(conn, attrs) do
     user = current_user(conn)
 
     with {:ok, updated_user} <- Accounts.update(user, attrs) do
