@@ -15,7 +15,7 @@ defmodule RecognizerWeb.Router do
 
     post "/accounts", AccountController, :create
 
-    get "/healthcheck", HealthCheckController, :index
+    get "/health", HealthCheckController, :index
   end
 
   scope "/", RecognizerWeb do
