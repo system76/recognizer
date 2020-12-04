@@ -11,11 +11,13 @@ defmodule RecognizerWeb.Router do
   end
 
   scope "/", RecognizerWeb do
+    get "/health", HealthCheckController, :index
+  end
+
+  scope "/", RecognizerWeb do
     pipe_through [:api]
 
     post "/accounts", AccountController, :create
-
-    get "/health", HealthCheckController, :index
   end
 
   scope "/", RecognizerWeb do
