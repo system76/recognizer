@@ -6,7 +6,7 @@ config :recognizer, RecognizerWeb.Endpoint,
   http: [:inet6, port: 8080],
   server: true
 
-config :logger, level: :warn
+config :logger, level: :debug
 
 config :appsignal, :config,
   active: true,
