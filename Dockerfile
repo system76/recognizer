@@ -1,4 +1,4 @@
-FROM elixir:1.9-alpine as build
+FROM elixir:1.10-alpine as build
 
 # Install deps
 RUN set -xe; \
@@ -7,8 +7,6 @@ RUN set -xe; \
         g++ \
         gcc \
         git \
-        imagemagick \
-        libmcrypt-dev \
         make \
         musl-dev \
         tzdata;
@@ -72,7 +70,7 @@ LABEL \
 ENV \
     PATH="/usr/local/bin:$PATH" \
     VERSION="${VERSION}" \
-    MIX_APP="recognizer" \
+    MIX_APP="copy_cat" \
     MIX_ENV="prod" \
     SHELL="/bin/bash"
 
@@ -81,7 +79,7 @@ USER recognizer
 
 WORKDIR /recognizer
 
-EXPOSE 80
+EXPOSE 8080
 
 ENTRYPOINT ["/recognizer/bin/recognizer"]
 
