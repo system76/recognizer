@@ -10,6 +10,8 @@ defmodule Recognizer.Application do
     children = [
       # Start the Ecto repository
       Recognizer.Repo,
+      # Start the PubSub system
+      {Phoenix.PubSub, name: Recognizer.PubSub},
       # Start the endpoint when the application starts
       RecognizerWeb.Endpoint
     ]
