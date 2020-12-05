@@ -17,3 +17,5 @@ config :recognizer, RecognizerWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+config :recognizer, Recognizer.Guardian, secret_key: "testkey"

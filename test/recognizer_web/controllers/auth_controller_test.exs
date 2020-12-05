@@ -22,19 +22,13 @@ defmodule RecognizerWeb.AuthControllerTest do
       {:ok, old_access_token, refresh_token} = Auth.login(email, "password", audience_id)
 
       assert %{
-               "data" => %{
-                 "attributes" => %{
-                   "access_token" => new_access_token,
-                   "refresh_token" => ^refresh_token
-                 },
-                 "id" => new_access_token,
-                 "type" => "auth"
-               }
+               "access_token" => new_access_token,
+               "refresh_token" => ^refresh_token
              } =
                conn
                |> put_req_header("x-recognizer-token", audience_token)
                |> put_req_header("content-type", "application/json")
-               |> post("/auth/exchange", Jason.encode!(%{data: %{token: refresh_token}}))
+               |> post("/auth/exchange", Jason.encode!(%{token: refresh_token}))
                |> json_response(201)
 
       assert new_access_token != old_access_token
@@ -52,7 +46,7 @@ defmodule RecognizerWeb.AuthControllerTest do
       conn
       |> put_req_header("x-recognizer-token", audience_token)
       |> put_req_header("content-type", "application/json")
-      |> post("/auth/exchange", Jason.encode!(%{data: %{token: refresh_token}}))
+      |> post("/auth/exchange", Jason.encode!(%{token: refresh_token}))
       |> json_response(401)
     end
   end
@@ -63,15 +57,11 @@ defmodule RecognizerWeb.AuthControllerTest do
       conn: conn,
       email: email
     } do
-      json_body = Jason.encode!(%{data: %{email: email, password: "password"}})
+      json_body = Jason.encode!(%{email: email, password: "password"})
 
       assert %{
-               "data" => %{
-                 "attributes" => %{
-                   "access_token" => access_token,
-                   "refresh_token" => refresh_token
-                 }
-               }
+               "access_token" => access_token,
+               "refresh_token" => refresh_token
              } =
                conn
                |> put_req_header("x-recognizer-token", audience_token)
@@ -88,7 +78,7 @@ defmodule RecognizerWeb.AuthControllerTest do
       email: email,
       conn: conn
     } do
-      json_body = Jason.encode!(%{data: %{email: email, password: "wrong password"}})
+      json_body = Jason.encode!(%{email: email, password: "wrong password"})
 
       conn
       |> put_req_header("x-recognizer-token", audience_token)

@@ -19,14 +19,11 @@ defmodule RecognizerWeb.AccountControllerTest do
         |> Map.put("password_confirmation", "p@ssw0Rd!")
 
       %{
-        "data" => %{
-          "attributes" => %{"email" => ^email, "first_name" => ^first_name},
-          "id" => _,
-          "type" => "user"
-        }
+        "email" => ^email,
+        "first_name" => ^first_name
       } =
         conn
-        |> post("/accounts", Jason.encode!(%{data: body}))
+        |> post("/accounts", Jason.encode!(body))
         |> json_response(201)
     end
   end
@@ -36,13 +33,9 @@ defmodule RecognizerWeb.AccountControllerTest do
       %{email: email, first_name: first, last_name: last} = user = insert(:user)
 
       assert %{
-               "data" => %{
-                 "attributes" => %{
-                   "email" => ^email,
-                   "first_name" => ^first,
-                   "last_name" => ^last
-                 }
-               }
+               "email" => ^email,
+               "first_name" => ^first,
+               "last_name" => ^last
              } =
                conn
                |> login(user)
@@ -65,16 +58,16 @@ defmodule RecognizerWeb.AccountControllerTest do
         first_name: "Changed"
       }
 
-      assert %{"data" => %{"attributes" => %{"first_name" => "Changed"}}} =
+      assert %{"first_name" => "Changed"} =
                conn
                |> login(user)
-               |> patch("/me", Jason.encode!(%{data: updates}))
+               |> patch("/me", Jason.encode!(updates))
                |> json_response(200)
     end
 
     test "returns a 401 for unauthenticated requests", %{conn: conn} do
       conn
-      |> patch("/me", Jason.encode!(%{data: %{}}))
+      |> patch("/me", Jason.encode!(%{}))
       |> json_response(401)
     end
   end
