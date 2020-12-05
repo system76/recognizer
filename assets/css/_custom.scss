@@ -1,0 +1,216 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,400;0,700;1,400&family=Roboto+Slab:wght@300;400;700&display=swap');
+
+html {
+  overflow: hidden;
+}
+
+body {
+  font-family: $family-sans-serif;
+}
+
+.content {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: $warm-grey;
+  }
+
+  p {
+    font-size: 16px;
+    line-height: 24px;
+    color: $warm-grey;
+  }
+}
+
+.title{
+  color: $warm-grey;
+  font-family: $family-sans-serif;
+
+  &.is-1,
+  &.is-2,
+  &.is-3,
+  &.is-4 {
+    color: $warm-grey;
+  }
+
+  &.is-1 {
+    font-family: $family-secondary;
+    font-size: 64px;
+    letter-spacing: 2px;
+    line-height: 64px;
+  }
+
+  &.is-2 {
+    text-transform: uppercase;
+    font-size: 40px;
+    line-height: 48px;
+    font-weight: 400;
+    letter-spacing: 6px;
+  }
+
+  &.is-3 {
+    font-family: $family-secondary;
+    font-size: 32px;
+    line-height: 40px;
+    font-weight: 400;
+  }
+
+  &.is-4 {
+    font-weight: 400;
+    font-style: italic;
+    font-size: 40px;
+    line-height: 58px;
+  }
+
+  &.is-5,
+  &.is-6 {
+    color: $grey-lighter;
+  }
+}
+
+.subtitle {
+  color: $warm-grey;
+  font-family: $family-sans-serif;
+  &.is-1,
+  &.is-2 {
+    color: $warm-grey;
+  }
+
+  &.is-1 {
+    font-family: $family-secondary;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  &.is-2 {
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 700;
+  }
+
+  &.is-3,
+  &.is-4,
+  &.is-5,
+  &.is-6, {
+    color: $grey-lighter;
+  }
+}
+
+a {
+  color: $bronze;
+}
+
+.button {
+  text-transform: uppercase;
+  font-family: $family-secondary;
+  letter-spacing: 1px;
+  font-weight: 700;
+  border: 2px solid transparent;
+
+  @each $name, $pair in $custom-colors {
+    $color: nth($pair, 1);
+    $color-invert: nth($pair, 2);
+
+    &.is-#{$name} {
+      &.is-hovered,
+      &:hover {
+        background-color: $color;
+        box-shadow: 1px 1px 3px darken($color, 20%);
+      }
+
+      &.is-active,
+      &.is-focused,
+      &:active,
+      &:focus {
+        box-shadow: inset 1px 0 3px rgba($grey-darker, 0.3);
+        background-color: darken($color, 10);
+      }
+    }
+  }
+}
+
+.button {
+  &.is-outlined {
+    &.is-grey {
+        color: $grey !important;
+      &:focus,
+      &:active,
+      &:hover {
+        background-color: transparent;
+      }
+
+      &.has-hover-orange {
+        color: $black !important;
+      }
+
+      &.has-hover-orange:hover {
+        background-color: $curiosity-orange !important;
+        box-shadow: none;
+        color: $black !important;
+      }
+
+      &.has-hover-link {
+        color: $black !important;
+      }
+      &.has-hover-link:hover {
+        border-color: $bronze !important;
+        background-color: transparent !important;
+        color: $bronze !important;
+      }
+    }
+  }
+}
+
+.button:not(.is-inverted) {
+  color: $black !important;
+
+  &:hover {
+    color: $black !important;
+  }
+}
+
+.p2 {
+  font-family: $family-sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.tabs {
+  li.is-active > a {
+    color: #AF5C02;
+    border-bottom-color: #AF5C02;
+  }
+}
+
+.sidebar-content.is-grey {
+  .menu-label {
+    color: $white-bis;
+  }
+
+  .menu-label:not(:first-child) {
+    margin-top: 4em;
+  }
+
+  .menu-list a {
+    background-color: transparent;
+    color: $white;
+  }
+
+  .menu-list a:hover {
+    background-color: $grey-dark;
+    color: $white;
+  }
+
+  .menu-list a.is-active {
+    background-color: $primary;
+    color: $primary-invert;
+  }
+}
+
+.b-tabs .tab-content {
+  padding: 0;
+}
