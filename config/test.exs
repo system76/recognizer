@@ -2,6 +2,8 @@ import Config
 
 # Configure your database
 config :recognizer, Recognizer.Repo,
+  username: "root",
+  password: "recognizer",
   database: "recognizer_test",
   hostname: Map.get(System.get_env(), "DB_HOST", "0.0.0.0"),
   pool: Ecto.Adapters.SQL.Sandbox,

@@ -1,14 +1,16 @@
 ---
+
 version: "3"
 
 services:
   mysql:
     image: mysql:5.7.24
     environment:
-      - MYSQL_DATABASE=recognizer_test
-      - MYSQL_ROOT_PASSWORD=recognizer
+      MYSQL_PASSWORD: recognizer
+      MYSQL_DATABASE: recognizer_test
+      MYSQL_ROOT_PASSWORD: recognizer
+    ports:
+      - "3306:3306"
     command:
       - --character-set-server=utf8
       - --collation-server=utf8_general_ci
-    ports:
-      - "3306:3306"
