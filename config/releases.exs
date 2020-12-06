@@ -6,9 +6,9 @@ recognizer_config =
   |> Jason.decode!()
 
 config :recognizer, RecognizerWeb.Endpoint,
-  url: [
+  http: [
     host: System.get_env("DOMAIN"),
-    port: "PORT" |> System.get_env("443") |> String.to_integer()
+    port: String.to_integer(System.get_env("PORT") || "443")
   ],
   secret_key_base: recognizer_config["SECRET_KEY_BASE"]
 
@@ -18,8 +18,6 @@ config :recognizer, Recognizer.Repo,
   database: recognizer_config["DB_NAME"],
   hostname: recognizer_config["DB_HOST"],
   pool_size: recognizer_config["DB_POOL"]
-
-config :recognizer, Recognizer.Guardian, secret_key: recognizer_config["GUARDIAN_KEY"]
 
 config :recognizer, :message_queues, [
   {Bottle.Notification.User.V1.Created, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},

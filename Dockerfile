@@ -1,4 +1,4 @@
-FROM elixir:1.10-alpine as build
+FROM elixir:1.11-alpine as build
 
 # Install deps
 RUN set -xe; \
@@ -9,6 +9,9 @@ RUN set -xe; \
         git \
         make \
         musl-dev \
+        nodejs \
+        nodejs-npm \
+        python3 \
         tzdata;
 
 # Use the standard /usr/local/src destination
@@ -29,6 +32,11 @@ RUN set -xe; \
     mix local.rebar --force; \
     mix deps.get; \
     mix deps.compile --all; \
+    cd /usr/local/src/recognizer/assets/; \
+    npm ci; \
+    npm run build; \
+    cd /usr/local/src/recognizer/; \
+    mix phx.digest; \
     mix release
 
 FROM alpine:3.9 as release

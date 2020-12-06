@@ -6,12 +6,17 @@ defmodule Recognizer.Application do
   use Application
 
   def start(_type, _args) do
-    # List all child processes to be supervised
     children = [
       # Start the Ecto repository
       Recognizer.Repo,
-      # Start the endpoint when the application starts
+      # Start the Telemetry supervisor
+      RecognizerWeb.Telemetry,
+      # Start the PubSub system
+      {Phoenix.PubSub, name: Recognizer.PubSub},
+      # Start the Endpoint (http/https)
       RecognizerWeb.Endpoint
+      # Start a worker by calling: Recognizer.Worker.start_link(arg)
+      # {Recognizer.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

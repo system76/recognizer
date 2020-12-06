@@ -5,13 +5,12 @@ defmodule Recognizer.MixProject do
     [
       app: :recognizer,
       version: "0.1.0",
-      elixir: "~> 1.5",
+      elixir: "~> 1.9",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps(),
-      releases: releases()
+      deps: deps()
     ]
   end
 
@@ -34,42 +33,34 @@ defmodule Recognizer.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:argon2_elixir, "~> 2.1"},
-      {:ecto_sql, "~> 3.1"},
+      {:bcrypt_elixir, "~> 2.0"},
+      {:phoenix, "~> 1.5.7"},
+      {:phoenix_ecto, "~> 4.1"},
+      {:ecto_sql, "~> 3.4"},
+      {:myxql, ">= 0.0.0"},
+      {:phx_gen_auth, "~> 0.6", only: [:dev], runtime: false},
+      {:phoenix_html, "~> 2.11"},
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
+      {:telemetry_metrics, "~> 0.4"},
+      {:telemetry_poller, "~> 0.4"},
       {:gettext, "~> 0.11"},
-      {:guardian, "~> 2.0"},
       {:jason, "~> 1.0"},
-      {:myxql, "~> 0.2"},
-      {:phoenix, "~> 1.4.11"},
-      {:phoenix_ecto, "~> 4.0"},
-      {:phoenix_pubsub, "~> 1.1"},
-      {:plug_cowboy, "~> 2.0"},
-      {:ex_machina, "~> 2.3", only: :test},
-      {:credo, "~> 1.1", only: :dev},
-      {:sobelow, "~> 0.8", only: :dev}
-    ]
-  end
-
-  defp releases do
-    [
-      recognizer: [
-        include_executables_for: [:unix],
-        applications: [recognizer: :permanent, runtime_tools: :permanent]
-      ]
+      {:plug_cowboy, "~> 2.0"}
     ]
   end
 
   # Aliases are shortcuts or tasks specific to the current project.
-  # For example, to create, migrate and run the seeds file at once:
+  # For example, to install project dependencies and perform other setup tasks, run:
   #
-  #     $ mix ecto.setup
+  #     $ mix setup
   #
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
+      setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
   end
 end

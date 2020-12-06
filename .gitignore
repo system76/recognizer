@@ -1,82 +1,37 @@
+# The directory Mix will write compiled artifacts to.
+/_build/
 
-# Created by https://www.gitignore.io/api/elixir,phoenix,linux,vim
-# Edit at https://www.gitignore.io/?templates=elixir,phoenix,linux,vim
-
-### Elixir ###
-/_build
-/cover
-/deps
-/doc
-/.fetch
-erl_crash.dump
-*.ez
-*.beam
+# Ignore any secret local configuration files
 /config/*.secret.exs
-.elixir_ls/
 
-### Elixir Patch ###
+# If you run "mix test --cover", coverage assets end up here.
+/cover/
 
-### Linux ###
-*~
+# The directory Mix downloads your dependencies sources to.
+/deps/
 
-# temporary files which can be created if a process still has a handle open of a deleted file
-.fuse_hidden*
+# Where 3rd-party dependencies like ExDoc output generated docs.
+/doc/
 
-# KDE directory preferences
-.directory
+# Ignore .fetch files in case you like to edit your project deps locally.
+/.fetch
 
-# Linux trash folder which might appear on any partition or disk
-.Trash-*
+# If the VM crashes, it generates a dump, let's ignore it too.
+erl_crash.dump
 
-# .nfs files are created when an open file is removed but is still being accessed
-.nfs*
+# Also ignore archive artifacts (built via "mix archive.build").
+*.ez
 
-### Phoenix ###
-# gitignore template for Phoenix projects
-# website: http://www.phoenixframework.org/
-#
-# Recommended template: Elixir.gitignore
+# Ignore package tarball (built via "mix hex.build").
+recognizer-*.tar
 
-# Temporary files
-/tmp
+# If NPM crashes, it generates a log, let's ignore it too.
+npm-debug.log
 
-# Static artifacts
-/node_modules
-/assets/node_modules
+# The directory NPM downloads your dependencies sources to.
+/assets/node_modules/
 
-# Since we are building assets from web/static,
+# Since we are building assets from assets/,
 # we ignore priv/static. You may want to comment
 # this depending on your deployment strategy.
 /priv/static/
-
-# Installer-related files
-/installer/_build
-/installer/tmp
-/installer/doc
-/installer/deps
-
-### Vim ###
-# Swap
-[._]*.s[a-v][a-z]
-[._]*.sw[a-p]
-[._]s[a-rt-v][a-z]
-[._]ss[a-gi-z]
-[._]sw[a-p]
-
-# Session
-Session.vim
-Sessionx.vim
-
-# Temporary
-.netrwhist
-
-# Auto-generated tag files
-tags
-
-# Persistent undo
-[._]*.un~
-
-# Coc configuration directory
-.vim
-
-# End of https://www.gitignore.io/api/elixir,phoenix,linux,vim

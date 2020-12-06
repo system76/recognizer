@@ -10,8 +10,8 @@ defmodule Recognizer.DataCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use RecognizerWeb.DataCase, async: true`, although
-  this option is not recommendded for other databases.
+  by setting `use Recognizer.DataCase, async: true`, although
+  this option is not recommended for other databases.
   """
 
   use ExUnit.CaseTemplate
