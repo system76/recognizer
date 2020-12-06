@@ -9,7 +9,6 @@ defmodule Recognizer.Accounts.UserToken do
   @rand_size 32
 
   @reset_password_validity_in_days 1
-  @confirm_validity_in_days 7
   @change_email_validity_in_days 7
   @session_validity_in_days 60
 
@@ -97,7 +96,6 @@ defmodule Recognizer.Accounts.UserToken do
     end
   end
 
-  defp days_for_context("confirm"), do: @confirm_validity_in_days
   defp days_for_context("reset_password"), do: @reset_password_validity_in_days
 
   @doc """

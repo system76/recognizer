@@ -2,7 +2,7 @@ defmodule RecognizerWeb.Accounts.UserSessionController do
   use RecognizerWeb, :controller
 
   alias Recognizer.Accounts
-  alias RecognizerWeb.Accounts.UserAuth
+  alias RecognizerWeb.UserAuth
 
   def new(conn, _params) do
     render(conn, "new.html", error_message: nil)

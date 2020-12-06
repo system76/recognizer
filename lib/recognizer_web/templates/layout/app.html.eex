@@ -5,31 +5,37 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-    <title>Recognizer · Phoenix Framework</title>
+    <title>Accounts · System76</title>
 
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/styles/main.css") %>"/>
 
     <script defer type="text/javascript" src="<%= Routes.static_path(@conn, "/scripts/main.js") %>"></script>
   </head>
   <body>
-    <header>
-      <section class="container">
-        <nav role="navigation">
-          <ul>
-            <li><a href="https://hexdocs.pm/phoenix/overview.html">Get Started</a></li>
+    <div class="section">
+      <div class="columns is-centered">
+        <div class="column is-full-mobile is-two-thirds-tablet is-half-desktop is-narrow-desktop">
+          <header class="center" style="max-width:320px;">
+            <%= render("logo.html") %>
+          </header>
 
-          </ul>
-          <%= render "_user_menu.html", assigns %>
-        </nav>
-        <a href="https://phoenixframework.org/" class="phx-logo">
-          <img src="<%= Routes.static_path(@conn, "/images/phoenix.png") %>" alt="Phoenix Framework Logo"/>
-        </a>
-      </section>
-    </header>
-    <main role="main" class="container">
-      <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-      <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
-      <%= @inner_content %>
-    </main>
+          <main role="main" class="box mt-4">
+            <%= if get_flash(@conn, :info) do %>
+              <div class="notification is-info">
+                <%= get_flash(@conn, :info) %>
+              </div>
+            <% end %>
+
+            <%= if get_flash(@conn, :error) do %>
+              <div class="notification is-danger">
+                <%= get_flash(@conn, :error) %>
+              </div>
+            <% end %>
+
+            <%= @inner_content %>
+          </main>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

@@ -133,7 +133,6 @@ defmodule Recognizer.Accounts do
   Updates the user email using the given token.
 
   If the token matches, the user email is updated and the token is deleted.
-  The confirmed_at date is also updated to the current time.
   """
   def update_user_email(user, token) do
     context = "change:#{user.email}"
@@ -148,7 +147,7 @@ defmodule Recognizer.Accounts do
   end
 
   defp user_email_multi(user, email, context) do
-    changeset = user |> User.email_changeset(%{email: email}) |> User.confirm_changeset()
+    changeset = user |> User.email_changeset(%{email: email})
 
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, changeset)
@@ -242,35 +241,6 @@ defmodule Recognizer.Accounts do
   def delete_session_token(token) do
     Repo.delete_all(UserToken.token_and_context_query(token, "session"))
     :ok
-  end
-
-  ## Confirmation
-
-  @doc """
-  Delivers the confirmation email instructions to the given user.
-
-  ## Examples
-
-      iex> deliver_user_confirmation_instructions(user, &Routes.user_confirmation_url(conn, :confirm, &1))
-      {:ok, %{to: ..., body: ...}}
-
-      iex> deliver_user_confirmation_instructions(confirmed_user, &Routes.user_confirmation_url(conn, :confirm, &1))
-      {:error, :already_confirmed}
-
-  """
-  def deliver_user_confirmation_instructions(%User{} = user, confirmation_url_fun)
-      when is_function(confirmation_url_fun, 1) do
-    if user.confirmed_at do
-      {:error, :already_confirmed}
-    else
-      {encoded_token, user_token} = UserToken.build_email_token(user, "confirm")
-      Repo.insert!(user_token)
-
-      Notifications.Account.deliver_confirmation_instructions(
-        user,
-        confirmation_url_fun.(encoded_token)
-      )
-    end
   end
 
   @doc """

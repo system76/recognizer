@@ -1,13 +1,22 @@
-<h1>Forgot your password?</h1>
+<h1 class="title">Forgot your password?</h1>
 
 <%= form_for :user, Routes.user_reset_password_path(@conn, :create), fn f -> %>
-  <%= label f, :email %>
-  <%= email_input f, :email, required: true %>
+  <div class="field">
+    <%= label f, :email, class: "label" %>
 
-  <div>
-    <%= submit "Send instructions to reset password" %>
+    <div class="control">
+      <%= email_input f, :email, class: "input", required: true %>
+    </div>
+  </div>
+
+  <div class="field is-grouped">
+    <div class="control">
+      <%= submit "Reset my password", class: "button" %>
+    </div>
   </div>
 <% end %>
+
+<hr class="has-background-grey-lighter" />
 
 <p>
   <%= link "Register", to: Routes.user_registration_path(@conn, :new) %> |

@@ -1,7 +1,7 @@
 defmodule RecognizerWeb.Router do
   use RecognizerWeb, :router
 
-  import RecognizerWeb.Accounts.UserAuth
+  import RecognizerWeb.UserAuth
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -19,7 +19,7 @@ defmodule RecognizerWeb.Router do
   scope "/", RecognizerWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    get "/", HomepageController, :index
   end
 
   # Other scopes may use custom stacks.
@@ -52,8 +52,5 @@ defmodule RecognizerWeb.Router do
     pipe_through [:browser]
 
     delete "/users/log_out", UserSessionController, :delete
-    get "/users/confirm", UserConfirmationController, :new
-    post "/users/confirm", UserConfirmationController, :create
-    get "/users/confirm/:token", UserConfirmationController, :confirm
   end
 end

@@ -8,7 +8,6 @@ defmodule Recognizer.Repo.Migrations.CreateUsersAuthTables do
       add :username, :string, null: false
       add :email, :string, null: false, size: 160
       add :password, :string
-      add :confirmed_at, :naive_datetime
 
       timestamps()
     end

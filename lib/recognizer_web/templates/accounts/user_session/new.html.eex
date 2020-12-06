@@ -1,25 +1,45 @@
-<h1>Log in</h1>
+<h1 class="title">Log in</h1>
 
 <%= form_for @conn, Routes.user_session_path(@conn, :create), [as: :user], fn f -> %>
   <%= if @error_message do %>
-    <div class="alert alert-danger">
+    <div class="notification is-danger">
       <p><%= @error_message %></p>
     </div>
   <% end %>
 
-  <%= label f, :email %>
-  <%= email_input f, :email, required: true %>
+  <div class="field">
+    <%= label f, :email, class: "label" %>
 
-  <%= label f, :password %>
-  <%= password_input f, :password, required: true %>
+    <div class="control">
+      <%= email_input f, :email, class: "input", required: true %>
+    </div>
+  </div>
 
-  <%= label f, :remember_me, "Keep me logged in for 60 days" %>
-  <%= checkbox f, :remember_me %>
+  <div class="field">
+    <%= label f, :password, class: "label" %>
 
-  <div>
-    <%= submit "Log in" %>
+    <div class="control">
+      <%= password_input f, :password, class: "input", required: true %>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="control">
+      <%= label f, :remember_me, class: "label" do %>
+        <%= checkbox f, :remember_me %>
+        Keep me logged in
+      <% end %>
+    </div>
+  </div>
+
+  <div class="field is-grouped">
+    <div class="control">
+      <%= submit "Log in", class: "button" %>
+    </div>
   </div>
 <% end %>
+
+<hr class="has-background-grey-lighter" />
 
 <p>
   <%= link "Register", to: Routes.user_registration_path(@conn, :new) %> |

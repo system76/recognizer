@@ -1,4 +1,4 @@
-defmodule RecognizerWeb.PageController do
+defmodule RecognizerWeb.HomepageController do
   use RecognizerWeb, :controller
 
   def index(conn, _params) do

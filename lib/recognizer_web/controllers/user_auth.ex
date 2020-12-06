@@ -1,4 +1,4 @@
-defmodule RecognizerWeb.Accounts.UserAuth do
+defmodule RecognizerWeb.UserAuth do
   import Plug.Conn
   import Phoenix.Controller
 

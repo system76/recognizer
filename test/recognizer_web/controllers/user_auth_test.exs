@@ -1,10 +1,10 @@
-defmodule RecognizerWeb.Accounts.UserAuthTest do
+defmodule RecognizerWeb.UserAuthTest do
   use RecognizerWeb.ConnCase
 
   import Recognizer.AccountsFixtures
 
   alias Recognizer.Accounts
-  alias RecognizerWeb.Accounts.UserAuth
+  alias RecognizerWeb.UserAuth
 
   @remember_me_cookie "_recognizer_web_user_remember_me"
 

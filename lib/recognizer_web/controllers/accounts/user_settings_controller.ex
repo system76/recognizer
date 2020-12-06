@@ -2,7 +2,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   use RecognizerWeb, :controller
 
   alias Recognizer.Accounts
-  alias RecognizerWeb.Accounts.UserAuth
+  alias RecognizerWeb.UserAuth
 
   plug :assign_email_and_password_changesets
 

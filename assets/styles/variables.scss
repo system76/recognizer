@@ -59,13 +59,6 @@ $family-secondary: 'Roboto Slab', serif;
 $radius: 4px;
 $body-size: 16px;
 
-// Sidebars
-$sidebar-box-shadow: none;
-$sidebar-mobile-width: 110px;
-// TODO: Set this to a much higher value once this PR is merged and released:
-// https://github.com/buefy/buefy/pull/2823
-$sidebar-mobile-breakpoint: $desktop;
-
 // Boxes
 $box-background-color: $white-bis;
 $box-radius: 3px;
