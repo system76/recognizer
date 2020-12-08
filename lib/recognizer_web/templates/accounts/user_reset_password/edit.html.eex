@@ -1,26 +1,34 @@
-<h1 class="title">Reset password</h1>
+<div class="box">
+  <h2 class="title is-2 mb-6 has-text-centered-mobile">Reset password</h2>
 
-<%= form_for @changeset, Routes.user_reset_password_path(@conn, :update, @token), fn f -> %>
-  <%= if @changeset.action do %>
-    <div class="notification is-danger">
-      <p>Oops, something went wrong! Please check the errors below.</p>
+  <%= form_for @changeset, Routes.user_reset_password_path(@conn, :update, @token), fn f -> %>
+    <%= if @changeset.action do %>
+      <div class="notification is-danger">
+        <p>Oops, something went wrong! Please check the errors below.</p>
+      </div>
+    <% end %>
+    <div class="field">
+      <%= label f, :password, "New password", class: "label" %>
+      <%= password_input f, :password, class: "input", required: true %>
+      <%= error_tag f, :password %>
+    </div>
+
+    <div class="field">
+      <%= label f, :password_confirmation, "Confirm new password", class: "label" %>
+      <%= password_input f, :password_confirmation, class: "input", required: true %>
+      <%= error_tag f, :password_confirmation %>
+    </div>
+    <div class="field is-grouped mt-6">
+      <div class="control">
+        <%= submit "Reset password" %>
+      </div>
     </div>
   <% end %>
 
-  <%= label f, :password, "New password" %>
-  <%= password_input f, :password, required: true %>
-  <%= error_tag f, :password %>
+  <hr class="has-background-grey-lighter" />
 
-  <%= label f, :password_confirmation, "Confirm new password" %>
-  <%= password_input f, :password_confirmation, required: true %>
-  <%= error_tag f, :password_confirmation %>
-
-  <div>
-    <%= submit "Reset password" %>
-  </div>
-<% end %>
-
-<p>
-  <%= link "Register", to: Routes.user_registration_path(@conn, :new) %> |
-  <%= link "Log in", to: Routes.user_session_path(@conn, :new) %>
-</p>
+  <p>
+    <%= link "Register", to: Routes.user_registration_path(@conn, :new) %> |
+    <%= link "Log in", to: Routes.user_session_path(@conn, :new) %>
+  </p>
+</div>
