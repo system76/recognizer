@@ -38,7 +38,7 @@ defmodule Recognizer.Notifications.Account do
   def deliver_reset_password_instructions(user, url) do
     user
     |> convert_user()
-    |> create_message(Account.PasswordReset, reset_key: url)
+    |> create_message(Account.PasswordReset, reset_url: url)
     |> send_message(:password_reset)
   end
 

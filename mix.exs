@@ -35,7 +35,7 @@ defmodule Recognizer.MixProject do
     [
       {:appsignal_phoenix, "~> 2.0.0"},
       {:bcrypt_elixir, "~> 2.0"},
-      {:bottle, github: "system76/bottle", branch: "elixir", sha: "62255e2"},
+      {:bottle, github: "system76/bottle", ref: "90fccf4"},
       {:cowboy, "~> 2.8", override: true},
       {:cowlib, "~> 2.9.1", override: true},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
