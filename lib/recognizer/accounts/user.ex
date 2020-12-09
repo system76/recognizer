@@ -1,4 +1,8 @@
 defmodule Recognizer.Accounts.User do
+  @moduledoc """
+  `Ecto.Schema` for user records.
+  """
+
   use Ecto.Schema
 
   import Ecto.Changeset

@@ -1,5 +1,8 @@
 defmodule RecognizerWeb.Telemetry do
+  @moduledoc false
+
   use Supervisor
+
   import Telemetry.Metrics
 
   def start_link(arg) do

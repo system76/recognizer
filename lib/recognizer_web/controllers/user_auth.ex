@@ -1,4 +1,8 @@
 defmodule RecognizerWeb.UserAuth do
+  @moduledoc """
+  Helpers for any controller that does user authentication logic.
+  """
+
   import Plug.Conn
   import Phoenix.Controller
 

@@ -1,4 +1,9 @@
 defmodule Recognizer.Accounts.UserToken do
+  @moduledoc """
+  Handles tokens for user actions, like account password resets, and web (not
+  oauth) session tokens.
+  """
+
   use Ecto.Schema
 
   import Ecto.Query

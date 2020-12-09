@@ -1,4 +1,10 @@
 defmodule Recognizer.Notifications.Account do
+  @moduledoc """
+  Sends notifications related to user account activites. Right now this logs to
+  console, but in the future this will put messages into a queue for our
+  notification microservice to deliver.
+  """
+
   require Logger
 
   defp deliver(email, message) do
