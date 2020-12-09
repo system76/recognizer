@@ -50,7 +50,6 @@ jobs:
         run: mix test
         env:
           DB_HOST: mysql
-          DB_PORT: ${{ job.services.mysql.ports[3306] }}
 
   Format:
     runs-on: ubuntu-latest

@@ -6,7 +6,7 @@ config :recognizer, Recognizer.Repo,
   username: "root",
   password: "recognizer",
   database: "recognizer_test#{System.get_env("MIX_TEST_PARTITION")}",
-  hostname: "localhost",
+  hostname: System.get_env("DB_HOST", "localhost"),
   pool: Ecto.Adapters.SQL.Sandbox
 
 config :recognizer, RecognizerWeb.Endpoint,
