@@ -29,4 +29,10 @@ config :appsignal, :config,
     "Policy.Error"
   ]
 
+config :recognizer, :message_queues, []
+
+config :ex_aws,
+  enabled: false,
+  json_codec: Jason
+
 import_config "#{Mix.env()}.exs"
