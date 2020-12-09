@@ -1,5 +1,6 @@
 defmodule RecognizerWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :recognizer
+  use Appsignal.Phoenix
 
   @session_options [
     store: :cookie,

@@ -9,6 +9,4 @@ config :recognizer, RecognizerWeb.Endpoint,
 
 config :logger, level: :info
 
-config :appsignal, :config,
-  active: true,
-  name: "Recognizer"
+config :appsignal, :config, active: true

@@ -17,4 +17,14 @@ config :logger, :console,
 
 config :phoenix, :json_library, Jason
 
+config :appsignal, :config,
+  name: "Recognizer",
+  active: false,
+  ignore_errors: [
+    "Ecto.NoResultsError",
+    "Phoenix.MissingParamError",
+    "Phoenix.Router.NoRouteError",
+    "Policy.Error"
+  ]
+
 import_config "#{Mix.env()}.exs"
