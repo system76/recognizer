@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
     <title>Accounts · System76</title>
 
@@ -13,13 +13,13 @@
   </head>
   <body>
     <div class="section">
-      <div class="columns is-centered">
-        <div class="column is-full-mobile is-two-thirds-tablet is-half-desktop is-narrow-desktop">
-          <header class="center" style="max-width:320px;">
+      <div class="container">
+        <div class="column is-6 is-offset-3">
+          <header style="margin: 0 auto; max-width:320px;">
             <%= render("logo.html") %>
           </header>
 
-          <main role="main" class="box mt-4">
+          <main role="main" class="mt-6">
             <%= if get_flash(@conn, :info) do %>
               <div class="notification is-info">
                 <%= get_flash(@conn, :info) %>

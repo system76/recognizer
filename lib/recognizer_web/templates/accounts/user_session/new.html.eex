@@ -1,47 +1,48 @@
-<h1 class="title">Log in</h1>
+<div class="box">
+  <h2 class="title is-2 mb-6 has-text-centered-mobile">Log In</h2>
 
-<%= form_for @conn, Routes.user_session_path(@conn, :create), [as: :user], fn f -> %>
-  <%= if @error_message do %>
-    <div class="notification is-danger">
-      <p><%= @error_message %></p>
+  <%= form_for @conn, Routes.user_session_path(@conn, :create), [as: :user], fn f -> %>
+    <%= if @error_message do %>
+      <div class="notification is-danger">
+        <p><%= @error_message %></p>
+      </div>
+    <% end %>
+
+    <div class="field">
+      <%= label f, :email, "Email Address", class: "label" %>
+
+      <div class="control">
+        <%= email_input f, :email, class: "input", required: true %>
+      </div>
+    </div>
+
+    <div class="field">
+      <%= label f, :password, class: "label" %>
+
+      <div class="control">
+        <%= password_input f, :password, class: "input", required: true %>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="control">
+        <%= label f, :remember_me, class: "label" do %>
+          <%= checkbox f, :remember_me %>
+          Keep me logged in
+        <% end %>
+      </div>
+    </div>
+    <div class="field mt-5 mb-6"><%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %></div>
+    <div class="field is-grouped">
+      <div class="control">
+        <%= submit "Log in", class: "button is-secondary" %>
+      </div>
     </div>
   <% end %>
 
-  <div class="field">
-    <%= label f, :email, class: "label" %>
+  <hr class="has-background-grey-lighter" />
 
-    <div class="control">
-      <%= email_input f, :email, class: "input", required: true %>
-    </div>
-  </div>
-
-  <div class="field">
-    <%= label f, :password, class: "label" %>
-
-    <div class="control">
-      <%= password_input f, :password, class: "input", required: true %>
-    </div>
-  </div>
-
-  <div class="field">
-    <div class="control">
-      <%= label f, :remember_me, class: "label" do %>
-        <%= checkbox f, :remember_me %>
-        Keep me logged in
-      <% end %>
-    </div>
-  </div>
-
-  <div class="field is-grouped">
-    <div class="control">
-      <%= submit "Log in", class: "button" %>
-    </div>
-  </div>
-<% end %>
-
-<hr class="has-background-grey-lighter" />
-
-<p>
-  <%= link "Register", to: Routes.user_registration_path(@conn, :new) %> |
-  <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
-</p>
+  <p>
+    New to System76? <%= link "Create Account", to: Routes.user_registration_path(@conn, :new) %>
+  </p>
+</div>

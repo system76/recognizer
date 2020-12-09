@@ -1,34 +1,45 @@
-<h1>Register</h1>
+<div class="box">
+  <h2 class="title is-2 mb-6 has-text-centered-mobile">Create Account</h2>
 
-<%= form_for @changeset, Routes.user_registration_path(@conn, :create), fn f -> %>
-  <%= if @changeset.action do %>
-    <div class="alert alert-danger">
-      <p>Oops, something went wrong! Please check the errors below.</p>
+  <%= form_for @changeset, Routes.user_registration_path(@conn, :create), fn f -> %>
+    <%= if @changeset.action do %>
+      <div class="alert alert-danger">
+        <p>Oops, something went wrong! Please check the errors below.</p>
+      </div>
+    <% end %>
+    <div class="field">
+      <%= label f, :first_name, class: "label" %>
+      <%= text_input f, :first_name, class: "input", required: true %>
+      <%= error_tag f, :first_name %>
+    </div>
+    <div class="field">
+      <%= label f, :last_name, class: "label" %>
+      <%= text_input f, :last_name, class: "input", required: true %>
+      <%= error_tag f, :last_name %>
+    </div>
+    <div class="field">
+      <%= label f, :email, "Email Address", class: "label" %>
+      <%= email_input f, :email, class: "input", required: true %>
+      <%= error_tag f, :email %>
+    </div>
+    <div class="field">
+      <%= label f, :password, class: "label" %>
+      <%= password_input f, :password, class: "input", required: true %>
+      <%= error_tag f, :password %>
+    </div>
+    <div class="field is-grouped mt-6">
+      <div class="control">
+        <%= submit "Create Account", class: "button is-secondary"%>
+      </div>
     </div>
   <% end %>
 
-  <%= label f, :first_name %>
-  <%= text_input f, :first_name, required: true %>
-  <%= error_tag f, :first_name %>
+  <hr class="has-background-grey-lighter" />
 
-  <%= label f, :last_name %>
-  <%= text_input f, :last_name, required: true %>
-  <%= error_tag f, :last_name %>
-
-  <%= label f, :email %>
-  <%= email_input f, :email, required: true %>
-  <%= error_tag f, :email %>
-
-  <%= label f, :password %>
-  <%= password_input f, :password, required: true %>
-  <%= error_tag f, :password %>
-
-  <div>
-    <%= submit "Register" %>
-  </div>
-<% end %>
-
-<p>
-  <%= link "Log in", to: Routes.user_session_path(@conn, :new) %> |
-  <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
-</p>
+  <p>
+    Already have an account? <%= link "Log in", to: Routes.user_session_path(@conn, :new) %>
+  </p>
+  <p>
+    <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
+  </p>
+</div>
