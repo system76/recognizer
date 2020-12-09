@@ -6,7 +6,7 @@ recognizer_config =
   |> Jason.decode!()
 
 config :recognizer, RecognizerWeb.Endpoint,
-  http: [host: System.get_env("DOMAIN")],
+  url: [host: System.get_env("DOMAIN")],
   secret_key_base: recognizer_config["SECRET_KEY_BASE"]
 
 config :recognizer, Recognizer.Repo,
