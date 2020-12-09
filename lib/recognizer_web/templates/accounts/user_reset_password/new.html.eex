@@ -1,6 +1,9 @@
 <div class="box">
   <h2 class="title is-2 has-text-centered-mobile">Forgot your password</h2>
-  <p class="content">Enter your email address below. We'll send you a link to reset your password. </p>
+  <p class="content">
+    Enter your email address below. We'll send you a link to reset your
+    password.
+  </p>
 
   <%= form_for :user, Routes.user_reset_password_path(@conn, :create), fn f -> %>
     <div class="field">
