@@ -7,6 +7,8 @@ defmodule RecognizerWeb.Endpoint do
     signing_salt: "juvsYHmf"
   ]
 
+  plug RecognizerWeb.HealthcheckPlug
+
   plug Plug.Static,
     at: "/",
     from: :recognizer,
