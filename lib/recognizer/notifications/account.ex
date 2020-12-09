@@ -29,7 +29,7 @@ defmodule Recognizer.Notifications.Account do
     user
     |> convert_user()
     |> create_message(Account.PasswordChanged)
-    |> send_message(:passowrd_changed)
+    |> send_message(:password_changed)
   end
 
   @doc """
