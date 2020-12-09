@@ -35,6 +35,9 @@ defmodule Recognizer.MixProject do
     [
       {:appsignal_phoenix, "~> 2.0.0"},
       {:bcrypt_elixir, "~> 2.0"},
+      {:bottle, github: "system76/bottle", branch: "elixir", sha: "62255e2"},
+      {:cowboy, "~> 2.8", override: true},
+      {:cowlib, "~> 2.9.1", override: true},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:ecto_sql, "~> 3.4"},
       {:gettext, "~> 0.11"},
@@ -46,7 +49,7 @@ defmodule Recognizer.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix, "~> 1.5.7"},
       {:phx_gen_auth, "~> 0.6", only: [:dev], runtime: false},
-      {:plug_cowboy, "~> 2.0"},
+      {:plug_cowboy, "~> 2.4"},
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"}
     ]
