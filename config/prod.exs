@@ -7,6 +7,10 @@ config :recognizer, RecognizerWeb.Endpoint,
   gzip: true,
   server: true
 
-config :logger, level: :info
+config :logger,
+  backends: [LoggerJSON],
+  level: :info
+
+config :recognizer, Recognizer.Repo, log: false
 
 config :appsignal, :config, active: true

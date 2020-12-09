@@ -19,6 +19,14 @@ defmodule RecognizerWeb.Telemetry do
       # {Telemetry.Metrics.ConsoleReporter, metrics: metrics()}
     ]
 
+    :ok =
+      :telemetry.attach(
+        "logger-json-ecto",
+        [:recognizer, :repo, :query],
+        &LoggerJSON.Ecto.telemetry_logging_handler/4,
+        :debug
+      )
+
     Supervisor.init(children, strategy: :one_for_one)
   end
 
