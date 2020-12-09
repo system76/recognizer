@@ -24,6 +24,7 @@ jobs:
       mysql:
         image: mysql:5.7.24
         env:
+          MYSQL_DATABASE: recognizer_test
           MYSQL_ROOT_PASSWORD: recognizer
 
     steps:
