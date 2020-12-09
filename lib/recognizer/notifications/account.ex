@@ -5,51 +5,84 @@ defmodule Recognizer.Notifications.Account do
   notification microservice to deliver.
   """
 
-  require Logger
+  import Logger
 
-  defp deliver(email, message) do
-    Logger.info(message)
+  alias Bottle.Account.V1, as: Account
 
-    {:ok, %{to: email, body: message}}
+  # credo:disable-for-next-line
+  @enabled Application.get_env(:ex_aws, :enabled)
+
+  @doc """
+  Deliver user creation welcome message.
+  """
+  def deliver_user_created_message(user) do
+    user
+    |> convert_user()
+    |> create_message(Account.UserCreated)
+    |> send_message(:user_created)
+  end
+
+  @doc """
+  Deliver user password changed notification.
+  """
+  def deliver_user_password_changed_notification(user) do
+    user
+    |> convert_user()
+    |> create_message(Account.PasswordChanged)
+    |> send_message(:passowrd_changed)
   end
 
   @doc """
   Deliver instructions to reset a user password.
   """
   def deliver_reset_password_instructions(user, url) do
-    deliver(user.email, """
-
-    ==============================
-
-    Hi #{user.email},
-
-    You can reset your password by visiting the URL below:
-
-    #{url}
-
-    If you didn't request this change, please ignore this.
-
-    ==============================
-    """)
+    user
+    |> convert_user()
+    |> create_message(Account.PasswordReset, reset_key: url)
+    |> send_message(:password_reset)
   end
 
-  @doc """
-  Deliver instructions to update a user email.
-  """
-  def deliver_update_email_instructions(user, url) do
-    deliver(user.email, """
+  defp convert_user(user) do
+    user
+    |> Map.take([:email, :first_name, :last_name])
+    |> Map.put(:id, to_string(user.id))
+    |> Account.User.new()
+  end
 
-    ==============================
+  defp create_message(user, type, args \\ []) do
+    apply(type, :new, [Keyword.merge([user: user], args)])
+  end
 
-    Hi #{user.email},
+  defp encode_message(resource, atom) do
+    message_in_a_bottle =
+      Bottle.Core.V1.Bottle.new(
+        request_id: Bottle.RequestId.write(:http),
+        resource: {atom, resource},
+        source: "recognizer",
+        timestamp: DateTime.to_unix(DateTime.utc_now())
+      )
 
-    You can change your email by visiting the URL below:
+    message_in_a_bottle
+    |> Bottle.Core.V1.Bottle.encode()
+    |> URI.encode()
+  end
 
-    #{url}
+  defp message_queue_url(%message_type{}) do
+    :recognizer
+    |> Application.get_env(:message_queues)
+    |> Keyword.get(message_type)
+  end
 
-    If you didn't request this change, please ignore this.
+  defp send_message(resource, atom) when @enabled do
+    encoded_message = encode_message(resource, atom)
 
-    ==============================
-    """)
+    resource
+    |> message_queue_url()
+    |> ExAws.SQS.send_message(encoded_message)
+    |> ExAws.request()
+  end
+
+  defp send_message(resource, _atom) do
+    {:ok, resource}
   end
 end

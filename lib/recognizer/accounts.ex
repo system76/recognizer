@@ -7,7 +7,7 @@ defmodule Recognizer.Accounts do
 
   alias Recognizer.Repo
   alias Recognizer.Accounts.{User, UserToken}
-  alias Recognizer.Notifications
+  alias Recognizer.Notifications.Account, as: Notification
 
   ## Database getters
 
@@ -79,6 +79,14 @@ defmodule Recognizer.Accounts do
     %User{}
     |> User.registration_changeset(attrs)
     |> Repo.insert()
+    |> case do
+      {:ok, user} ->
+        {:ok, _} = Notification.deliver_user_created_message(user)
+        {:ok, user}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
   end
 
   @doc """
@@ -101,8 +109,8 @@ defmodule Recognizer.Accounts do
 
   ## Examples
 
-      iex> change_user_email(user)
-      %Ecto.Changeset{data: %User{}}
+      iex> change_user_email(user, %{email: "new@example.com"})
+      %User{}
 
   """
   def change_user_email(user, attrs \\ %{}) do
@@ -110,69 +118,28 @@ defmodule Recognizer.Accounts do
   end
 
   @doc """
-  Emulates that the email will change without actually changing
-  it in the database.
+  Updates the user email.
 
   ## Examples
 
-      iex> apply_user_email(user, "valid password", %{email: ...})
+      iex> update_user_email(user, %{email: "valid@example.com"})
       {:ok, %User{}}
 
-      iex> apply_user_email(user, "invalid password", %{email: ...})
+      iex> update_user_email(user, %{email: "invalid"})
       {:error, %Ecto.Changeset{}}
 
   """
-  def apply_user_email(user, password, attrs) do
-    user
-    |> User.email_changeset(attrs)
-    |> User.validate_current_password(password)
-    |> Ecto.Changeset.apply_action(:update)
-  end
-
-  @doc """
-  Updates the user email using the given token.
-
-  If the token matches, the user email is updated and the token is deleted.
-  """
-  def update_user_email(user, token) do
-    context = "change:#{user.email}"
-
-    with {:ok, query} <- UserToken.verify_change_email_token_query(token, context),
-         %UserToken{sent_to: email} <- Repo.one(query),
-         {:ok, _} <- Repo.transaction(user_email_multi(user, email, context)) do
-      :ok
-    else
-      _ -> :error
-    end
-  end
-
-  defp user_email_multi(user, email, context) do
-    changeset = user |> User.email_changeset(%{email: email})
+  def update_user_email(user, attrs) do
+    changeset = User.email_changeset(user, attrs)
 
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, [context]))
-  end
-
-  @doc """
-  Delivers the update email instructions to the given user.
-
-  ## Examples
-
-      iex> deliver_update_email_instructions(user, current_email, &Routes.user_update_email_url(conn, :edit, &1))
-      {:ok, %{to: ..., body: ...}}
-
-  """
-  def deliver_update_email_instructions(%User{} = user, current_email, update_email_url_fun)
-      when is_function(update_email_url_fun, 1) do
-    {encoded_token, user_token} = UserToken.build_email_token(user, "change:#{current_email}")
-
-    Repo.insert!(user_token)
-
-    Notifications.Account.deliver_update_email_instructions(
-      user,
-      update_email_url_fun.(encoded_token)
-    )
+    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user}} -> {:ok, user}
+      {:error, :user, changeset, _} -> {:error, changeset}
+    end
   end
 
   @doc """
@@ -211,8 +178,12 @@ defmodule Recognizer.Accounts do
     |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
-      {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
+      {:ok, %{user: user}} ->
+        {:ok, _} = Notification.deliver_user_password_changed_notification(user)
+        {:ok, user}
+
+      {:error, :user, changeset, _} ->
+        {:error, changeset}
     end
   end
 
@@ -243,28 +214,6 @@ defmodule Recognizer.Accounts do
     :ok
   end
 
-  @doc """
-  Confirms a user by the given token.
-
-  If the token matches, the user account is marked as confirmed
-  and the token is deleted.
-  """
-  def confirm_user(token) do
-    with {:ok, query} <- UserToken.verify_email_token_query(token, "confirm"),
-         %User{} = user <- Repo.one(query),
-         {:ok, %{user: user}} <- Repo.transaction(confirm_user_multi(user)) do
-      {:ok, user}
-    else
-      _ -> :error
-    end
-  end
-
-  defp confirm_user_multi(user) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, User.confirm_changeset(user))
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, ["confirm"]))
-  end
-
   ## Reset password
 
   @doc """
@@ -281,7 +230,7 @@ defmodule Recognizer.Accounts do
     {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
     Repo.insert!(user_token)
 
-    Notifications.Account.deliver_reset_password_instructions(
+    Notification.deliver_reset_password_instructions(
       user,
       reset_password_url_fun.(encoded_token)
     )

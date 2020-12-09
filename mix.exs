@@ -40,6 +40,8 @@ defmodule Recognizer.MixProject do
       {:cowlib, "~> 2.9.1", override: true},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:ecto_sql, "~> 3.4"},
+      {:ex_aws_sqs, "~> 3.2"},
+      {:ex_aws, "~> 2.0"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:logger_json, "~> 4.0"},
@@ -50,6 +52,7 @@ defmodule Recognizer.MixProject do
       {:phoenix, "~> 1.5.7"},
       {:phx_gen_auth, "~> 0.6", only: [:dev], runtime: false},
       {:plug_cowboy, "~> 2.4"},
+      {:saxy, "~> 1.1"},
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"}
     ]
