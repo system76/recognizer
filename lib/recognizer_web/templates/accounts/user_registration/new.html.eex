@@ -42,7 +42,7 @@
       <%= error_tag f, :password %>
     </div>
 
-    <div class="field is-grouped mt-5">
+    <div class="buttons is-right mt-5">
       <div class="control">
         <%= submit "Create Account", class: "button is-secondary"%>
       </div>
