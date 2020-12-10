@@ -69,7 +69,9 @@ defmodule RecognizerWeb do
       import Phoenix.View
 
       import RecognizerWeb.ErrorHelpers
+      import RecognizerWeb.FormHelpers
       import RecognizerWeb.Gettext
+
       alias RecognizerWeb.Router.Helpers, as: Routes
     end
   end

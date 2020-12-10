@@ -1,33 +1,48 @@
 <div class="box">
-  <h2 class="title is-2 mb-6 has-text-centered-mobile">Create Account</h2>
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Create Account</h2>
 
   <%= form_for @changeset, Routes.user_registration_path(@conn, :create), fn f -> %>
-    <%= if @changeset.action do %>
-      <div class="alert alert-danger">
-        <p>Oops, something went wrong! Please check the errors below.</p>
-      </div>
-    <% end %>
     <div class="field">
       <%= label f, :first_name, class: "label" %>
-      <%= text_input f, :first_name, class: "input", required: true %>
+
+      <div class="control">
+        <%= text_input f, :first_name, class: input_classes(f, :first_name), required: true %>
+      </div>
+
       <%= error_tag f, :first_name %>
     </div>
+
     <div class="field">
       <%= label f, :last_name, class: "label" %>
-      <%= text_input f, :last_name, class: "input", required: true %>
+
+      <div class="control">
+        <%= text_input f, :last_name, class: input_classes(f, :last_name), required: true %>
+      </div>
+
       <%= error_tag f, :last_name %>
     </div>
+
     <div class="field">
       <%= label f, :email, "Email Address", class: "label" %>
-      <%= email_input f, :email, class: "input", required: true %>
+
+      <div class="control">
+        <%= email_input f, :email, class: input_classes(f, :email), required: true %>
+      </div>
+
       <%= error_tag f, :email %>
     </div>
+
     <div class="field">
       <%= label f, :password, class: "label" %>
-      <%= password_input f, :password, class: "input", required: true %>
+
+      <div class="control">
+        <%= password_input f, :password, class: input_classes(f, :password), required: true %>
+      </div>
+
       <%= error_tag f, :password %>
     </div>
-    <div class="field is-grouped mt-6">
+
+    <div class="field is-grouped mt-5">
       <div class="control">
         <%= submit "Create Account", class: "button is-secondary"%>
       </div>
@@ -38,8 +53,5 @@
 
   <p>
     Already have an account? <%= link "Log in", to: Routes.user_session_path(@conn, :new) %>
-  </p>
-  <p>
-    <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
   </p>
 </div>

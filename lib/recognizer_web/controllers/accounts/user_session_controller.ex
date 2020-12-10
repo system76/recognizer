@@ -14,7 +14,9 @@ defmodule RecognizerWeb.Accounts.UserSessionController do
     if user = Accounts.get_user_by_email_and_password(email, password) do
       UserAuth.log_in_user(conn, user, user_params)
     else
-      render(conn, "new.html", error_message: "Invalid email or password")
+      conn
+      |> put_flash(:error, "Invalid email or password")
+      |> render("new.html")
     end
   end
 

@@ -1,5 +1,16 @@
-<h1>Homepage</h1>
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">System76 Account</h2>
 
-<p>Eventually this will just redirect to System76. For now, click this button</p>
+  <p>
+    Your System76 account is a globaly usable profile accross all System76 and
+    third party websites. If you are trying to access a website, please go to
+    that website. If you are trying to access your settings, you can log in
+    here.
+  </p>
 
-<a href="https://system76.com">System76.com</a>
+  <div class="field is-grouped mt-5">
+    <div class="control">
+      <%= link "Edit My Settings", class: "button is-secondary", to: Routes.user_settings_path(@conn, :edit) %>
+    </div>
+  </div>
+</div>

@@ -1,27 +1,25 @@
 <div class="box">
-  <h2 class="title is-2 mb-6 has-text-centered-mobile">Log In</h2>
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Log In</h2>
 
   <%= form_for @conn, Routes.user_session_path(@conn, :create), [as: :user], fn f -> %>
-    <%= if @error_message do %>
-      <div class="notification is-danger">
-        <p><%= @error_message %></p>
-      </div>
-    <% end %>
-
     <div class="field">
       <%= label f, :email, "Email Address", class: "label" %>
 
       <div class="control">
-        <%= email_input f, :email, class: "input", required: true %>
+        <%= email_input f, :email, class: input_classes(f, :email), required: true %>
       </div>
+
+      <%= error_tag f, :email %>
     </div>
 
     <div class="field">
       <%= label f, :password, class: "label" %>
 
       <div class="control">
-        <%= password_input f, :password, class: "input", required: true %>
+        <%= password_input f, :password, class: input_classes(f, :password), required: true %>
       </div>
+
+      <%= error_tag f, :password %>
     </div>
 
     <div class="field">
@@ -32,8 +30,12 @@
         <% end %>
       </div>
     </div>
-    <div class="field mt-5 mb-6"><%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %></div>
-    <div class="field is-grouped">
+
+    <div class="field my-5">
+      <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
+    </div>
+
+    <div class="field is-grouped mt-5">
       <div class="control">
         <%= submit "Log in", class: "button is-secondary" %>
       </div>

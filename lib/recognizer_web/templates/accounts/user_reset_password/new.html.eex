@@ -1,5 +1,6 @@
 <div class="box">
-  <h2 class="title is-2 has-text-centered-mobile">Forgot your password</h2>
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Forgot your password</h2>
+
   <p class="content">
     Enter your email address below. We'll send you a link to reset your
     password.
@@ -12,9 +13,11 @@
       <div class="control">
         <%= email_input f, :email, class: "input", required: true %>
       </div>
+
+      <%= error_tag f, :email %>
     </div>
 
-    <div class="field is-grouped mt-6">
+    <div class="field is-grouped mt-5">
       <div class="control">
         <%= submit "Send Link", class: "button is-secondary" %>
       </div>
@@ -24,7 +27,6 @@
   <hr class="has-background-grey-lighter" />
 
   <p>
-    <%= link "Create Account", to: Routes.user_registration_path(@conn, :new) %> |
-    <%= link "Log in", to: Routes.user_session_path(@conn, :new) %>
+    New to System76? <%= link "Create Account", to: Routes.user_registration_path(@conn, :new) %>
   </p>
 </div>

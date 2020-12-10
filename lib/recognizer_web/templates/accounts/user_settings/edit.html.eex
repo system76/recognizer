@@ -1,53 +1,94 @@
-<h1>Settings</h1>
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Log Out</h2>
 
-<h3>Change email</h3>
+  <%= form_for :logout, Routes.user_session_path(@conn, :delete), [method: :delete], fn f -> %>
+    <p>
+      This will log you out of this website, but <b>not</b> the system76.com
+      website, or any other third party websites you have logged in on.
+    </p>
 
-<%= form_for @email_changeset, Routes.user_settings_path(@conn, :update), fn f -> %>
-  <%= if @email_changeset.action do %>
-    <div class="alert alert-danger">
-      <p>Oops, something went wrong! Please check the errors below.</p>
+    <div class="field is-grouped mt-5">
+      <div class="control">
+        <%= submit "Log Out", class: "button is-danger" %>
+      </div>
     </div>
   <% end %>
+</div>
 
-  <%= hidden_input f, :action, name: "action", value: "update_email" %>
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Change Email</h2>
 
-  <%= label f, :email %>
-  <%= email_input f, :email, required: true %>
-  <%= error_tag f, :email %>
+  <%= form_for @email_changeset, Routes.user_settings_path(@conn, :update), fn f -> %>
+    <%= hidden_input f, :action, name: "action", value: "update_email" %>
 
-  <%= label f, :current_password, for: "current_password_for_email" %>
-  <%= password_input f, :current_password, required: true, name: "current_password", id: "current_password_for_email" %>
-  <%= error_tag f, :current_password %>
+    <div class="field">
+      <%= label f, :email, "Email Address", class: "label" %>
 
-  <div>
-    <%= submit "Change email" %>
-  </div>
-<% end %>
+      <div class="control">
+        <%= email_input f, :email, class: input_classes(f, :email), required: true %>
+      </div>
 
-<h3>Change password</h3>
+      <%= error_tag f, :email %>
+    </div>
 
-<%= form_for @password_changeset, Routes.user_settings_path(@conn, :update), fn f -> %>
-  <%= if @password_changeset.action do %>
-    <div class="alert alert-danger">
-      <p>Oops, something went wrong! Please check the errors below.</p>
+    <div class="field">
+      <%= label f, :current_password, class: "label" %>
+
+      <div class="control">
+        <%= password_input f, :current_password, class: input_classes(f, :password), required: true, name: "current_password" %>
+      </div>
+
+      <%= error_tag f, :current_password %>
+    </div>
+
+    <div class="field is-grouped mt-5">
+      <div class="control">
+        <%= submit "Change Email", class: "button is-secondary" %>
+      </div>
     </div>
   <% end %>
+</div>
 
-  <%= hidden_input f, :action, name: "action", value: "update_password" %>
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Change Password</h2>
 
-  <%= label f, :password, "New password" %>
-  <%= password_input f, :password, required: true %>
-  <%= error_tag f, :password %>
+  <%= form_for @password_changeset, Routes.user_settings_path(@conn, :update), fn f -> %>
+    <%= hidden_input f, :action, name: "action", value: "update_password" %>
 
-  <%= label f, :password_confirmation, "Confirm new password" %>
-  <%= password_input f, :password_confirmation, required: true %>
-  <%= error_tag f, :password_confirmation %>
+    <div class="field">
+      <%= label f, :password, "New Password", class: "label" %>
 
-  <%= label f, :current_password, for: "current_password_for_password" %>
-  <%= password_input f, :current_password, required: true, name: "current_password", id: "current_password_for_password" %>
-  <%= error_tag f, :current_password %>
+      <div class="control">
+        <%= password_input f, :password, class: input_classes(f, :password), required: true %>
+      </div>
 
-  <div>
-    <%= submit "Change password" %>
-  </div>
-<% end %>
+      <%= error_tag f, :password %>
+    </div>
+
+    <div class="field">
+      <%= label f, :password_confirmation, "Confirm new password", class: "label" %>
+
+      <div class="control">
+        <%= password_input f, :password_confirmation, class: input_classes(f, :password_confirmation), required: true %>
+      </div>
+
+      <%= error_tag f, :password_confirmation %>
+    </div>
+
+    <div class="field">
+      <%= label f, :current_password, class: "label" %>
+
+      <div class="control">
+        <%= password_input f, :current_password, class: input_classes(f, :password), required: true, name: "current_password" %>
+      </div>
+
+      <%= error_tag f, :current_password %>
+    </div>
+
+    <div class="field is-grouped mt-5">
+      <div class="control">
+        <%= submit "Change Password", class: "button is-secondary" %>
+      </div>
+    </div>
+  <% end %>
+</div>

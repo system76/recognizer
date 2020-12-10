@@ -30,27 +30,26 @@ defmodule RecognizerWeb.Router do
   scope "/", RecognizerWeb.Accounts do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
-    get "/users/register", UserRegistrationController, :new
-    post "/users/register", UserRegistrationController, :create
-    get "/users/log_in", UserSessionController, :new
-    post "/users/log_in", UserSessionController, :create
-    get "/users/reset_password", UserResetPasswordController, :new
-    post "/users/reset_password", UserResetPasswordController, :create
-    get "/users/reset_password/:token", UserResetPasswordController, :edit
-    put "/users/reset_password/:token", UserResetPasswordController, :update
+    get "/create-account", UserRegistrationController, :new
+    post "/create-account", UserRegistrationController, :create
+    get "/login", UserSessionController, :new
+    post "/login", UserSessionController, :create
+    get "/forgot-password", UserResetPasswordController, :new
+    post "/forgot-password", UserResetPasswordController, :create
+    get "/forgot-password/:token", UserResetPasswordController, :edit
+    put "/forgot-password/:token", UserResetPasswordController, :update
   end
 
   scope "/", RecognizerWeb.Accounts do
     pipe_through [:browser, :require_authenticated_user]
 
-    get "/users/settings", UserSettingsController, :edit
-    put "/users/settings", UserSettingsController, :update
-    get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
+    get "/settings", UserSettingsController, :edit
+    put "/settings", UserSettingsController, :update
   end
 
   scope "/", RecognizerWeb.Accounts do
     pipe_through [:browser]
 
-    delete "/users/log_out", UserSessionController, :delete
+    delete "/logout", UserSessionController, :delete
   end
 end

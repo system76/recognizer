@@ -14,24 +14,24 @@
   <body>
     <div class="section">
       <div class="container">
-        <div class="column is-6 is-offset-3">
-          <header style="margin: 0 auto; max-width:320px;">
+        <div class="column is-8-tablet is-offset-2-tablet is-6-desktop is-offset-3-desktop">
+          <header style="margin: 0 auto 2rem; max-width:320px;">
             <%= render("logo.html") %>
           </header>
 
-          <main role="main" class="mt-6">
-            <%= if get_flash(@conn, :info) do %>
-              <div class="notification is-info">
-                <%= get_flash(@conn, :info) %>
-              </div>
-            <% end %>
+          <%= if get_flash(@conn, :info) do %>
+            <div class="notification is-info">
+              <%= get_flash(@conn, :info) %>
+            </div>
+          <% end %>
 
-            <%= if get_flash(@conn, :error) do %>
-              <div class="notification is-danger">
-                <%= get_flash(@conn, :error) %>
-              </div>
-            <% end %>
+          <%= if get_flash(@conn, :error) do %>
+            <div class="notification is-danger">
+              <%= get_flash(@conn, :error) %>
+            </div>
+          <% end %>
 
+          <main role="main">
             <%= @inner_content %>
           </main>
         </div>
