@@ -6,7 +6,7 @@ defmodule Recognizer.Accounts do
   import Ecto.Query, warn: false
 
   alias Recognizer.Repo
-  alias Recognizer.Accounts.{User, UserToken}
+  alias Recognizer.Accounts.{User, OAuth, UserToken}
   alias Recognizer.Notifications.Account, as: Notification
 
   ## Database getters
@@ -25,6 +25,26 @@ defmodule Recognizer.Accounts do
   """
   def get_user_by_email(email) when is_binary(email) do
     Repo.get_by(User, email: email)
+  end
+
+  def get_user_by_service_guid(service, service_guid) do
+    query =
+      from o in OAuth,
+        join: u in assoc(o, :user),
+        where: o.service == ^service and o.service_guid == ^service_guid,
+        preload: [user: u]
+
+    with %OAuth{user: user} <- Repo.one(query) do
+      user
+    end
+  end
+
+  def create_oauth(user, service, service_guid) do
+    attrs = %{service: service, service_guid: service_guid, user_id: user.id}
+
+    %OAuth{}
+    |> OAuth.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -79,14 +99,23 @@ defmodule Recognizer.Accounts do
     %User{}
     |> User.registration_changeset(attrs)
     |> Repo.insert()
-    |> case do
-      {:ok, user} ->
-        {:ok, _} = Notification.deliver_user_created_message(user)
-        {:ok, user}
+    |> maybe_notify_new_user()
+  end
 
-      {:error, changeset} ->
-        {:error, changeset}
-    end
+  def register_oauth_user(attrs) do
+    %User{}
+    |> User.oauth_registration_changeset(attrs)
+    |> Repo.insert()
+    |> maybe_notify_new_user()
+  end
+
+  defp maybe_notify_new_user({:ok, user}) do
+    {:ok, _} = Notification.deliver_user_created_message(user)
+    {:ok, user}
+  end
+
+  defp maybe_notify_new_user(error) do
+    error
   end
 
   @doc """

@@ -22,11 +22,6 @@ defmodule RecognizerWeb.Router do
     get "/", HomepageController, :index
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", RecognizerWeb do
-  #   pipe_through :api
-  # end
-
   scope "/", RecognizerWeb.Accounts do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
@@ -38,6 +33,9 @@ defmodule RecognizerWeb.Router do
     post "/forgot-password", UserResetPasswordController, :create
     get "/forgot-password/:token", UserResetPasswordController, :edit
     put "/forgot-password/:token", UserResetPasswordController, :update
+
+    get "/oauth/:provider", OAuthController, :request
+    get "/oauth/:provider/callback", OAuthController, :callback
   end
 
   scope "/", RecognizerWeb.Accounts do
