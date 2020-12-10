@@ -42,6 +42,7 @@ defmodule Recognizer.MixProject do
       {:ecto_sql, "~> 3.4"},
       {:ex_aws_sqs, "~> 3.2"},
       {:ex_aws, "~> 2.0"},
+      {:ex_oauth2_provider, "~> 0.5.6"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:logger_json, "~> 4.0"},
@@ -66,8 +67,9 @@ defmodule Recognizer.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      setup: ["deps.get", "ecto.setup", "cmd npm ci --prefix assets"],
+      "ecto.seed": ["run priv/repo/seeds.exs"],
+      "ecto.setup": ["ecto.create", "ecto.migrate", "ecto.seed"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
