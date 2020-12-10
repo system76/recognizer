@@ -1,7 +1,7 @@
 import Config
 
 config :recognizer, RecognizerWeb.Endpoint,
-  url: [port: 443],
+  url: [scheme: "https"],
   http: [port: 8080],
   cache_static_manifest: "priv/static/cache_manifest.json",
   gzip: true,
