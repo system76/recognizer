@@ -40,6 +40,18 @@
         <%= submit "Log in", class: "button is-secondary" %>
       </div>
     </div>
+    <div class="content oauth">
+      <p>Or log in with</p>
+      <div class="buttons">
+        <%= link to: Routes.o_auth_path(@conn, :request, "github"), class: "github" do %>
+          <i class="fa fa-github"></i>
+        <% end %>
+
+        <%= link to: Routes.o_auth_path(@conn, :request, "google"), class: "google" do %>
+          <i class="fa fa-google"></i>
+        <% end %>
+      </div>
+    </div>
   <% end %>
 
   <hr class="has-background-grey-lighter" />

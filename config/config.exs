@@ -49,4 +49,19 @@ config :recognizer, ExOauth2Provider,
   revoke_refresh_token_on_use: true,
   force_ssl_in_redirect_uri: true
 
+config :ueberauth, Ueberauth,
+  base_path: "/oauth",
+  providers: [
+    github: {Ueberauth.Strategy.Github, [default_scope: "user:email", send_redirect_uri: false]},
+    google: {Ueberauth.Strategy.Google, [default_scope: "email profile"]}
+  ]
+
+config :ueberauth, Ueberauth.Strategy.Github.OAuth,
+  client_id: "",
+  client_secret: ""
+
+config :ueberauth, Ueberauth.Strategy.Google.OAuth,
+  client_id: "",
+  client_secret: ""
+
 import_config "#{Mix.env()}.exs"

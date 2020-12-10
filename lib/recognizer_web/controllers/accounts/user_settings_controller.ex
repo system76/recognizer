@@ -14,7 +14,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     user = conn.assigns.current_user
 
     case Accounts.update_user_email(user, user_params) do
-      {:ok, updated_user} ->
+      {:ok, _updated_user} ->
         conn
         |> put_flash(:info, "Email has been updated.")
         |> redirect(to: Routes.user_settings_path(conn, :edit))

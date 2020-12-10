@@ -49,6 +49,15 @@ defmodule Recognizer.Accounts.User do
     |> generate_username()
   end
 
+  def oauth_registration_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:first_name, :last_name, :email])
+    |> validate_required([:first_name, :last_name])
+    |> put_change(:hashed_password, "")
+    |> validate_email()
+    |> generate_username()
+  end
+
   defp validate_email(changeset) do
     changeset
     |> validate_required([:email])

@@ -30,3 +30,15 @@ config :ex_aws,
 config :appsignal, :config,
   push_api_key: recognizer_config["APPSIGNAL_KEY"],
   env: recognizer_config["APPSIGNAL_ENV"]
+
+config :ueberauth, Ueberauth.Strategy.Facebook.OAuth,
+  client_id: recognizer_config["FACEBOOK_CLIENT_ID"],
+  client_secret: recognizer_config["FACEBOOK_CLIENT_SECRET"]
+
+config :ueberauth, Ueberauth.Strategy.Github.OAuth,
+  client_id: recognizer_config["GITHUB_CLIENT_ID"],
+  client_secret: recognizer_config["GITHUB_CLIENT_SECRET"]
+
+config :ueberauth, Ueberauth.Strategy.Google.OAuth,
+  client_id: recognizer_config["GOOGLE_CLIENT_ID"],
+  client_secret: recognizer_config["GOOGLE_CLIENT_SECRET"]
