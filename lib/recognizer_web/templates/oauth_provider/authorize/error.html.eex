@@ -1,0 +1,7 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Authorization Error</h2>
+
+  <p>
+    <%= @error.error_description %>
+  </p>
+</div>

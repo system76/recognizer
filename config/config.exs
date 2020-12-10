@@ -35,4 +35,18 @@ config :ex_aws,
   enabled: false,
   json_codec: Jason
 
+config :recognizer, ExOauth2Provider,
+  repo: Recognizer.Repo,
+  resource_owner: Recognizer.Accounts.User,
+  access_grant: Recognizer.OauthProvider.AccessGrant,
+  access_token: Recognizer.OauthProvider.AccessToken,
+  application: Recognizer.OauthProvider.Application,
+  default_scopes: ~w(public),
+  optional_scopes: ~w(write update),
+  authorization_code_expires_in: 600,
+  access_token_expires_in: 7200,
+  use_refresh_token: true,
+  revoke_refresh_token_on_use: true,
+  force_ssl_in_redirect_uri: true
+
 import_config "#{Mix.env()}.exs"

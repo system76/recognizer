@@ -1,0 +1,5 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Authorization code</h2>
+
+  <p><%= @code %></p>
+</div>

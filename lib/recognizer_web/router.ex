@@ -52,4 +52,13 @@ defmodule RecognizerWeb.Router do
 
     delete "/logout", UserSessionController, :delete
   end
+
+  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
+    pipe_through [:browser, :require_authenticated_user]
+
+    get "/oauth/authorize", AuthorizeController, :new
+    get "/oauth/authorize/:code", AuthorizeController, :show
+    post "/oauth/authorize", AuthorizeController, :create
+    delete "/oauth/authorize", AuthorizeController, :delete
+  end
 end
