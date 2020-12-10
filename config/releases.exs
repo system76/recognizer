@@ -17,10 +17,9 @@ config :recognizer, Recognizer.Repo,
   pool_size: recognizer_config["DB_POOL"]
 
 config :recognizer, :message_queues, [
-  {Bottle.Notification.User.V1.Created, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
-  {Bottle.Notification.User.V1.PasswordChanged,
-   recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
-  {Bottle.Notification.User.V1.PasswordReset, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]}
+  {Bottle.Account.V1.UserCreated, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
+  {Bottle.Account.V1.PasswordChanged, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
+  {Bottle.Account.V1.PasswordReset, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]}
 ]
 
 config :ex_aws,
