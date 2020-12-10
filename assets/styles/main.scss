@@ -1,3 +1,49 @@
 @import "variables.scss";
 @import "bulma";
 @import "overrides.scss";
+@import '~font-awesome/css/font-awesome.css';
+
+.button-col {
+  align-self: flex-end;
+}
+
+.oauth {
+  text-align: center;
+
+  .buttons {
+    line-height: 0.8;
+
+    a:first-child {
+      margin: 0 1.5rem 0 0;
+    }
+
+    a {
+      width: 40px;
+      height: 40px;
+
+      &.github {
+        color: #000;
+        font-size: 2.5rem;
+
+        ::before {
+          height: 40px;
+          width: 40px;
+        }
+      }
+
+      &.google {
+        background-color: #E43E2B;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 1.602rem;
+        padding: 0.45rem;
+
+        ::before {
+          height: 26px;
+          width: 26px;
+          margin-left: 2px;
+        }
+      }
+    }
+  }
+}
