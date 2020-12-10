@@ -1,6 +1,8 @@
 import Config
 
-config :bcrypt_elixir, :log_rounds, 1
+config :argon2_elixir,
+  t_cost: 1,
+  m_cost: 8
 
 config :recognizer, Recognizer.Repo,
   username: "root",

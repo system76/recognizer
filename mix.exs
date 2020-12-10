@@ -34,7 +34,7 @@ defmodule Recognizer.MixProject do
   defp deps do
     [
       {:appsignal_phoenix, "~> 2.0.0"},
-      {:bcrypt_elixir, "~> 2.0"},
+      {:argon2_elixir, "~> 2.0"},
       {:bottle, github: "system76/bottle", ref: "90fccf4"},
       {:cowboy, "~> 2.8", override: true},
       {:cowlib, "~> 2.9.1", override: true},
