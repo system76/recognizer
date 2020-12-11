@@ -7,7 +7,7 @@
       website, or any other third party websites you have logged in on.
     </p>
 
-    <div class="field is-grouped mt-5">
+    <div class="buttons is-right mt-5">
       <div class="control">
         <%= submit "Log Out", class: "button is-danger" %>
       </div>
@@ -41,7 +41,7 @@
       <%= error_tag f, :current_password %>
     </div>
 
-    <div class="field is-grouped mt-5">
+    <div class="buttons is-right mt-5">
       <div class="control">
         <%= submit "Change Email", class: "button is-secondary" %>
       </div>
@@ -85,7 +85,7 @@
       <%= error_tag f, :current_password %>
     </div>
 
-    <div class="field is-grouped mt-5">
+    <div class="buttons is-right mt-5">
       <div class="control">
         <%= submit "Change Password", class: "button is-secondary" %>
       </div>
