@@ -21,15 +21,15 @@ Recognizer.Repo.insert!(%Recognizer.Accounts.User{
 
 Recognizer.Repo.insert!(%Recognizer.OauthProvider.Application{
   name: "Privileged Application",
-  uid: "1",
-  redirect_uri: "https://localhost:3000",
+  uid: "privileged",
+  redirect_uri: "http://localhost:3002/auth/callback http://localhost:3000/auth/callback",
   privileged: true,
   owner_id: 1
 })
 
 Recognizer.Repo.insert!(%Recognizer.OauthProvider.Application{
   name: "Third Party Application",
-  uid: "2",
-  redirect_uri: "https://localhost:3000",
+  uid: "third-party",
+  redirect_uri: "http://localhost:3002/auth/callback http://localhost:3000/auth/callback",
   owner_id: 1
 })
