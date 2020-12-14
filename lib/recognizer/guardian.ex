@@ -23,15 +23,17 @@ defmodule Recognizer.Guardian do
 
   def encode_and_sign_access_token(access_token) do
     user = Keyword.get(access_token, :resource_owner)
+
     scopes =
       access_token
       |> Keyword.get(:scopes, [])
       |> String.split(" ")
 
-    {:ok, token, _claims} = encode_and_sign(user, %{scopes: scopes}, [
-      token_type: "access",
-      ttl: {Keyword.get(access_token, :expires_in), :seconds}
-    ])
+    {:ok, token, _claims} =
+      encode_and_sign(user, %{scopes: scopes},
+        token_type: "access",
+        ttl: {Keyword.get(access_token, :expires_in), :seconds}
+      )
 
     token
   end
