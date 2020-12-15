@@ -22,6 +22,21 @@ defmodule RecognizerWeb.Router do
     get "/", HomepageController, :index
   end
 
+  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
+    pipe_through [:browser, :require_authenticated_user]
+
+    get "/oauth/authorize", AuthorizeController, :new
+    get "/oauth/authorize/:code", AuthorizeController, :show
+    post "/oauth/authorize", AuthorizeController, :create
+    delete "/oauth/authorize", AuthorizeController, :delete
+  end
+
+  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
+    pipe_through [:api]
+
+    post "/oauth/token", TokenController, :create
+  end
+
   scope "/", RecognizerWeb.Accounts do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
@@ -49,20 +64,5 @@ defmodule RecognizerWeb.Router do
     pipe_through [:browser]
 
     delete "/logout", UserSessionController, :delete
-  end
-
-  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
-    pipe_through [:browser, :require_authenticated_user]
-
-    get "/oauth/authorize", AuthorizeController, :new
-    get "/oauth/authorize/:code", AuthorizeController, :show
-    post "/oauth/authorize", AuthorizeController, :create
-    delete "/oauth/authorize", AuthorizeController, :delete
-  end
-
-  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
-    pipe_through [:api]
-
-    post "/oauth/token", TokenController, :create
   end
 end
