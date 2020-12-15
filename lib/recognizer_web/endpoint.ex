@@ -25,6 +25,7 @@ defmodule RecognizerWeb.Endpoint do
     plug Phoenix.Ecto.CheckRepoStatus, otp_app: :recognizer
   end
 
+  plug CORSPlug
   plug Bottle.RequestIdPlug
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 

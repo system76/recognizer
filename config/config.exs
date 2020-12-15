@@ -41,13 +41,18 @@ config :recognizer, ExOauth2Provider,
   access_grant: Recognizer.OauthProvider.AccessGrant,
   access_token: Recognizer.OauthProvider.AccessToken,
   application: Recognizer.OauthProvider.Application,
-  default_scopes: ~w(public),
-  optional_scopes: ~w(write update),
+  access_token_generator: {Recognizer.Guardian, :encode_and_sign_access_token},
+  default_scopes: ~w(profile:read),
+  optional_scopes: ~w(profile:read profile:write),
   authorization_code_expires_in: 600,
   access_token_expires_in: 7200,
   use_refresh_token: true,
   revoke_refresh_token_on_use: true,
-  force_ssl_in_redirect_uri: true
+  force_ssl_in_redirect_uri: false
+
+config :recognizer, Recognizer.Guardian,
+  issuer: "recognizer",
+  secret_key: "g6Ddv3l/3cYkgtOwkhspAAcw0cjL3Pg23rnmt69UVYHi4WrU1smdFykZa0GfY4xl"
 
 config :ueberauth, Ueberauth,
   base_path: "/oauth",

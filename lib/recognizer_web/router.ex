@@ -59,4 +59,10 @@ defmodule RecognizerWeb.Router do
     post "/oauth/authorize", AuthorizeController, :create
     delete "/oauth/authorize", AuthorizeController, :delete
   end
+
+  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
+    pipe_through [:api]
+
+    post "/oauth/token", TokenController, :create
+  end
 end
