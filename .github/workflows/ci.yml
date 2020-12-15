@@ -32,13 +32,13 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Install (os)
-        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev
+        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev zstd
 
       - name: Cache
         id: cache-mix
         uses: actions/cache@v2
         with:
-          key: ${{ runner.os }}-${{ hashFiles('**/mix.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('mix.lock') }}
           path: |
             _build
             deps
@@ -66,13 +66,13 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Install (os)
-        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev
+        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev zstd
 
       - name: Cache
         id: cache-mix
         uses: actions/cache@v2
         with:
-          key: ${{ runner.os }}-${{ hashFiles('**/mix.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('mix.lock') }}
           path: |
             _build
             deps
@@ -98,13 +98,13 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Install (os)
-        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev
+        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev zstd
 
       - name: Cache
         id: cache-mix
         uses: actions/cache@v2
         with:
-          key: ${{ runner.os }}-${{ hashFiles('**/mix.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('mix.lock') }}
           path: |
             _build
             deps
