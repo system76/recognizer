@@ -78,7 +78,8 @@ LABEL \
 ENV \
     PATH="/usr/local/bin:$PATH" \
     VERSION="${VERSION}" \
-    MIX_APP="copy_cat" \
+    APP_REVISION="${VERSION}" \
+    MIX_APP="recognizer" \
     MIX_ENV="prod" \
     SHELL="/bin/bash"
 
