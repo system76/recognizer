@@ -54,4 +54,19 @@ config :recognizer, Recognizer.Guardian,
   issuer: "recognizer",
   secret_key: "g6Ddv3l/3cYkgtOwkhspAAcw0cjL3Pg23rnmt69UVYHi4WrU1smdFykZa0GfY4xl"
 
+config :ueberauth, Ueberauth,
+  base_path: "/oauth",
+  providers: [
+    github: {Ueberauth.Strategy.Github, [default_scope: "user:email", send_redirect_uri: false]},
+    google: {Ueberauth.Strategy.Google, [default_scope: "email profile"]}
+  ]
+
+config :ueberauth, Ueberauth.Strategy.Github.OAuth,
+  client_id: "",
+  client_secret: ""
+
+config :ueberauth, Ueberauth.Strategy.Google.OAuth,
+  client_id: "",
+  client_secret: ""
+
 import_config "#{Mix.env()}.exs"

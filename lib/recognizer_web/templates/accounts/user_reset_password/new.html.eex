@@ -17,7 +17,7 @@
       <%= error_tag f, :email %>
     </div>
 
-    <div class="field is-grouped mt-5">
+    <div class="buttons is-right mt-5">
       <div class="control">
         <%= submit "Send Link", class: "button is-secondary" %>
       </div>

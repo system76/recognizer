@@ -32,3 +32,11 @@ config :appsignal, :config,
   env: recognizer_config["APPSIGNAL_ENV"]
 
 config :recognizer, Recognizer.Guardian, secret_key: recognizer_config["GUARDIAN_KEY"]
+
+config :ueberauth, Ueberauth.Strategy.Github.OAuth,
+  client_id: recognizer_config["GITHUB_CLIENT_ID"],
+  client_secret: recognizer_config["GITHUB_CLIENT_SECRET"]
+
+config :ueberauth, Ueberauth.Strategy.Google.OAuth,
+  client_id: recognizer_config["GOOGLE_CLIENT_ID"],
+  client_secret: recognizer_config["GOOGLE_CLIENT_SECRET"]

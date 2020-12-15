@@ -57,7 +57,9 @@ defmodule Recognizer.MixProject do
       {:plug_cowboy, "~> 2.4"},
       {:saxy, "~> 1.1"},
       {:telemetry_metrics, "~> 0.4"},
-      {:telemetry_poller, "~> 0.4"}
+      {:telemetry_poller, "~> 0.4"},
+      {:ueberauth_github, "~> 0.8"},
+      {:ueberauth_google, "~> 0.10"}
     ]
   end
 
