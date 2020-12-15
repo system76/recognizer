@@ -30,3 +30,5 @@ config :ex_aws,
 config :appsignal, :config,
   push_api_key: recognizer_config["APPSIGNAL_KEY"],
   env: recognizer_config["APPSIGNAL_ENV"]
+
+config :recognizer, Recognizer.Guardian, secret_key: recognizer_config["GUARDIAN_KEY"]
