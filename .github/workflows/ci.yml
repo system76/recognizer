@@ -28,25 +28,29 @@ jobs:
           MYSQL_ROOT_PASSWORD: recognizer
 
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Cache
-        uses: actions/cache@v1
-        with:
-          path: _build
-          key: ${{ runner.os }}-build
-          restore-keys: |
-             ${{ runner.os }}-build
+      - name: Install (os)
+        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev
 
-      - name: Install Dependencies
+      - name: Cache
+        id: cache-mix
+        uses: actions/cache@v2
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('**/mix.lock') }}
+          path: |
+            _build
+            deps
+
+      - name: Install (mix)
+        if: steps.cache-mix.outputs.cache-hit != 'true'
         run: |
-          apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev
           mix local.rebar --force
           mix local.hex --force
           mix deps.get
 
-      - name: Run Tests
+      - name: Test
         run: mix test
         env:
           DB_HOST: mysql
@@ -58,25 +62,29 @@ jobs:
       image: elixir:1.10-alpine
 
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Cache
-        uses: actions/cache@v1
-        with:
-          path: _build
-          key: ${{ runner.os }}-build
-          restore-keys: |
-             ${{ runner.os }}-build
+      - name: Install (os)
+        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev
 
-      - name: Install Dependencies
+      - name: Cache
+        id: cache-mix
+        uses: actions/cache@v2
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('**/mix.lock') }}
+          path: |
+            _build
+            deps
+
+      - name: Install (mix)
+        if: steps.cache-mix.outputs.cache-hit != 'true'
         run: |
-          apk add --no-cache gcc g++ git libmcrypt-dev make musl-dev
           mix local.rebar --force
           mix local.hex --force
           mix deps.get
 
-      - name: Run Formatter
+      - name: Format
         run: mix format --check-formatted
 
   Credo:
@@ -86,23 +94,27 @@ jobs:
       image: elixir:1.10-alpine
 
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Cache
-        uses: actions/cache@v1
-        with:
-          path: _build
-          key: ${{ runner.os }}-build
-          restore-keys: |
-             ${{ runner.os }}-build
+      - name: Install (os)
+        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev
 
-      - name: Install Dependencies
+      - name: Cache
+        id: cache-mix
+        uses: actions/cache@v2
+        with:
+          key: ${{ runner.os }}-${{ hashFiles('**/mix.lock') }}
+          path: |
+            _build
+            deps
+
+      - name: Install (mix)
+        if: steps.cache-mix.outputs.cache-hit != 'true'
         run: |
-          apk add --no-cache gcc g++ git libmcrypt-dev make musl-dev
           mix local.rebar --force
           mix local.hex --force
           mix deps.get
 
-      - name: Run Credo
+      - name: Credo
         run: mix credo
