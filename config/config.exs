@@ -51,7 +51,7 @@ config :recognizer, ExOauth2Provider,
   force_ssl_in_redirect_uri: false
 
 config :recognizer, Recognizer.Guardian,
-  issuer: "recognizer",
+  issuer: "system76",
   secret_key: "g6Ddv3l/3cYkgtOwkhspAAcw0cjL3Pg23rnmt69UVYHi4WrU1smdFykZa0GfY4xl"
 
 config :ueberauth, Ueberauth,
