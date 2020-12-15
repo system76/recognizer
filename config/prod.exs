@@ -18,5 +18,3 @@ config :phoenix, :logger, false
 config :appsignal, :config, active: true
 
 config :ex_aws, enabled: true
-
-config :recognizer, ExOauth2Provider, force_ssl_in_redirect_uri: true
