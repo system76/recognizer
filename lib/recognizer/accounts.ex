@@ -252,9 +252,8 @@ defmodule Recognizer.Accounts do
   Gets the user with the given signed token.
   """
   def get_user_by_session_token(token) do
-    with {:ok, user, _claims} <- Guardian.resource_from_token(token, %{"typ" => "access"}) do
-      user
-    else
+    case Guardian.resource_from_token(token, %{"typ" => "access"}) do
+      {:ok, user, _claims} -> user
       _ -> nil
     end
   end
@@ -302,9 +301,8 @@ defmodule Recognizer.Accounts do
 
   """
   def get_user_by_reset_password_token(token) do
-    with {:ok, user, _claims} <- Guardian.resource_from_token(token, %{"typ" => "reset_password"}) do
-      user
-    else
+    case Guardian.resource_from_token(token, %{"typ" => "reset_password"}) do
+      {:ok, user, _claims} -> user
       _ -> nil
     end
   end

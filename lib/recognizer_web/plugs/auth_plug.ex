@@ -1,4 +1,8 @@
 defmodule RecognizerWeb.AuthPlug do
+  @moduledoc """
+  `Guardian.Plug.Pipeline` for verifying JWT tokens in the session and header.
+  """
+
   use Guardian.Plug.Pipeline,
     otp_app: :recognizer,
     module: Recognizer.Guardian,
