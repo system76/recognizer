@@ -22,13 +22,9 @@
       <%= error_tag f, :password %>
     </div>
 
-    <div class="columns mt-4">
-      <div class="column is-6">
-        <div class="buttons is-right">
-          <div class="control">
-            <%= submit "Log in", class: "button is-secondary" %>
-          </div>
-        </div>
+    <div class="buttons is-right mt-5">
+      <div class="control">
+        <%= submit "Log in", class: "button is-secondary" %>
       </div>
     </div>
 
