@@ -2,7 +2,7 @@ defmodule RecognizerWeb.Accounts.UserSessionController do
   use RecognizerWeb, :controller
 
   alias Recognizer.Accounts
-  alias RecognizerWeb.UserAuth
+  alias RecognizerWeb.Authentication
 
   def new(conn, _params) do
     render(conn, "new.html", error_message: nil)
@@ -12,7 +12,7 @@ defmodule RecognizerWeb.Accounts.UserSessionController do
     %{"email" => email, "password" => password} = user_params
 
     if user = Accounts.get_user_by_email_and_password(email, password) do
-      UserAuth.log_in_user(conn, user, user_params)
+      Authentication.log_in_user(conn, user, user_params)
     else
       conn
       |> put_flash(:error, "Invalid email or password")
@@ -23,6 +23,6 @@ defmodule RecognizerWeb.Accounts.UserSessionController do
   def delete(conn, _params) do
     conn
     |> put_flash(:info, "Logged out successfully.")
-    |> UserAuth.log_out_user()
+    |> Authentication.log_out_user()
   end
 end

@@ -21,17 +21,8 @@
 
       <%= error_tag f, :password %>
     </div>
+
     <div class="columns mt-4">
-      <div class="column is-6 button-col">
-        <div class="field">
-          <div class="control">
-            <%= label f, :remember_me, class: "label" do %>
-              <%= checkbox f, :remember_me %>
-              Keep me logged in
-            <% end %>
-          </div>
-        </div>
-      </div>
       <div class="column is-6">
         <div class="buttons is-right">
           <div class="control">
@@ -40,6 +31,7 @@
         </div>
       </div>
     </div>
+
     <div class="content oauth mb-6">
       <p>Or log in with</p>
       <div class="buttons is-centered">
@@ -55,11 +47,11 @@
   <% end %>
 
   <hr class="has-background-grey-lighter" />
+
   <p class="content">
     <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
   </p>
   <p class="content">
     New to System76? <%= link "Create Account", to: Routes.user_registration_path(@conn, :new) %>
   </p>
-
 </div>

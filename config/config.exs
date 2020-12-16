@@ -6,7 +6,7 @@ config :recognizer,
 config :recognizer, RecognizerWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "vbOPS+hzz+UAQRtWxIdqiKrcOuWpbLTfocvgvRVDR9P4JRfxtmWZa45H25iKKYoI",
-  render_errors: [view: RecognizerWeb.ErrorView, accepts: ~w(html json), layout: false],
+  render_errors: [view: RecognizerWeb.ErrorView, accepts: ~w(html json), layout: RecognizerWeb.LayoutView],
   pubsub_server: Recognizer.PubSub,
   live_view: [signing_salt: "YzwhzV25"],
   gzip: false
@@ -53,6 +53,12 @@ config :recognizer, ExOauth2Provider,
 config :recognizer, Recognizer.Guardian,
   issuer: "system76",
   secret_key: "g6Ddv3l/3cYkgtOwkhspAAcw0cjL3Pg23rnmt69UVYHi4WrU1smdFykZa0GfY4xl"
+
+config :guardian, Guardian.DB,
+  repo: Recognizer.Repo,
+  schema_name: "users_tokens",
+  token_types: ["refresh_token"],
+  sweep_interval: 60
 
 config :ueberauth, Ueberauth,
   base_path: "/oauth",
