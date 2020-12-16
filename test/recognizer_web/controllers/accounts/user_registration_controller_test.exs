@@ -32,7 +32,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
           }
         })
 
-      assert get_session(conn, :user_token)
+      assert Recognizer.Guardian.Plug.current_resource(conn)
       assert redirected_to(conn) =~ "/settings"
 
       # Now do a logged in request and assert on the menu

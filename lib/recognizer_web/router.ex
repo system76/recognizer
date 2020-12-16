@@ -30,7 +30,7 @@ defmodule RecognizerWeb.Router do
 
     get "/", HomepageController, :index
 
-    delete "/logout", UserSessionController, :delete
+    delete "/logout", Accounts.UserSessionController, :delete
   end
 
   scope "/", RecognizerWeb.OauthProvider, as: :oauth do

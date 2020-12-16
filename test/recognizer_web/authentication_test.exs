@@ -3,7 +3,6 @@ defmodule RecognizerWeb.AuthenticationTest do
 
   import Recognizer.AccountsFixtures
 
-  alias Recognizer.Accounts
   alias RecognizerWeb.Authentication
 
   setup %{conn: conn} do
@@ -33,17 +32,6 @@ defmodule RecognizerWeb.AuthenticationTest do
   end
 
   describe "logout_user/1" do
-    test "erases session and cookies", %{conn: conn, user: user} do
-      conn =
-        conn
-        |> Guardian.Plug.sign_in(user, %{})
-        |> fetch_cookies()
-        |> Authentication.log_out_user()
-
-      refute Guardian.Plug.current_resource(conn)
-      assert redirected_to(conn) == "/"
-    end
-
     test "works even if user is already logged out", %{conn: conn} do
       conn = conn |> fetch_cookies() |> Authentication.log_out_user()
       assert redirected_to(conn) == "/"

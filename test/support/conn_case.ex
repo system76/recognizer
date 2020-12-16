@@ -62,6 +62,6 @@ defmodule RecognizerWeb.ConnCase do
   def log_in_user(conn, user) do
     conn
     |> Phoenix.ConnTest.init_test_session(%{})
-    |> Guardian.Plug.sign_in(user)
+    |> Recognizer.Guardian.Plug.sign_in(user, %{})
   end
 end

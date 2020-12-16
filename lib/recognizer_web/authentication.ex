@@ -13,9 +13,12 @@ defmodule RecognizerWeb.Authentication do
   Logs the user in.
   """
   def log_in_user(conn, user, params \\ %{}) do
+    redirect = return_to(conn)
+
     conn
+    |> clear_session()
     |> Guardian.Plug.sign_in(user, params)
-    |> redirect(to: return_to(conn))
+    |> redirect(to: redirect)
   end
 
   @doc """
@@ -24,6 +27,7 @@ defmodule RecognizerWeb.Authentication do
   def log_out_user(conn) do
     conn
     |> Guardian.Plug.sign_out()
+    |> clear_session()
     |> redirect(to: Routes.homepage_path(conn, :index))
   end
 
@@ -31,7 +35,7 @@ defmodule RecognizerWeb.Authentication do
   Authenticates the user by looking into the session
   and remember me token.
   """
-  def fetch_current_user(conn, _opts) do
+  def fetch_current_user(conn) do
     Guardian.Plug.current_resource(conn)
   end
 
