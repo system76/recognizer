@@ -5,8 +5,6 @@ defmodule Recognizer.Notifications.Account do
   notification microservice to deliver.
   """
 
-  import Logger
-
   alias Bottle.Account.V1, as: Account
 
   # credo:disable-for-next-line
@@ -40,6 +38,13 @@ defmodule Recognizer.Notifications.Account do
     |> convert_user()
     |> create_message(Account.PasswordReset, reset_url: url)
     |> send_message(:password_reset)
+  end
+
+  def deliver_two_factor_token(user, token) do
+    user
+    |> convert_user()
+    |> create_message(Account.TwoFactorAuthorizationRequested, token: token)
+    |> send_message(:two_factor_requested)
   end
 
   defp convert_user(user) do

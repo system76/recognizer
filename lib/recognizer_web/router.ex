@@ -62,6 +62,9 @@ defmodule RecognizerWeb.Router do
 
     get "/oauth/:provider", OAuthController, :request
     get "/oauth/:provider/callback", OAuthController, :callback
+
+    get "/two_factor", TwoFactorController, :new
+    post "/two_factor", TwoFactorController, :create
   end
 
   scope "/", RecognizerWeb.Accounts do

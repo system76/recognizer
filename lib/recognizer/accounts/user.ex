@@ -19,6 +19,10 @@ defmodule Recognizer.Accounts.User do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, source: :password
+    field :two_factor_enabled, :string
+    field :two_factor_seed, :string
+
+    has_one NotificationPreference, :notification_preference
 
     timestamps()
   end

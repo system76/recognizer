@@ -11,12 +11,19 @@ defmodule RecognizerWeb.Accounts.UserSessionController do
   def create(conn, %{"user" => user_params}) do
     %{"email" => email, "password" => password} = user_params
 
-    if user = Accounts.get_user_by_email_and_password(email, password) do
-      Authentication.log_in_user(conn, user, user_params)
-    else
-      conn
-      |> put_flash(:error, "Invalid email or password")
-      |> render("new.html")
+    case Accounts.get_user_by_email_and_password(email, password) do
+      {:ok, user} ->
+        Authentication.log_in_user(conn, user, user_params)
+
+      {:two_factor, user} ->
+        conn
+        |> put_session(:current_user, user)
+        |> redirect(Routes.two_factor_path(conn, :new))
+
+      nil ->
+        conn
+        |> put_flash(:error, "Invalid email or password")
+        |> render("new.html")
     end
   end
 

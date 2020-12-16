@@ -1,0 +1,34 @@
+<div class="box">
+<h2 class="title is-2 mb-5 has-text-centered-mobile">Enter Two Factor Code</h2>
+
+<%= form_for @conn, Routes.two_factor_path(@conn, :create), fn f -> %>
+  <div class="field">
+    <%= label f, :token, "Two Factor Code", class: "label" %>
+
+    <div class="control">
+      <%= text_input f, :token, required: true %>
+    </div>
+
+    <%= error_tag f, :token %>
+  </div>
+
+  <div class="columns mt-4">
+    <div class="column is-6">
+      <div class="buttons is-right">
+        <div class="control">
+          <%= submit "Submit", class: "button is-secondary" %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<hr class="has-background-grey-lighter" />
+<p class="content">
+  <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
+</p>
+<p class="content">
+  New to System76? <%= link "Create Account", to: Routes.user_registration_path(@conn, :new) %>
+</p>
+
+</div>

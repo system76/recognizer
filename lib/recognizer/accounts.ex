@@ -44,8 +44,9 @@ defmodule Recognizer.Accounts do
     query =
       from o in OAuth,
         join: u in assoc(o, :user),
+        join: n in assoc(u, :notification_preference),
         where: o.service == ^service and o.service_guid == ^service_guid,
-        preload: [user: u]
+        preload: [user: {u, notification_preference: n}]
 
     with %OAuth{user: user} <- Repo.one(query) do
       user
@@ -69,7 +70,7 @@ defmodule Recognizer.Accounts do
   ## Examples
 
       iex> get_user_by_email_and_password("foo@example.com", "correct_password")
-      %User{}
+      {:ok, %User{}}
 
       iex> get_user_by_email_and_password("foo@example.com", "invalid_password")
       nil
@@ -77,8 +78,23 @@ defmodule Recognizer.Accounts do
   """
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, email: email)
-    if User.valid_password?(user, password), do: user
+    query =
+      from u in User,
+        join: n in assoc(u, :notification_preference),
+        where: u.email == ^email,
+        preload: [notification_preference: n]
+
+    with %User{} = user <- Repo.one(query),
+         true <- User.valid_password?(user, password),
+         %User{two_factor_enabled: false} <- user do
+      {:ok, user}
+    else
+      %User{two_factor_enabled: true} = user ->
+        {:two_factor, user}
+
+      _ ->
+        nil
+    end
   end
 
   @doc """
