@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <title>Accounts · System76</title>
+
+    <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/styles/main.css") %>"/>
+
+    <script defer type="text/javascript" src="<%= Routes.static_path(@conn, "/scripts/main.js") %>"></script>
+  </head>
+  <body>
+    <div class="section">
+      <div class="container">
+        <div class="column is-8-tablet is-offset-2-tablet is-6-desktop is-offset-3-desktop">
+          <header style="margin: 0 auto 2rem; max-width:320px;">
+            <%= render("logo.html") %>
+          </header>
+
+          <main role="main">
+            <%= @inner_content %>
+          </main>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

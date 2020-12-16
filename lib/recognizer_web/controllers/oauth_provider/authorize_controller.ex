@@ -2,6 +2,7 @@ defmodule RecognizerWeb.OauthProvider.AuthorizeController do
   use RecognizerWeb, :controller
 
   alias ExOauth2Provider.Authorization
+  alias RecognizerWeb.Authentication
 
   def show(conn, %{"code" => code}) do
     render(conn, "show.html", code: code)

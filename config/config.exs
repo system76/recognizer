@@ -9,7 +9,7 @@ config :recognizer, RecognizerWeb.Endpoint,
   render_errors: [
     view: RecognizerWeb.ErrorView,
     accepts: ~w(html json),
-    layout: RecognizerWeb.LayoutView
+    layout: {RecognizerWeb.LayoutView, "error.html"}
   ],
   pubsub_server: Recognizer.PubSub,
   live_view: [signing_salt: "YzwhzV25"],

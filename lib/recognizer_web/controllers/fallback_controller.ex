@@ -22,8 +22,7 @@ defmodule RecognizerWeb.FallbackController do
   end
 
   @impl Guardian.Plug.ErrorHandler
-  def auth_error(conn, {type, reason}, _) do
-    IO.inspect({type, reason}, label: "error")
+  def auth_error(conn, {_type, _reason}, _) do
     respond(conn, :unauthorized, "401")
   end
 
@@ -32,7 +31,7 @@ defmodule RecognizerWeb.FallbackController do
 
     conn
     |> put_status(type)
-    |> put_layout({RecognizerWeb.LayoutView, "app.html"})
+    |> put_layout({RecognizerWeb.LayoutView, "error.html"})
     |> put_view(RecognizerWeb.ErrorView)
     |> render("#{template}.#{extension}", %{})
     |> halt()
@@ -40,8 +39,8 @@ defmodule RecognizerWeb.FallbackController do
 
   defp json?(conn) do
     conn
-    |> Plug.get_req_header("accept")
-    |> String.includes?("json")
+    |> Plug.Conn.get_req_header("accept")
+    |> String.contains?("json")
   rescue
     _ -> false
   end
