@@ -20,9 +20,11 @@ defmodule Recognizer.Server do
   end
 
   defp convert_user(user) do
-    user
-    |> Map.take(~w(id first_name last_name email)a)
-    |> Enum.map(fn {k, v} -> {k, to_string(v)} end)
-    |> User.new()
+    User.new(
+      email: user.email,
+      first_name: user.first_name,
+      id: to_string(user.id),
+      last_name: user.last_name
+    )
   end
 end
