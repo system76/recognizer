@@ -5,12 +5,9 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordController do
 
   plug :get_user_by_reset_password_token when action in [:edit, :update]
 
-  def new(conn, %{"user" => %{"email" => email}}) do
-    render(conn, "new.html", email: email)
-  end
-
   def new(conn, params) do
-    render(conn, "new.html", email: "")
+    email = get_in(params, ["user", "email"])
+    render(conn, "new.html", email: email)
   end
 
   def create(conn, %{"user" => %{"email" => email}}) do
