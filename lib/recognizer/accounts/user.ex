@@ -179,4 +179,26 @@ defmodule Recognizer.Accounts.User do
       add_error(changeset, :current_password, "is not valid")
     end
   end
+
+  @doc """
+  A user changeset for changing the two factor preference.
+  """
+  def two_factor_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:two_factor_enabled])
+    |> set_two_factor_seed()
+  end
+
+  defp set_two_factor_seed(%{two_factor_enabled: two_factor_enabled} = changeset) do
+    if two_factor_enabled do
+      seed = 5 |> :crypto.strong_rand_bytes() |> Base.encode32()
+      put_change(changeset, :two_factor_seed, seed)
+    else
+      put_change(changeset, :two_factor_seed, nil)
+    end
+  end
+
+  defp set_two_factor_seed(changeset) do
+    changeset
+  end
 end

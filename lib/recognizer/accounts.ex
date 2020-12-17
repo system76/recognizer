@@ -359,4 +359,35 @@ defmodule Recognizer.Accounts do
     from t in "users_tokens",
       where: t.sub == ^sub and t.typ == ^typ
   end
+
+  @doc """
+  Updates the user's two factor status and preference.
+
+  ## Examples
+
+      iex> update_user_two_factor(user, ...)
+      {:ok, %User{}}
+
+      iex> > update_user_two_factor(user, "invalid password", %{password: ...})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_two_factor(user, %{"two_factor_enabled" => enabled} = attrs) do
+    user_changeset = User.two_factor_changeset(user, attrs)
+    notification_attrs = Map.get("notification_preference", attrs)
+
+    notification_changeset =
+      NotificationPreference.changeset(user.notification_preference, notification_attrs)
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:user, changeset)
+    |> Ecto.Multi.update(:notification_preference, notification_changeset)
+    |> Repo.transaction()
+      {:ok, %{user: user}} ->
+        {:ok, Repo.preload(user, [:notification_preference])}
+
+      {:error, :user, changeset, _} ->
+        {:error, changeset}
+    end
+  end
 end

@@ -40,6 +40,21 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
+  def update(conn, %{"action" => "update_two_factor"} = params) do
+    %{"user" => user_params} = params
+    user = Authentication.fetch_current_user(conn)
+
+    case Accounts.update_user_two_factor(user, user_params) do
+      {:ok, _updated_user} ->
+        conn
+        |> put_flash(:info, "Email has been updated.")
+        |> redirect(to: Routes.user_settings_path(conn, :edit))
+
+      {:error, changeset} ->
+        render(conn, "edit.html", email_changeset: changeset)
+    end
+  end
+
   defp assign_email_and_password_changesets(conn, _opts) do
     user = Authentication.fetch_current_user(conn)
 

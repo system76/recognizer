@@ -8,7 +8,7 @@ defmodule Recognizer.Repo.Migrations.Add2faPreferences do
     end
 
     create table(:notification_preferences) do
-      add :user_id, references(:users, type: :"int(11) unsigned"), null: true
+      add :user_id, references(:users, type: :"int(11) unsigned")
       add :two_factor, :string, default: "text"
 
       timestamps()
