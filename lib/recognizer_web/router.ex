@@ -72,5 +72,7 @@ defmodule RecognizerWeb.Router do
 
     get "/settings", UserSettingsController, :edit
     put "/settings", UserSettingsController, :update
+
+    get "/settings/barcode.svg", TwoFactorController, :barcode
   end
 end

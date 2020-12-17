@@ -43,7 +43,7 @@ defmodule Recognizer.Notifications.Account do
   def deliver_two_factor_token(user, token) do
     user
     |> convert_user()
-    |> create_message(Account.TwoFactorAuthorizationRequested, token: token)
+    |> create_message(Account.TwoFactorRequested, token: token)
     |> send_message(:two_factor_requested)
   end
 

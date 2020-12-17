@@ -42,6 +42,7 @@ defmodule Recognizer.MixProject do
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:ecto_enum, "~> 1.4"},
       {:ecto_sql, "~> 3.4"},
+      {:eqrcode, "~> 0.1.7"},
       {:ex_aws_sqs, "~> 3.2"},
       {:ex_aws, "~> 2.0"},
       {:ex_oauth2_provider, "~> 0.5.6"},
