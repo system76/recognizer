@@ -5,10 +5,13 @@ defmodule RecognizerWeb.Accounts.UserRegistrationController do
   alias Recognizer.Accounts.User
   alias RecognizerWeb.UserAuth
 
-  def new(conn, params) do
-    url_params = Map.get(params, "user", %{})
-    changeset = Accounts.change_user_registration(%User{}, url_params)
+  def new(conn, %{"user" => user_params}) when is_map(user_params) do
+    changeset = Accounts.change_user_registration(%User{}, user_params)
     render(conn, "new.html", changeset: changeset)
+  end
+
+  def new(conn, _params) do
+    new(conn, %{"user" => %{}})
   end
 
   def create(conn, %{"user" => user_params}) do
