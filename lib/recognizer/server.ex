@@ -3,18 +3,18 @@ defmodule Recognizer.Server do
 
   alias Bottle.Account.V1.{NotificationMethodResponse, User}
   alias GRPC.Server
-  alias Recognizer.Account
+  alias Recognizer.Accounts
 
-  def notification_method(%{event_type: event_type, user: req_user} = request) do
+  def notification_method(%{event_type: event_type, user: req_user} = request, _stream) do
     Bottle.RequestId.read(:rpc, request)
 
-    user = Account.get_user!(req_user.id)
+    user = Accounts.get_user!(req_user.id)
 
     # TODO: Get notification method for event type
 
     %NotificationMethodResponse{
       request_id: Bottle.RequestId.write(:rpc),
-      notification_method: "NOTIFICATION_METHOD_UNSPECIFIED",
+      notification_method: :NOTIFICATION_METHOD_UNSPECIFIED,
       user: convert_user(user)
     }
   end
@@ -22,6 +22,7 @@ defmodule Recognizer.Server do
   defp convert_user(user) do
     user
     |> Map.take(~w(id first_name last_name email)a)
+    |> Enum.map(fn {k, v} -> {k, to_string(v)} end)
     |> User.new()
   end
 end
