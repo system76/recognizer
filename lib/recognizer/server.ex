@@ -1,4 +1,8 @@
 defmodule Recognizer.Server do
+  @moduledoc """
+  gRPC server for `Bottle.Account.V1.Server`.
+  """
+
   use GRPC.Server, service: Bottle.Account.V1.Service
 
   alias Bottle.Account.V1.{NotificationMethodResponse, User}
@@ -9,8 +13,6 @@ defmodule Recognizer.Server do
     Bottle.RequestId.read(:rpc, request)
 
     user = Accounts.get_user!(req_user.id)
-
-    # TODO: Get notification method for event type
 
     %NotificationMethodResponse{
       request_id: Bottle.RequestId.write(:rpc),
