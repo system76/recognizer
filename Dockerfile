@@ -89,6 +89,7 @@ USER recognizer
 WORKDIR /recognizer
 
 EXPOSE 8080
+EXPOSE 50051
 
 ENTRYPOINT ["/recognizer/bin/recognizer"]
 
