@@ -32,8 +32,7 @@ defmodule Recognizer.AccountsTest do
     test "returns the user if the email and password are valid" do
       %{id: id} = user = user_fixture()
 
-      assert %User{id: ^id} =
-               Accounts.get_user_by_email_and_password(user.email, valid_user_password())
+      assert %User{id: ^id} = Accounts.get_user_by_email_and_password(user.email, valid_user_password())
     end
   end
 
@@ -82,8 +81,7 @@ defmodule Recognizer.AccountsTest do
       assert "has already been taken" in errors_on(changeset).email
 
       # Now try with the upper cased email too, to check that email case is ignored.
-      {:error, changeset} =
-        Accounts.register_user(%{user_params | email: String.upcase(user_params.email)})
+      {:error, changeset} = Accounts.register_user(%{user_params | email: String.upcase(user_params.email)})
 
       assert "has already been taken" in errors_on(changeset).email
     end
@@ -198,15 +196,13 @@ defmodule Recognizer.AccountsTest do
     test "validates maximum values for password for security", %{user: user} do
       too_long = String.duplicate("db", 100)
 
-      {:error, changeset} =
-        Accounts.update_user_password(user, valid_user_password(), %{password: too_long})
+      {:error, changeset} = Accounts.update_user_password(user, valid_user_password(), %{password: too_long})
 
       assert "should be at most 80 character(s)" in errors_on(changeset).password
     end
 
     test "validates current password", %{user: user} do
-      {:error, changeset} =
-        Accounts.update_user_password(user, "invalid", %{password: valid_user_password()})
+      {:error, changeset} = Accounts.update_user_password(user, "invalid", %{password: valid_user_password()})
 
       assert %{current_password: ["is not valid"]} = errors_on(changeset)
     end
@@ -259,8 +255,7 @@ defmodule Recognizer.AccountsTest do
           Accounts.deliver_user_reset_password_instructions(user, url)
         end)
 
-      {:ok, token_user, _claims} =
-        Recognizer.Guardian.resource_from_token(token, %{"typ" => "reset_password"})
+      {:ok, token_user, _claims} = Recognizer.Guardian.resource_from_token(token, %{"typ" => "reset_password"})
 
       assert token_user.id == user.id
     end
