@@ -5,6 +5,8 @@ defmodule Recognizer.Application do
 
   use Application
 
+  import Supervisor.Spec
+
   def start(_type, _args) do
     children = [
       # Start the Ecto repository
@@ -13,6 +15,8 @@ defmodule Recognizer.Application do
       RecognizerWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: Recognizer.PubSub},
+      # Start the gRPC server for internal requests
+      supervisor(GRPC.Server.Supervisor, [{Recognizer.Endpoint, 50_051}]),
       # Start the Endpoint (http/https)
       RecognizerWeb.Endpoint
       # Start a worker by calling: Recognizer.Worker.start_link(arg)
