@@ -38,7 +38,7 @@ jobs:
         id: cache-mix
         uses: actions/cache@v2
         with:
-          key: ${{ runner.os }}-${{ hashFiles('mix.lock') }}
+          key: elixir-${{ hashFiles('mix.lock') }}
           path: |
             _build
             deps
@@ -95,7 +95,7 @@ jobs:
         id: cache-mix
         uses: actions/cache@v2
         with:
-          key: ${{ runner.os }}-${{ hashFiles('mix.lock') }}
+          key: elixir-${{ hashFiles('mix.lock') }}
           path: |
             _build
             deps
