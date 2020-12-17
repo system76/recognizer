@@ -32,7 +32,7 @@ defmodule Recognizer.AccountsTest do
     test "returns the user if the email and password are valid" do
       %{id: id} = user = user_fixture()
 
-      assert %User{id: ^id} = Accounts.get_user_by_email_and_password(user.email, valid_user_password())
+      assert {:ok, %User{id: ^id}} = Accounts.get_user_by_email_and_password(user.email, valid_user_password())
     end
   end
 
@@ -309,7 +309,7 @@ defmodule Recognizer.AccountsTest do
     test "updates the password", %{user: user} do
       {:ok, updated_user} = Accounts.reset_user_password(user, %{password: @new_valid_password})
       assert is_nil(updated_user.password)
-      assert Accounts.get_user_by_email_and_password(user.email, @new_valid_password)
+      assert {:ok, Accounts.get_user_by_email_and_password(user.email, @new_valid_password)}
     end
 
     test "deletes all tokens for the given user", %{user: user} do

@@ -7,6 +7,7 @@ defmodule Recognizer.Accounts.User do
 
   import Ecto.Changeset
 
+  alias Recognizer.Accounts.NotificationPreference
   alias Recognizer.Repo
   alias __MODULE__
 
@@ -22,7 +23,7 @@ defmodule Recognizer.Accounts.User do
     field :two_factor_enabled, :boolean
     field :two_factor_seed, :string
 
-    has_one NotificationPreference, :notification_preference
+    has_one :notification_preference, NotificationPreference
 
     timestamps()
   end

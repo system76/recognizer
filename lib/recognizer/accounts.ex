@@ -5,7 +5,7 @@ defmodule Recognizer.Accounts do
 
   import Ecto.Query, warn: false
 
-  alias Recognizer.Accounts.{User, OAuth}
+  alias Recognizer.Accounts.{User, OAuth, NotificationPreference}
   alias Recognizer.Guardian
   alias Recognizer.Notifications.Account, as: Notification
   alias Recognizer.Repo
@@ -111,7 +111,15 @@ defmodule Recognizer.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id) do
+    query =
+      from u in User,
+        join: n in assoc(u, :notification_preference),
+        where: u.id == ^id,
+        preload: [notification_preference: n]
+
+    Repo.one!(query)
+  end
 
   ## User registration
 
@@ -130,7 +138,7 @@ defmodule Recognizer.Accounts do
   def register_user(attrs) do
     %User{}
     |> User.registration_changeset(attrs)
-    |> Repo.insert()
+    |> insert_user_and_notification_preferences()
     |> maybe_notify_new_user()
   end
 
@@ -142,8 +150,18 @@ defmodule Recognizer.Accounts do
   def register_oauth_user(attrs) do
     %User{}
     |> User.oauth_registration_changeset(attrs)
-    |> Repo.insert()
+    |> insert_user_and_notification_preferences()
     |> maybe_notify_new_user()
+  end
+
+  defp insert_user_and_notification_preferences(changeset) do
+    with {:ok, user} <- Repo.insert(changeset) do
+      user
+      |> Ecto.build_assoc(:notification_preference)
+      |> Repo.insert()
+
+      {:ok, user}
+    end
   end
 
   defp maybe_notify_new_user({:ok, user}) do
@@ -372,17 +390,17 @@ defmodule Recognizer.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_user_two_factor(user, %{"two_factor_enabled" => enabled} = attrs) do
+  def update_user_two_factor(user, %{"two_factor_enabled" => _} = attrs) do
     user_changeset = User.two_factor_changeset(user, attrs)
     notification_attrs = Map.get("notification_preference", attrs)
 
-    notification_changeset =
-      NotificationPreference.changeset(user.notification_preference, notification_attrs)
+    notification_changeset = NotificationPreference.changeset(user.notification_preference, notification_attrs)
 
     Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
+    |> Ecto.Multi.update(:user, user_changeset)
     |> Ecto.Multi.update(:notification_preference, notification_changeset)
     |> Repo.transaction()
+    |> case do
       {:ok, %{user: user}} ->
         {:ok, Repo.preload(user, [:notification_preference])}
 
