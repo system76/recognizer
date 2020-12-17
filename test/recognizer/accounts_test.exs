@@ -4,7 +4,7 @@ defmodule Recognizer.AccountsTest do
   import Recognizer.AccountsFixtures
 
   alias Recognizer.Accounts
-  alias Recognizer.Accounts.{User, UserToken}
+  alias Recognizer.Accounts.User
 
   @new_valid_password "NeWVal1DP!ssW0R$"
 
@@ -216,38 +216,6 @@ defmodule Recognizer.AccountsTest do
       assert is_nil(user.password)
       assert Accounts.get_user_by_email_and_password(user.email, @new_valid_password)
     end
-
-    test "deletes all tokens for the given user", %{user: user} do
-      _ = Accounts.generate_user_session_token(user)
-
-      {:ok, _} =
-        Accounts.update_user_password(user, valid_user_password(), %{
-          password: @new_valid_password
-        })
-
-      refute Repo.get_by(UserToken, user_id: user.id)
-    end
-  end
-
-  describe "generate_user_session_token/1" do
-    setup do
-      %{user: user_fixture()}
-    end
-
-    test "generates a token", %{user: user} do
-      token = Accounts.generate_user_session_token(user)
-      assert user_token = Repo.get_by(UserToken, token: token)
-      assert user_token.context == "session"
-
-      # Creating the same token for another user should fail
-      assert_raise Ecto.ConstraintError, fn ->
-        Repo.insert!(%UserToken{
-          token: user_token.token,
-          user_id: user_fixture().id,
-          context: "session"
-        })
-      end
-    end
   end
 
   describe "get_user_by_session_token/1" do
@@ -264,11 +232,6 @@ defmodule Recognizer.AccountsTest do
 
     test "does not return user for invalid token" do
       refute Accounts.get_user_by_session_token("oops")
-    end
-
-    test "does not return user for expired token", %{token: token} do
-      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-      refute Accounts.get_user_by_session_token(token)
     end
   end
 
@@ -292,11 +255,10 @@ defmodule Recognizer.AccountsTest do
           Accounts.deliver_user_reset_password_instructions(user, url)
         end)
 
-      {:ok, token} = Base.url_decode64(token, padding: false)
-      assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
-      assert user_token.user_id == user.id
-      assert user_token.sent_to == user.email
-      assert user_token.context == "reset_password"
+      {:ok, token_user, _claims} =
+        Recognizer.Guardian.resource_from_token(token, %{"typ" => "reset_password"})
+
+      assert token_user.id == user.id
     end
   end
 
@@ -314,18 +276,10 @@ defmodule Recognizer.AccountsTest do
 
     test "returns the user with valid token", %{user: %{id: id}, token: token} do
       assert %User{id: ^id} = Accounts.get_user_by_reset_password_token(token)
-      assert Repo.get_by(UserToken, user_id: id)
     end
 
-    test "does not return the user with invalid token", %{user: user} do
+    test "does not return the user with invalid token" do
       refute Accounts.get_user_by_reset_password_token("oops")
-      assert Repo.get_by(UserToken, user_id: user.id)
-    end
-
-    test "does not return the user if token expired", %{user: user, token: token} do
-      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-      refute Accounts.get_user_by_reset_password_token(token)
-      assert Repo.get_by(UserToken, user_id: user.id)
     end
   end
 
@@ -362,7 +316,6 @@ defmodule Recognizer.AccountsTest do
     test "deletes all tokens for the given user", %{user: user} do
       _ = Accounts.generate_user_session_token(user)
       {:ok, _} = Accounts.reset_user_password(user, %{password: @new_valid_password})
-      refute Repo.get_by(UserToken, user_id: user.id)
     end
   end
 

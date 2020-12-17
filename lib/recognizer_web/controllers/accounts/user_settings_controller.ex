@@ -2,7 +2,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   use RecognizerWeb, :controller
 
   alias Recognizer.Accounts
-  alias RecognizerWeb.UserAuth
+  alias RecognizerWeb.Authentication
 
   plug :assign_email_and_password_changesets
 
@@ -11,7 +11,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   end
 
   def update(conn, %{"action" => "update_email", "user" => user_params}) do
-    user = conn.assigns.current_user
+    user = Authentication.fetch_current_user(conn)
 
     case Accounts.update_user_email(user, user_params) do
       {:ok, _updated_user} ->
@@ -26,14 +26,14 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   def update(conn, %{"action" => "update_password"} = params) do
     %{"current_password" => password, "user" => user_params} = params
-    user = conn.assigns.current_user
+    user = Authentication.fetch_current_user(conn)
 
     case Accounts.update_user_password(user, password, user_params) do
       {:ok, user} ->
         conn
         |> put_flash(:info, "Password updated successfully.")
         |> put_session(:user_return_to, Routes.user_settings_path(conn, :edit))
-        |> UserAuth.log_in_user(user)
+        |> Authentication.log_in_user(user)
 
       {:error, changeset} ->
         render(conn, "edit.html", password_changeset: changeset)
@@ -41,7 +41,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   end
 
   defp assign_email_and_password_changesets(conn, _opts) do
-    user = conn.assigns.current_user
+    user = Authentication.fetch_current_user(conn)
 
     conn
     |> assign(:email_changeset, Accounts.change_user_email(user))

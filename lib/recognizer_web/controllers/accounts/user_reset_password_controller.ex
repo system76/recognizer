@@ -5,8 +5,9 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordController do
 
   plug :get_user_by_reset_password_token when action in [:edit, :update]
 
-  def new(conn, _params) do
-    render(conn, "new.html")
+  def new(conn, params) do
+    email = get_in(params, ["user", "email"])
+    render(conn, "new.html", email: email)
   end
 
   def create(conn, %{"user" => %{"email" => email}}) do
@@ -23,7 +24,7 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordController do
       :info,
       "If your email is in our system, you will receive instructions to reset your password shortly."
     )
-    |> redirect(to: "/")
+    |> redirect(to: Routes.user_session_path(conn, :create))
   end
 
   def edit(conn, _params) do
@@ -52,7 +53,7 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordController do
     else
       conn
       |> put_flash(:error, "Reset password link is invalid or it has expired.")
-      |> redirect(to: "/")
+      |> redirect(to: Routes.user_reset_password_path(conn, :new))
       |> halt()
     end
   end

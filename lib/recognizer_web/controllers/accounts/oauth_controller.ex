@@ -3,7 +3,7 @@ defmodule RecognizerWeb.Accounts.OAuthController do
   use RecognizerWeb, :controller
 
   alias Recognizer.{Accounts, Accounts.User, Repo}
-  alias RecognizerWeb.UserAuth
+  alias RecognizerWeb.Authentication
 
   plug Ueberauth
 
@@ -19,7 +19,7 @@ defmodule RecognizerWeb.Accounts.OAuthController do
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
     case get_or_create_user_from_auth(auth) do
       %User{} = user ->
-        UserAuth.log_in_user(conn, user)
+        Authentication.log_in_user(conn, user)
 
       {:error, %Ecto.Changeset{}} ->
         conn

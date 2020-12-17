@@ -17,6 +17,8 @@ defmodule Recognizer.Application do
       {Phoenix.PubSub, name: Recognizer.PubSub},
       # Start the gRPC server for internal requests
       supervisor(GRPC.Server.Supervisor, [{Recognizer.Endpoint, 50_051}]),
+      # Start the DB sweeper to remove old keys
+      {Guardian.DB.Token.SweeperServer, []},
       # Start the Endpoint (http/https)
       RecognizerWeb.Endpoint
       # Start a worker by calling: Recognizer.Worker.start_link(arg)

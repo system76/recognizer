@@ -3,10 +3,11 @@ defmodule RecognizerWeb.Accounts.UserRegistrationController do
 
   alias Recognizer.Accounts
   alias Recognizer.Accounts.User
-  alias RecognizerWeb.UserAuth
+  alias RecognizerWeb.Authentication
 
-  def new(conn, _params) do
-    changeset = Accounts.change_user_registration(%User{})
+  def new(conn, params) do
+    user_params = Map.get(params, "user", %{})
+    changeset = Accounts.change_user_registration(%User{}, user_params)
     render(conn, "new.html", changeset: changeset)
   end
 
@@ -15,7 +16,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationController do
       {:ok, user} ->
         conn
         |> put_flash(:info, "User created successfully.")
-        |> UserAuth.log_in_user(user)
+        |> Authentication.log_in_user(user)
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)

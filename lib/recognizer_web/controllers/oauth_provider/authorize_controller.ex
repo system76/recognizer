@@ -2,13 +2,16 @@ defmodule RecognizerWeb.OauthProvider.AuthorizeController do
   use RecognizerWeb, :controller
 
   alias ExOauth2Provider.Authorization
+  alias RecognizerWeb.Authentication
 
   def show(conn, %{"code" => code}) do
     render(conn, "show.html", code: code)
   end
 
   def new(conn, params) do
-    case Authorization.preauthorize(conn.assigns.current_user, params, otp_app: :recognizer) do
+    user = Authentication.fetch_current_user(conn)
+
+    case Authorization.preauthorize(user, params, otp_app: :recognizer) do
       {:ok, client, scopes} ->
         if client.privileged,
           do: authorize(conn, params),
@@ -32,13 +35,15 @@ defmodule RecognizerWeb.OauthProvider.AuthorizeController do
   end
 
   def delete(conn, params) do
-    conn.assigns.current_user
+    conn
+    |> Authentication.fetch_current_user()
     |> Authorization.deny(params, otp_app: :recognizer)
     |> redirect_or_render(conn)
   end
 
   defp authorize(conn, params) do
-    conn.assigns.current_user
+    conn
+    |> Authentication.fetch_current_user()
     |> Authorization.authorize(params, otp_app: :recognizer)
     |> redirect_or_render(conn)
   end

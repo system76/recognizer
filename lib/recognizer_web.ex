@@ -23,7 +23,10 @@ defmodule RecognizerWeb do
 
       import Plug.Conn
       import RecognizerWeb.Gettext
+
       alias RecognizerWeb.Router.Helpers, as: Routes
+
+      action_fallback RecognizerWeb.FallbackController
     end
   end
 

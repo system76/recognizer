@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: elixir:1.10-alpine
+      image: elixir:1.11-alpine
 
     services:
       mysql:
@@ -28,25 +28,37 @@ jobs:
           MYSQL_ROOT_PASSWORD: recognizer
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v1
-
-      - name: Cache
-        uses: actions/cache@v1
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          path: _build
-          key: ${{ runner.os }}-build
-          restore-keys: |
-             ${{ runner.os }}-build
+          persist-credentials: false
 
-      - name: Install Dependencies
+      - name: Install (os)
+        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev tar zstd
+
+      - name: Install (mix)
         run: |
-          apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev
           mix local.rebar --force
           mix local.hex --force
-          mix deps.get
 
-      - name: Run Tests
+      - name: Cache
+        uses: actions/cache@v2
+        id: cache
+        with:
+          key: elixir-${{ hashFiles('Dockerfile', 'mix.lock') }}-${{ github.ref }}-test
+          restore-keys: |
+            elixir-${{ hashFiles('Dockerfile', 'mix.lock') }}-${{ github.ref }}-
+            elixir-${{ hashFiles('Dockerfile', 'mix.lock') }}-
+            elixir-
+          path: |
+            _build
+            deps
+
+      - name: Install (deps)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: mix deps.get
+
+      - name: Test
         run: mix test
         env:
           DB_HOST: mysql
@@ -58,51 +70,59 @@ jobs:
       image: elixir:1.10-alpine
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v1
-
-      - name: Cache
-        uses: actions/cache@v1
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          path: _build
-          key: ${{ runner.os }}-build
-          restore-keys: |
-             ${{ runner.os }}-build
+          persist-credentials: false
 
-      - name: Install Dependencies
+      - name: Install (os)
+        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev
+
+      - name: Install (mix)
         run: |
-          apk add --no-cache gcc g++ git libmcrypt-dev make musl-dev
           mix local.rebar --force
           mix local.hex --force
           mix deps.get
 
-      - name: Run Formatter
+      - name: Format
         run: mix format --check-formatted
 
   Credo:
     runs-on: ubuntu-latest
 
     container:
-      image: elixir:1.10-alpine
+      image: elixir:1.11-alpine
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v1
-
-      - name: Cache
-        uses: actions/cache@v1
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          path: _build
-          key: ${{ runner.os }}-build
-          restore-keys: |
-             ${{ runner.os }}-build
+          persist-credentials: false
 
-      - name: Install Dependencies
+      - name: Install (os)
+        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev tar zstd
+
+      - name: Install (mix)
         run: |
-          apk add --no-cache gcc g++ git libmcrypt-dev make musl-dev
           mix local.rebar --force
           mix local.hex --force
-          mix deps.get
 
-      - name: Run Credo
+      - name: Cache
+        uses: actions/cache@v2
+        id: cache
+        with:
+          key: elixir-${{ hashFiles('Dockerfile', 'mix.lock') }}-${{ github.ref }}-credo
+          restore-keys: |
+            elixir-${{ hashFiles('Dockerfile', 'mix.lock') }}-${{ github.ref }}-
+            elixir-${{ hashFiles('Dockerfile', 'mix.lock') }}-
+            elixir-
+          path: |
+            _build
+            deps
+
+      - name: Install (deps)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: mix deps.get
+
+      - name: Credo
         run: mix credo

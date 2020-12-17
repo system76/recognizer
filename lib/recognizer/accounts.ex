@@ -5,9 +5,10 @@ defmodule Recognizer.Accounts do
 
   import Ecto.Query, warn: false
 
-  alias Recognizer.Repo
-  alias Recognizer.Accounts.{User, OAuth, UserToken}
+  alias Recognizer.Accounts.{User, OAuth}
+  alias Recognizer.Guardian
   alias Recognizer.Notifications.Account, as: Notification
+  alias Recognizer.Repo
 
   ## Database getters
 
@@ -27,6 +28,18 @@ defmodule Recognizer.Accounts do
     Repo.get_by(User, email: email)
   end
 
+  @doc """
+  Gets a user by a third party service login.
+
+  ## Examples
+
+      iex> get_user_by_service_guid("github", "1234")
+      %User{}
+
+      iex> get_user_by_service_guid("github", "nope")
+      nil
+
+  """
   def get_user_by_service_guid(service, service_guid) do
     query =
       from o in OAuth,
@@ -39,6 +52,9 @@ defmodule Recognizer.Accounts do
     end
   end
 
+  @doc """
+  Creates a new third party service login for a user.
+  """
   def create_oauth(user, service, service_guid) do
     attrs = %{service: service, service_guid: service_guid, user_id: user.id}
 
@@ -64,20 +80,6 @@ defmodule Recognizer.Accounts do
     user = Repo.get_by(User, email: email)
     if User.valid_password?(user, password), do: user
   end
-
-  @doc """
-  Gets a single user.
-
-  ## Examples
-
-      iex> get_user(123)
-      %User{}
-
-      iex> get_user(456)
-      nil
-
-  """
-  def get_user(id), do: Repo.get(User, id)
 
   @doc """
   Gets a single user.
@@ -116,6 +118,11 @@ defmodule Recognizer.Accounts do
     |> maybe_notify_new_user()
   end
 
+  @doc """
+  Registers a user from a third party service. This is different from above
+  because it does not set a password, therefor only letting the user login with
+  their third party account.
+  """
   def register_oauth_user(attrs) do
     %User{}
     |> User.oauth_registration_changeset(attrs)
@@ -177,7 +184,7 @@ defmodule Recognizer.Accounts do
 
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
+    |> Ecto.Multi.delete_all(:tokens, user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
@@ -218,7 +225,7 @@ defmodule Recognizer.Accounts do
 
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
+    |> Ecto.Multi.delete_all(:tokens, user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} ->
@@ -236,25 +243,28 @@ defmodule Recognizer.Accounts do
   Generates a session token.
   """
   def generate_user_session_token(user) do
-    {token, user_token} = UserToken.build_session_token(user)
-    Repo.insert!(user_token)
-    token
+    with {:ok, token, _claims} <- Guardian.encode_and_sign(user) do
+      token
+    end
   end
 
   @doc """
   Gets the user with the given signed token.
   """
   def get_user_by_session_token(token) do
-    {:ok, query} = UserToken.verify_session_token_query(token)
-    Repo.one(query)
+    case Guardian.resource_from_token(token, %{"typ" => "access"}) do
+      {:ok, user, _claims} -> user
+      _ -> nil
+    end
   end
 
   @doc """
   Deletes the signed token with the given context.
   """
   def delete_session_token(token) do
-    Repo.delete_all(UserToken.token_and_context_query(token, "session"))
-    :ok
+    with {:ok, _claims} <- Guardian.revoke(token) do
+      :ok
+    end
   end
 
   ## Reset password
@@ -270,12 +280,11 @@ defmodule Recognizer.Accounts do
   """
   def deliver_user_reset_password_instructions(%User{} = user, reset_password_url_fun)
       when is_function(reset_password_url_fun, 1) do
-    {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
-    Repo.insert!(user_token)
+    {:ok, token, _claims} = Guardian.encode_and_sign(user, %{"typ" => "reset_password"})
 
     Notification.deliver_reset_password_instructions(
       user,
-      reset_password_url_fun.(encoded_token)
+      reset_password_url_fun.(token)
     )
   end
 
@@ -292,10 +301,8 @@ defmodule Recognizer.Accounts do
 
   """
   def get_user_by_reset_password_token(token) do
-    with {:ok, query} <- UserToken.verify_email_token_query(token, "reset_password"),
-         %User{} = user <- Repo.one(query) do
-      user
-    else
+    case Guardian.resource_from_token(token, %{"typ" => "reset_password"}) do
+      {:ok, user, _claims} -> user
       _ -> nil
     end
   end
@@ -315,11 +322,25 @@ defmodule Recognizer.Accounts do
   def reset_user_password(user, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
+    |> Ecto.Multi.delete_all(:tokens, user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  defp user_and_contexts_query(user, :all) do
+    {:ok, sub} = Guardian.subject_for_token(user, %{})
+
+    from t in "users_tokens",
+      where: t.sub == ^sub
+  end
+
+  defp user_and_contexts_query(user, typ) do
+    {:ok, sub} = Guardian.subject_for_token(user, %{"typ" => typ})
+
+    from t in "users_tokens",
+      where: t.sub == ^sub and t.typ == ^typ
   end
 end
