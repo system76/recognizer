@@ -60,10 +60,8 @@ defmodule RecognizerWeb.ConnCase do
   It returns an updated `conn`.
   """
   def log_in_user(conn, user) do
-    token = Recognizer.Accounts.generate_user_session_token(user)
-
     conn
     |> Phoenix.ConnTest.init_test_session(%{})
-    |> Plug.Conn.put_session(:user_token, token)
+    |> Recognizer.Guardian.Plug.sign_in(user, %{})
   end
 end

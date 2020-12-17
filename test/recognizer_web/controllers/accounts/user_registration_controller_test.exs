@@ -32,12 +32,13 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
           }
         })
 
-      assert get_session(conn, :user_token)
+      assert Recognizer.Guardian.Plug.current_resource(conn)
       assert redirected_to(conn) =~ "/settings"
 
       # Now do a logged in request and assert on the menu
-      conn = get(conn, "/")
-      response = html_response(conn, 200)
+      conn
+      |> get("/")
+      |> html_response(200)
     end
 
     test "render errors for invalid data", %{conn: conn} do

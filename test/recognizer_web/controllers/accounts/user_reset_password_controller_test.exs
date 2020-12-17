@@ -4,7 +4,6 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
   import Recognizer.AccountsFixtures
 
   alias Recognizer.Accounts
-  alias Recognizer.Repo
 
   setup do
     %{user: user_fixture()}
@@ -28,7 +27,6 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
 
       assert redirected_to(conn) == Routes.user_session_path(conn, :create)
       assert get_flash(conn, :info) =~ "If your email is in our system"
-      assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "reset_password"
     end
 
     test "does not send reset password token if email is invalid", %{conn: conn} do
@@ -39,7 +37,6 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
 
       assert redirected_to(conn) == Routes.user_session_path(conn, :create)
       assert get_flash(conn, :info) =~ "If your email is in our system"
-      assert Repo.all(Accounts.UserToken) == []
     end
   end
 

@@ -13,6 +13,8 @@ defmodule Recognizer.Application do
       RecognizerWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: Recognizer.PubSub},
+      # Start the DB sweeper to remove old keys
+      {Guardian.DB.Token.SweeperServer, []},
       # Start the Endpoint (http/https)
       RecognizerWeb.Endpoint
       # Start a worker by calling: Recognizer.Worker.start_link(arg)

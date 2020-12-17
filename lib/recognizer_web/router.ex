@@ -1,34 +1,36 @@
 defmodule RecognizerWeb.Router do
   use RecognizerWeb, :router
 
-  import RecognizerWeb.UserAuth
-
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug :fetch_current_user
   end
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug RecognizerWeb.AuthPlug
+  end
+
+  pipeline :user do
+    plug Guardian.Plug.EnsureAuthenticated
+  end
+
+  pipeline :guest do
+    plug Guardian.Plug.EnsureNotAuthenticated
+  end
+
   scope "/", RecognizerWeb do
     pipe_through :browser
 
     get "/", HomepageController, :index
-  end
 
-  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
-    pipe_through [:browser, :require_authenticated_user]
-
-    get "/oauth/authorize", AuthorizeController, :new
-    get "/oauth/authorize/:code", AuthorizeController, :show
-    post "/oauth/authorize", AuthorizeController, :create
-    delete "/oauth/authorize", AuthorizeController, :delete
+    delete "/logout", Accounts.UserSessionController, :delete
   end
 
   scope "/", RecognizerWeb.OauthProvider, as: :oauth do
@@ -37,8 +39,17 @@ defmodule RecognizerWeb.Router do
     post "/oauth/token", TokenController, :create
   end
 
+  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
+    pipe_through [:browser, :auth, :user]
+
+    get "/oauth/authorize", AuthorizeController, :new
+    get "/oauth/authorize/:code", AuthorizeController, :show
+    post "/oauth/authorize", AuthorizeController, :create
+    delete "/oauth/authorize", AuthorizeController, :delete
+  end
+
   scope "/", RecognizerWeb.Accounts do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
+    pipe_through [:browser, :auth, :guest]
 
     get "/create-account", UserRegistrationController, :new
     post "/create-account", UserRegistrationController, :create
@@ -54,15 +65,9 @@ defmodule RecognizerWeb.Router do
   end
 
   scope "/", RecognizerWeb.Accounts do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :auth, :user]
 
     get "/settings", UserSettingsController, :edit
     put "/settings", UserSettingsController, :update
-  end
-
-  scope "/", RecognizerWeb.Accounts do
-    pipe_through [:browser]
-
-    delete "/logout", UserSessionController, :delete
   end
 end

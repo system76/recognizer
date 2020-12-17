@@ -46,6 +46,7 @@ defmodule Recognizer.MixProject do
       {:ex_oauth2_provider, "~> 0.5.6"},
       {:gettext, "~> 0.11"},
       {:guardian, "~> 2.0"},
+      {:guardian_db, "~> 2.0"},
       {:jason, "~> 1.0"},
       {:logger_json, "~> 4.0"},
       {:myxql, ">= 0.0.0"},

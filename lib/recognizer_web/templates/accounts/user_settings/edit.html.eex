@@ -1,7 +1,7 @@
 <div class="box">
   <h2 class="title is-2 mb-5 has-text-centered-mobile">Log Out</h2>
 
-  <%= form_for :logout, Routes.user_session_path(@conn, :delete), [method: :delete], fn f -> %>
+  <%= form_for :logout, Routes.user_session_path(@conn, :delete), [method: :delete], fn _f -> %>
     <p>
       This will log you out of this website, but <b>not</b> the system76.com
       website, or any other third party websites you have logged in on.

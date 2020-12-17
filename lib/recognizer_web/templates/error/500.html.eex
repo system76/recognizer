@@ -1,0 +1,8 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Internal Server Error</h2>
+
+  <p>
+    Something has gone horribly wrong. Please try again later, or contact
+    support.
+  </p>
+</div>
