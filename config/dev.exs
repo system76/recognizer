@@ -1,8 +1,8 @@
 import Config
 
 config :recognizer, Recognizer.Repo,
-  username: "system76",
-  password: "system76",
+  username: "root",
+  password: "recognizer",
   database: "recognizer_dev",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
