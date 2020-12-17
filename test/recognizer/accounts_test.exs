@@ -282,7 +282,7 @@ defmodule Recognizer.AccountsTest do
       assert %User{id: ^id} = Accounts.get_user_by_reset_password_token(token)
     end
 
-    test "does not return the user with invalid token", %{user: user} do
+    test "does not return the user with invalid token" do
       refute Accounts.get_user_by_reset_password_token("oops")
     end
   end

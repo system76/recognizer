@@ -4,7 +4,6 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
   import Recognizer.AccountsFixtures
 
   alias Recognizer.Accounts
-  alias Recognizer.Repo
 
   setup do
     %{user: user_fixture()}

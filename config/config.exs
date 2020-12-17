@@ -61,7 +61,7 @@ config :recognizer, Recognizer.Guardian,
 config :guardian, Guardian.DB,
   repo: Recognizer.Repo,
   schema_name: "users_tokens",
-  token_types: ["refresh_token"],
+  token_types: ["access"],
   sweep_interval: 60
 
 config :ueberauth, Ueberauth,
