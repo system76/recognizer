@@ -26,7 +26,7 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
           "user" => %{"email" => user.email}
         })
 
-      assert redirected_to(conn) == "/"
+      assert redirected_to(conn) == Routes.user_session_path(conn, :create)
       assert get_flash(conn, :info) =~ "If your email is in our system"
       assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "reset_password"
     end
@@ -37,7 +37,7 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
           "user" => %{"email" => "unknown@example.com"}
         })
 
-      assert redirected_to(conn) == "/"
+      assert redirected_to(conn) == Routes.user_session_path(conn, :create)
       assert get_flash(conn, :info) =~ "If your email is in our system"
       assert Repo.all(Accounts.UserToken) == []
     end
@@ -60,7 +60,7 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
 
     test "does not render reset password with invalid token", %{conn: conn} do
       conn = get(conn, Routes.user_reset_password_path(conn, :edit, "oops"))
-      assert redirected_to(conn) == "/"
+      assert redirected_to(conn) == Routes.user_reset_password_path(conn, :create)
       assert get_flash(conn, :error) =~ "Reset password link is invalid or it has expired"
     end
   end
@@ -107,7 +107,7 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
 
     test "does not reset password with invalid token", %{conn: conn} do
       conn = put(conn, Routes.user_reset_password_path(conn, :update, "oops"))
-      assert redirected_to(conn) == "/"
+      assert redirected_to(conn) == Routes.user_reset_password_path(conn, :create)
       assert get_flash(conn, :error) =~ "Reset password link is invalid or it has expired"
     end
   end

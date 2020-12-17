@@ -11,7 +11,7 @@
       <%= label f, :email, "Email Address", class: "label" %>
 
       <div class="control">
-        <%= email_input f, :email, class: "input", required: true %>
+        <%= email_input f, :email, class: "input", value: @email, required: true %>
       </div>
 
       <%= error_tag f, :email %>
