@@ -255,8 +255,7 @@ defmodule Recognizer.AccountsTest do
           Accounts.deliver_user_reset_password_instructions(user, url)
         end)
 
-      {:ok, token_user, _claims} =
-        Recognizer.Guardian.resource_from_token(token, %{"typ" => "reset_password"})
+      {:ok, token_user, _claims} = Recognizer.Guardian.resource_from_token(token, %{"typ" => "reset_password"})
 
       assert token_user.id == user.id
     end
