@@ -1,4 +1,4 @@
-defmodule RecognizerWeb.Accounts.OAuthController do
+defmodule RecognizerWeb.Accounts.UserOAuthController do
   @moduledoc false
   use RecognizerWeb, :controller
 

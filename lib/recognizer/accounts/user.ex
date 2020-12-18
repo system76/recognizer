@@ -190,7 +190,7 @@ defmodule Recognizer.Accounts.User do
     |> set_two_factor_seed()
   end
 
-  defp set_two_factor_seed(%{two_factor_enabled: two_factor_enabled} = changeset) do
+  defp set_two_factor_seed(%{changes: %{two_factor_enabled: two_factor_enabled}} = changeset) do
     if two_factor_enabled do
       seed = 5 |> :crypto.strong_rand_bytes() |> Base.encode32()
       put_change(changeset, :two_factor_seed, seed)

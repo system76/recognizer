@@ -31,11 +31,11 @@
     <div class="content oauth mb-6">
       <p>Or log in with</p>
       <div class="buttons is-centered">
-        <%= link to: Routes.o_auth_path(@conn, :request, "github"), class: "github" do %>
+        <%= link to: Routes.user_oauth_path(@conn, :request, "github"), class: "github" do %>
           <i class="fa fa-github"></i>
         <% end %>
 
-        <%= link to: Routes.o_auth_path(@conn, :request, "google"), class: "google" do %>
+        <%= link to: Routes.user_oauth_path(@conn, :request, "google"), class: "google" do %>
           <i class="fa fa-google"></i>
         <% end %>
       </div>

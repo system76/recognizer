@@ -3,8 +3,18 @@ defmodule RecognizerWeb.Accounts.UserSessionControllerTest do
 
   import Recognizer.AccountsFixtures
 
+  alias Recognizer.Accounts
+
   setup do
-    %{user: user_fixture()}
+    {:ok, two_factor_user} =
+      user_fixture()
+      |> Recognizer.Repo.preload(:notification_preference)
+      |> Accounts.update_user_two_factor(%{two_factor_enabled: true})
+
+    %{
+      user: user_fixture(),
+      two_factor_user: two_factor_user
+    }
   end
 
   describe "GET /users/log_in" do
@@ -42,6 +52,15 @@ defmodule RecognizerWeb.Accounts.UserSessionControllerTest do
         })
 
       assert redirected_to(conn) == "/foo/bar"
+    end
+
+    test "logs the user in and redirects to two factor page", %{conn: conn, two_factor_user: user} do
+      conn =
+        post(conn, Routes.user_session_path(conn, :create), %{
+          "user" => %{"email" => user.email, "password" => valid_user_password()}
+        })
+
+      assert redirected_to(conn) == Routes.user_two_factor_path(conn, :new)
     end
 
     test "emits error message with invalid credentials", %{conn: conn, user: user} do

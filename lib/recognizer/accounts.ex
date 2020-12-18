@@ -383,16 +383,13 @@ defmodule Recognizer.Accounts do
 
   ## Examples
 
-      iex> update_user_two_factor(user, ...)
+  iex> update_user_two_factor(user, %{"two_factor_enabled" => true, "notification_preference" => %{"two_factor" => "app"}})
       {:ok, %User{}}
 
-      iex> > update_user_two_factor(user, "invalid password", %{password: ...})
-      {:error, %Ecto.Changeset{}}
-
   """
-  def update_user_two_factor(user, %{"two_factor_enabled" => _} = attrs) do
+  def update_user_two_factor(user, attrs) do
     user_changeset = User.two_factor_changeset(user, attrs)
-    notification_attrs = Map.get("notification_preference", attrs)
+    notification_attrs = Map.get(attrs, "notification_preference", attrs)
 
     notification_changeset = NotificationPreference.changeset(user.notification_preference, notification_attrs)
 

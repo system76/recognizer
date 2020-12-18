@@ -1,4 +1,4 @@
-defmodule RecognizerWeb.Accounts.TwoFactorController do
+defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   @moduledoc false
   use RecognizerWeb, :controller
 
@@ -12,15 +12,15 @@ defmodule RecognizerWeb.Accounts.TwoFactorController do
     render_two_factor(conn, current_user)
   end
 
-  def create(conn, params) do
+  def create(conn, %{"user" => user_params}) do
     current_user = get_session(conn, :current_user)
-    token = Map.get(params, "token", "")
+    token = Map.get(user_params, "token", "")
 
     if Authentication.valid_token?(token, current_user) do
       Authentication.log_in_user(conn, current_user)
     else
       conn
-      |> put_flash(:error, "Invalid two factor code")
+      |> put_flash(:error, "Invalid security code")
       |> render_two_factor(current_user)
     end
   end
@@ -31,7 +31,7 @@ defmodule RecognizerWeb.Accounts.TwoFactorController do
       |> Guardian.Plug.current_resource()
       |> barcode_content()
       |> EQRCode.encode()
-      |> EQRCode.svg(color: "#574F4A")
+      |> EQRCode.svg()
 
     conn
     |> put_resp_content_type("image/svg+xml")
