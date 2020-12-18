@@ -57,10 +57,18 @@ defmodule RecognizerWeb.Authentication do
   def maybe_store_return_to(conn), do: conn
 
   @doc """
+  Generate a user's TOTP URL for authenticator apps
+  """
+  def get_totp_app_url(user) do
+    "otpauth://totp/#{user.email}?secret=#{user.two_factor_seed}&issuer=#{two_factor_issuer()}"
+  end
+
+  @doc """
   Generate a user's TOTP barcode for authenticator apps
   """
   def generate_totp_barcode(user) do
-    "otpauth://totp/#{user.email}?secret=#{user.two_factor_seed}&issuer=#{two_factor_issuer()}"
+    user
+    |> get_totp_app_url()
     |> EQRCode.encode()
     |> EQRCode.svg()
   end

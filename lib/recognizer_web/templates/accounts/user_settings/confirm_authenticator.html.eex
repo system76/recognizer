@@ -1,12 +1,24 @@
 <div class="box">
-  <h2 class="title is-2 mb-5 has-text-centered-mobile">Confirm App</h2>
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Configure App</h2>
+  <p>Complete the following steps to configure your mobile app:</p>
+    <p>1. Install an authenticator app on your mobile device.</p>
+    <p>2. In the app choose to add by QR code.</p>
+    <p>3. Scan the barcode below.</p>
 
   <%= form_for @conn, Routes.user_settings_path(@conn, :confirm_authenticator), fn f -> %>
     <div class="has-text-centered">
     <%= raw @barcode %>
     </div>
-    <div class="field is-centered has-text-centered">
-      <%= label f, :two_factor_code, "Current Security Code", method: "post", class: "label" %>
+
+    <p>If you are unable to scan the QR code you can enter the URL manually:<p>
+    <ul>
+      <li>URL: <%= @totp_app_url %></li>
+    </ul>
+
+    <div class="field">
+  <p>
+    4. Enter the displayed 6-digit code: </li>
+  </p>
 
       <div class="control">
         <%= text_input f, :two_factor_code, required: true %>
