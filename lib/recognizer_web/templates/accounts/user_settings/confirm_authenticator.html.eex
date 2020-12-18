@@ -1,22 +1,38 @@
 <div class="box">
-  <h2 class="title is-2 mb-5 has-text-centered-mobile">Confirm App</h2>
-
-  <%= form_for @conn, Routes.user_settings_path(@conn, :confirm_authenticator), fn f -> %>
-    <%= raw @barcode %>
-    <div class="field">
-      <%= label f, :two_factor_code, "Current Security Code", method: "post", class: "label" %>
-
-      <div class="control">
-        <%= text_input f, :two_factor_code, required: true %>
-      </div>
-
-      <%= error_tag f, :two_factor_code %>
+  <section class="section">
+    <h2 class="title is-2 mb-5 has-text-centered-mobile">Configure App</h2>
+    <div class="content">
+      <p>Complete the following steps to configure your mobile app:</p>
+      <p>1. Install an authenticator app on your mobile device.</p>
+      <p>2. In the app choose to add by QR code.</p>
+      <p>3. Scan the barcode below.</p>
     </div>
 
-    <div class="field is-grouped mt-5">
-      <div class="control">
-        <%= submit "Confirm Authenicator Setup", class: "button is-secondary" %>
-      </div>
+    <div class="has-text-centered is-centered qrcode">
+      <%= raw @barcode %>
     </div>
-  <% end %>
+    <div class="content mt-5">
+      <p>If you are unable to scan the QR code you can enter the URL manually:<p>
+      <p class="box is-shadowless" style="background-color: #f5f5f5"><%= @totp_app_url %></p>
+      <p>4. Enter the displayed 6-digit code:</p>
+
+    </div>
+
+    <%= form_for @conn, Routes.user_settings_path(@conn, :confirm_authenticator), fn f -> %>
+      <div class="field">
+
+        <div class="control">
+          <%= text_input f, :two_factor_code, required: true, class: "input is-medium two-factor-verify-input" %>
+        </div>
+
+        <%= error_tag f, :two_factor_code %>
+      </div>
+
+      <div class="buttons is-right mt-5">
+        <%= submit "Verify Code", class: "button is-secondary" %>
+        <a href="/settings" class="button">Cancel</a>
+      </div>
+    <% end %>
+
+  </section>
 </div>

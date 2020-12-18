@@ -68,7 +68,10 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
     case Accounts.update_user_two_factor(user, user_params) do
       {:ok, user} ->
-        render(conn, "confirm_authenticator.html", barcode: Authentication.generate_totp_barcode(user))
+        render(conn, "confirm_authenticator.html",
+          barcode: Authentication.generate_totp_barcode(user),
+          totp_app_url: Authentication.get_totp_app_url(user)
+        )
 
       {:error, changeset} ->
         render(conn, "edit.html", two_factor_changeset: changeset)

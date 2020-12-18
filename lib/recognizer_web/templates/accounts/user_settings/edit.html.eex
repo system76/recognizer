@@ -7,7 +7,7 @@
       website, or any other third party websites you have logged in on.
     </p>
 
-    <div class="field is-grouped mt-5">
+    <div class="buttons is-right mt-5">
       <div class="control">
         <%= submit "Log Out", class: "button is-danger" %>
       </div>
@@ -41,7 +41,7 @@
       <%= error_tag f, :current_password %>
     </div>
 
-    <div class="field is-grouped mt-5">
+    <div class="buttons is-right mt-5">
       <div class="control">
         <%= submit "Change Email", class: "button is-secondary" %>
       </div>
@@ -85,7 +85,7 @@
       <%= error_tag f, :current_password %>
     </div>
 
-    <div class="field is-grouped mt-5">
+    <div class="buttons is-right mt-5">
       <div class="control">
         <%= submit "Change Password", class: "button is-secondary" %>
       </div>
@@ -95,36 +95,46 @@
 
 <div class="box">
   <h2 class="title is-2 mb-5 has-text-centered-mobile">Two Factor</h2>
-
+  <div class="message is-grey">
+    <p class="message-body is-size-7">Changing your preference will reset your two factor, invalidating all other codes</p>
+  </div>
   <%= form_for @two_factor_changeset, Routes.user_settings_path(@conn, :update), fn f -> %>
     <%= hidden_input f, :action, name: "action", value: "update_two_factor" %>
 
     <div class="field">
-      <%= label f, :two_factor_enabled, class: "label" %>
 
       <div class="control">
-        <%= checkbox f, :two_factor_enabled %>
+        <label class="label">
+          <%= checkbox f, :two_factor_enabled %>
+          Enabled
+        </label>
       </div>
     </div>
 
     <%= inputs_for f, :notification_preference, fn n -> %>
+    <h5 class="subtitle is-2" style="margin: 16px 0">Method</h5>
     <div class="field">
-      <%= label n, :two_factor, class: "label" %>
-
       <div class="control">
-        <%= radio_button n, :two_factor, "app" %>
-        <%= label n, :two_factor_app, "app", class: "label" %>
+        <%= label class: "label" do %>
+          <%= radio_button n, :two_factor, "app" %>
+          App
+        <% end %>
 
-        <%= radio_button n, :two_factor, "text" %>
-        <%= label n, :two_factor_text, "text", class: "label" %>
+        <%= label class: "label" do %>
+          <%= radio_button n, :two_factor, "text" %>
+          Text
+        <% end %>
 
-        <%= radio_button n, :two_factor, "voice" %>
-        <%= label n, :two_factor_voice, "voice", class: "label" %>
+        <%= label class: "label" do %>
+          <%= radio_button n, :two_factor, "voice" %>
+          Voice
+        <% end %>
+
       </div>
     </div>
     <% end %>
 
-    <div class="field is-grouped mt-5">
+    <div class="buttons is-right mt-5">
       <div class="control">
         <%= submit "Change Two Factor", class: "button is-secondary" %>
       </div>
