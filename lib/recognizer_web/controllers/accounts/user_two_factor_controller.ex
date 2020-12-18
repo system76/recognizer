@@ -14,7 +14,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
   def create(conn, %{"user" => user_params}) do
     current_user = get_session(conn, :current_user)
-    token = Map.get(user_params, "token", "")
+    token = Map.get(user_params, "two_factor_code", "")
 
     if Authentication.valid_token?(token, current_user) do
       Authentication.log_in_user(conn, current_user)
@@ -23,23 +23,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
       |> put_flash(:error, "Invalid security code")
       |> render_two_factor(current_user)
     end
-  end
-
-  def barcode(conn, _params) do
-    barcode =
-      conn
-      |> Guardian.Plug.current_resource()
-      |> barcode_content()
-      |> EQRCode.encode()
-      |> EQRCode.svg()
-
-    conn
-    |> put_resp_content_type("image/svg+xml")
-    |> text(barcode)
-  end
-
-  defp barcode_content(%{email: email, two_factor_seed: two_factor_seed}) do
-    "otpauth://totp/#{email}?secret=#{two_factor_seed}&issuer=#{two_factor_issuer()}"
   end
 
   defp maybe_send_two_factor_notification(conn, _current_user, :app) do
@@ -60,6 +43,4 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     |> maybe_send_two_factor_notification(current_user, two_factor_method)
     |> render("new.html", two_factor_method: two_factor_method)
   end
-
-  defp two_factor_issuer, do: Application.get_env(:recognizer, :two_factor_issuer)
 end

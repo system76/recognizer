@@ -22,6 +22,7 @@ defmodule Recognizer.Accounts.User do
     field :hashed_password, :string, source: :password
     field :two_factor_enabled, :boolean
     field :two_factor_seed, :string
+    field :two_factor_code, :string, virtual: true, redact: true
 
     has_one :notification_preference, NotificationPreference
 
@@ -186,7 +187,7 @@ defmodule Recognizer.Accounts.User do
   """
   def two_factor_changeset(user, attrs) do
     user
-    |> cast(attrs, [:two_factor_enabled])
+    |> cast(attrs, [:two_factor_code, :two_factor_enabled])
     |> set_two_factor_seed()
   end
 

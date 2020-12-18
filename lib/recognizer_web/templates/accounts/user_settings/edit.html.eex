@@ -92,3 +92,44 @@
     </div>
   <% end %>
 </div>
+
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Two Factor</h2>
+
+  <%= form_for @two_factor_changeset, Routes.user_settings_path(@conn, :update), fn f -> %>
+    <%= hidden_input f, :action, name: "action", value: "update_two_factor" %>
+
+    <div class="field">
+      <%= label f, :two_factor_enabled, class: "label" %>
+
+      <div class="control">
+        <%= checkbox f, :two_factor_enabled %>
+      </div>
+    </div>
+
+    <%= inputs_for f, :notification_preference, fn n -> %>
+    <div class="field">
+      <%= label n, :two_factor, class: "label" %>
+
+      <div class="control">
+        <%= radio_button n, :two_factor, "app" %>
+        <%= label n, :two_factor_app, "app", class: "label" %>
+
+        <%= radio_button n, :two_factor, "text" %>
+        <%= label n, :two_factor_text, "text", class: "label" %>
+
+        <%= radio_button n, :two_factor, "voice" %>
+        <%= label n, :two_factor_voice, "voice", class: "label" %>
+      </div>
+    </div>
+    <% end %>
+
+    <div class="field is-grouped mt-5">
+      <div class="control">
+        <%= submit "Change Two Factor", class: "button is-secondary" %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+

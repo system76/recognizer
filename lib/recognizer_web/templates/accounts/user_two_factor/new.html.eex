@@ -3,13 +3,13 @@
 
 <%= form_for @conn, Routes.user_two_factor_path(@conn, :create), [as: :user], fn f -> %>
   <div class="field">
-    <%= label f, :token, "Two Factor Code", class: "label" %>
+    <%= label f, :two_factor_code, "Security Code", class: "label" %>
 
     <div class="control">
-      <%= text_input f, :token, required: true %>
+      <%= text_input f, :two_factor_code, required: true %>
     </div>
 
-    <%= error_tag f, :token %>
+    <%= error_tag f, :two_factor_code %>
   </div>
 
   <div class="columns mt-4">

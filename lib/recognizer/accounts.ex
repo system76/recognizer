@@ -378,6 +378,10 @@ defmodule Recognizer.Accounts do
       where: t.sub == ^sub and t.typ == ^typ
   end
 
+  def change_user_two_factor(user, attrs \\ %{}) do
+    User.two_factor_changeset(user, attrs)
+  end
+
   @doc """
   Updates the user's two factor status and preference.
 
@@ -388,7 +392,7 @@ defmodule Recognizer.Accounts do
 
   """
   def update_user_two_factor(user, attrs) do
-    user_changeset = User.two_factor_changeset(user, attrs)
+    user_changeset = change_user_two_factor(user, attrs)
     notification_attrs = Map.get(attrs, "notification_preference", attrs)
 
     notification_changeset = NotificationPreference.changeset(user.notification_preference, notification_attrs)

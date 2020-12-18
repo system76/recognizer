@@ -1,0 +1,22 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Confirm App</h2>
+
+  <%= form_for @conn, Routes.user_settings_path(@conn, :confirm_authenticator), fn f -> %>
+    <%= raw @barcode %>
+    <div class="field">
+      <%= label f, :two_factor_code, "Current Security Code", method: "post", class: "label" %>
+
+      <div class="control">
+        <%= text_input f, :two_factor_code, required: true %>
+      </div>
+
+      <%= error_tag f, :two_factor_code %>
+    </div>
+
+    <div class="field is-grouped mt-5">
+      <div class="control">
+        <%= submit "Confirm Authenicator Setup", class: "button is-secondary" %>
+      </div>
+    </div>
+  <% end %>
+</div>
