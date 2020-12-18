@@ -187,20 +187,25 @@ defmodule Recognizer.Accounts.User do
   """
   def two_factor_changeset(user, attrs) do
     user
-    |> cast(attrs, [:two_factor_code, :two_factor_enabled])
-    |> set_two_factor_seed()
+    |> cast(attrs, [:two_factor_enabled])
+    |> cast_assoc(:notification_preference)
+    |> maybe_reset_two_factor_seed()
   end
 
-  defp set_two_factor_seed(%{changes: %{two_factor_enabled: two_factor_enabled}} = changeset) do
-    if two_factor_enabled do
-      seed = 5 |> :crypto.strong_rand_bytes() |> Base.encode32()
-      put_change(changeset, :two_factor_seed, seed)
-    else
-      put_change(changeset, :two_factor_seed, nil)
+  defp maybe_reset_two_factor_seed(changeset) do
+    enabled = get_change(changeset, :two_factor_enabled)
+    preference = get_change(changeset, :notification_preference)
+
+    cond do
+      enabled == true or preference ->
+        seed = 5 |> :crypto.strong_rand_bytes() |> Base.encode32()
+        put_change(changeset, :two_factor_seed, seed)
+
+      enabled == false ->
+        put_change(changeset, :two_factor_seed, nil)
+
+      true ->
+        changeset
     end
-  end
-
-  defp set_two_factor_seed(changeset) do
-    changeset
   end
 end

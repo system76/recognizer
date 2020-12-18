@@ -393,17 +393,13 @@ defmodule Recognizer.Accounts do
   """
   def update_user_two_factor(user, attrs) do
     user_changeset = change_user_two_factor(user, attrs)
-    notification_attrs = Map.get(attrs, "notification_preference", attrs)
-
-    notification_changeset = NotificationPreference.changeset(user.notification_preference, notification_attrs)
 
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, user_changeset)
-    |> Ecto.Multi.update(:notification_preference, notification_changeset)
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} ->
-        {:ok, Repo.preload(user, [:notification_preference])}
+        {:ok, user}
 
       {:error, :user, changeset, _} ->
         {:error, changeset}
