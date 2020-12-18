@@ -95,7 +95,9 @@
 
 <div class="box">
   <h2 class="title is-2 mb-5 has-text-centered-mobile">Two Factor</h2>
-
+  <div class="message is-grey">
+    <p class="message-body is-size-7">Changing your preference will reset your two factor, invalidating all other codes</p>
+  </div>
   <%= form_for @two_factor_changeset, Routes.user_settings_path(@conn, :update), fn f -> %>
     <%= hidden_input f, :action, name: "action", value: "update_two_factor" %>
 

@@ -70,7 +70,7 @@ defmodule RecognizerWeb.Authentication do
     user
     |> get_totp_app_url()
     |> EQRCode.encode()
-    |> EQRCode.svg()
+    |> EQRCode.svg(viewbox: true)
   end
 
   defp two_factor_issuer, do: Application.get_env(:recognizer, :two_factor_issuer)
