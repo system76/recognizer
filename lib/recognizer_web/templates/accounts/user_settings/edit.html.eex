@@ -16,34 +16,104 @@
 </div>
 
 <div class="box">
-  <h2 class="title is-2 mb-5 has-text-centered-mobile">Change Email</h2>
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Change Profile</h2>
 
-  <%= form_for @email_changeset, Routes.user_settings_path(@conn, :update), fn f -> %>
-    <%= hidden_input f, :action, name: "action", value: "update_email" %>
+  <%= form_for @changeset, Routes.user_settings_path(@conn, :update), fn f -> %>
+    <%= hidden_input f, :action, name: "action", value: "update" %>
+
+    <div class="field">
+      <%= label f, :first_name, class: "label" %>
+
+      <div class="control">
+        <%= text_input f, :first_name,
+          autocapitalize: "words",
+          autocomplete: "given-name",
+          autocorrect: "off",
+          class: input_classes(f, :first_name),
+          required: true,
+          spellcheck: "false"
+        %>
+      </div>
+
+      <%= error_tag f, :first_name %>
+    </div>
+
+    <div class="field">
+      <%= label f, :last_name, class: "label" %>
+
+      <div class="control">
+        <%= text_input f, :last_name,
+          autocapitalize: "words",
+          autocomplete: "family-name",
+          autocorrect: "off",
+          class: input_classes(f, :last_name),
+          required: true,
+          spellcheck: "false"
+        %>
+      </div>
+
+      <%= error_tag f, :last_name %>
+    </div>
+
+    <div class="field my-5">
+      <div class="control">
+        <%= label class: "label" do %>
+          <%= radio_button f, :type, :individual %>
+          Personal Account
+        <% end %>
+
+        <%= label class: "label" do %>
+          <%= radio_button f, :type, :business %>
+          Organization Account
+        <% end %>
+      </div>
+    </div>
+
+    <div class="field company_name" style="display:<%= business_type_class(@changeset) %>;">
+      <%= label f, :email, "Company Name", class: "label" %>
+
+      <div class="control">
+        <%= text_input f, :company_name,
+          autocapitalize: "none",
+          autocomplete: "organization",
+          autocorrect: "off",
+          class: input_classes(f, :company_name),
+          spellcheck: "false"
+        %>
+      </div>
+
+      <%= error_tag f, :company_name %>
+    </div>
 
     <div class="field">
       <%= label f, :email, "Email Address", class: "label" %>
 
       <div class="control">
-        <%= email_input f, :email, class: input_classes(f, :email), required: true %>
+        <%= email_input f, :email,
+          autocapitalize: "none",
+          autocomplete: "email",
+          autocorrect: "off",
+          class: input_classes(f, :email),
+          required: true,
+          spellcheck: "false"
+        %>
       </div>
 
       <%= error_tag f, :email %>
     </div>
 
-    <div class="field">
-      <%= label f, :current_password, class: "label" %>
-
+    <div class="field mt-5">
       <div class="control">
-        <%= password_input f, :current_password, class: input_classes(f, :password), required: true, name: "current_password" %>
+        <%= label class: "label" do %>
+          <%= checkbox f, :newsletter %>
+          Subscribe to our newsletter
+        <% end %>
       </div>
-
-      <%= error_tag f, :current_password %>
     </div>
 
     <div class="buttons is-right mt-5">
       <div class="control">
-        <%= submit "Change Email", class: "button is-secondary" %>
+        <%= submit "Change Profile", class: "button is-secondary" %>
       </div>
     </div>
   <% end %>
@@ -103,17 +173,17 @@
       <%= hidden_input f, :two_factor_enabled, value: "0" %>
 
       <%= case two_factor_method(@two_factor_changeset) do %>
-        <%= :text -> %>
+        <% :text -> %>
           <p>
             Two factor authentication is enabled for your account. You will
             receive a <strong>text message</strong> every time you try to log in.
           </p>
-        <%= :voice -> %>
+        <% :voice -> %>
           <p>
             Two factor authentication is enabled for your account. You will
             receive a <strong>phone call</strong> every time you try to log in.
           </p>
-        <%= _ -> %>
+        <% _ -> %>
           <p>
             Two factor authentication is enabled for your account. You will need
             to enter the generated token from your favorite authentication
