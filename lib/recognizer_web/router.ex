@@ -73,7 +73,5 @@ defmodule RecognizerWeb.Router do
     get "/settings", UserSettingsController, :edit
     put "/settings", UserSettingsController, :update
     post "/confirm_authenicator", UserSettingsController, :confirm_authenticator
-
-    get "/settings/barcode.svg", UserTwoFactorController, :barcode
   end
 end
