@@ -1,0 +1,41 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Enter Security Code</h2>
+
+  <%= form_for @conn, Routes.user_two_factor_path(@conn, :create), [as: :user], fn f -> %>
+    <div class="field">
+      <%= label f, :two_factor_code, "Security Code", class: "label" %>
+
+      <div class="control">
+        <%= text_input f, :two_factor_code,
+          autocapitalize: "none",
+          autocomplete: "on",
+          autocomplete: "one-time-code",
+          autocorrect: "off",
+          autofocus: true,
+          class: "is-medium #{input_classes(f, :two_factor_code)}",
+          inputmode: "numeric",
+          pattern: "[0-9]*",
+          required: true
+        %>
+      </div>
+
+      <%= error_tag f, :two_factor_code %>
+    </div>
+
+    <div class="buttons is-right mt-5">
+      <div class="control">
+        <%= submit "Log in", class: "button is-secondary" %>
+      </div>
+    </div>
+  <% end %>
+
+  <hr class="has-background-grey-lighter" />
+
+  <p class="content">
+    <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
+  </p>
+
+  <p class="content">
+    New to System76? <%= link "Create Account", to: Routes.user_registration_path(@conn, :new) %>
+  </p>
+</div>

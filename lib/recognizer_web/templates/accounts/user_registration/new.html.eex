@@ -6,7 +6,15 @@
       <%= label f, :first_name, class: "label" %>
 
       <div class="control">
-        <%= text_input f, :first_name, class: input_classes(f, :first_name), required: true %>
+        <%= text_input f, :first_name,
+          autocapitalize: "words",
+          autocomplete: "given-name",
+          autocorrect: "off",
+          autofocus: true,
+          class: input_classes(f, :first_name),
+          required: true,
+          spellcheck: "false"
+        %>
       </div>
 
       <%= error_tag f, :first_name %>
@@ -16,7 +24,14 @@
       <%= label f, :last_name, class: "label" %>
 
       <div class="control">
-        <%= text_input f, :last_name, class: input_classes(f, :last_name), required: true %>
+        <%= text_input f, :last_name,
+          autocapitalize: "words",
+          autocomplete: "family-name",
+          autocorrect: "off",
+          class: input_classes(f, :last_name),
+          required: true,
+          spellcheck: "false"
+        %>
       </div>
 
       <%= error_tag f, :last_name %>
@@ -26,7 +41,14 @@
       <%= label f, :email, "Email Address", class: "label" %>
 
       <div class="control">
-        <%= email_input f, :email, class: input_classes(f, :email), required: true %>
+        <%= email_input f, :email,
+          autocapitalize: "none",
+          autocomplete: "email",
+          autocorrect: "off",
+          class: input_classes(f, :email),
+          required: true,
+          spellcheck: "false"
+        %>
       </div>
 
       <%= error_tag f, :email %>
@@ -36,7 +58,14 @@
       <%= label f, :password, class: "label" %>
 
       <div class="control">
-        <%= password_input f, :password, class: input_classes(f, :password), required: true %>
+        <%= password_input f, :password,
+          autocapitalize: "none",
+          autocomplete: "new-password",
+          autocorrect: "off",
+          class: input_classes(f, :password),
+          required: true,
+          spellcheck: "false"
+        %>
       </div>
 
       <%= error_tag f, :password %>

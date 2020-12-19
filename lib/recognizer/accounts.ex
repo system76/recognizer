@@ -44,8 +44,9 @@ defmodule Recognizer.Accounts do
     query =
       from o in OAuth,
         join: u in assoc(o, :user),
+        join: n in assoc(u, :notification_preference),
         where: o.service == ^service and o.service_guid == ^service_guid,
-        preload: [user: u]
+        preload: [user: {u, notification_preference: n}]
 
     with %OAuth{user: user} <- Repo.one(query) do
       user
@@ -69,7 +70,7 @@ defmodule Recognizer.Accounts do
   ## Examples
 
       iex> get_user_by_email_and_password("foo@example.com", "correct_password")
-      %User{}
+      {:ok, %User{}}
 
       iex> get_user_by_email_and_password("foo@example.com", "invalid_password")
       nil
@@ -77,8 +78,23 @@ defmodule Recognizer.Accounts do
   """
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, email: email)
-    if User.valid_password?(user, password), do: user
+    query =
+      from u in User,
+        join: n in assoc(u, :notification_preference),
+        where: u.email == ^email,
+        preload: [notification_preference: n]
+
+    with %User{} = user <- Repo.one(query),
+         true <- User.valid_password?(user, password),
+         %User{two_factor_enabled: false} <- user do
+      {:ok, user}
+    else
+      %User{two_factor_enabled: true} = user ->
+        {:two_factor, user}
+
+      _ ->
+        nil
+    end
   end
 
   @doc """
@@ -95,7 +111,15 @@ defmodule Recognizer.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id) do
+    query =
+      from u in User,
+        join: n in assoc(u, :notification_preference),
+        where: u.id == ^id,
+        preload: [notification_preference: n]
+
+    Repo.one!(query)
+  end
 
   ## User registration
 
@@ -114,7 +138,7 @@ defmodule Recognizer.Accounts do
   def register_user(attrs) do
     %User{}
     |> User.registration_changeset(attrs)
-    |> Repo.insert()
+    |> insert_user_and_notification_preferences()
     |> maybe_notify_new_user()
   end
 
@@ -126,8 +150,18 @@ defmodule Recognizer.Accounts do
   def register_oauth_user(attrs) do
     %User{}
     |> User.oauth_registration_changeset(attrs)
-    |> Repo.insert()
+    |> insert_user_and_notification_preferences()
     |> maybe_notify_new_user()
+  end
+
+  defp insert_user_and_notification_preferences(changeset) do
+    with {:ok, user} <- Repo.insert(changeset) do
+      user
+      |> Ecto.build_assoc(:notification_preference)
+      |> Repo.insert()
+
+      {:ok, user}
+    end
   end
 
   defp maybe_notify_new_user({:ok, user}) do
@@ -342,5 +376,33 @@ defmodule Recognizer.Accounts do
 
     from t in "users_tokens",
       where: t.sub == ^sub and t.typ == ^typ
+  end
+
+  def change_user_two_factor(user, attrs \\ %{}) do
+    User.two_factor_changeset(user, attrs)
+  end
+
+  @doc """
+  Updates the user's two factor status and preference.
+
+  ## Examples
+
+  iex> update_user_two_factor(user, %{"two_factor_enabled" => true, "notification_preference" => %{"two_factor" => "app"}})
+      {:ok, %User{}}
+
+  """
+  def update_user_two_factor(user, attrs) do
+    user_changeset = change_user_two_factor(user, attrs)
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:user, user_changeset)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user}} ->
+        {:ok, user}
+
+      {:error, :user, changeset, _} ->
+        {:error, changeset}
+    end
   end
 end

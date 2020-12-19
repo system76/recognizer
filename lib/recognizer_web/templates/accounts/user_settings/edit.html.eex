@@ -7,7 +7,7 @@
       website, or any other third party websites you have logged in on.
     </p>
 
-    <div class="field is-grouped mt-5">
+    <div class="buttons is-right mt-5">
       <div class="control">
         <%= submit "Log Out", class: "button is-danger" %>
       </div>
@@ -41,7 +41,7 @@
       <%= error_tag f, :current_password %>
     </div>
 
-    <div class="field is-grouped mt-5">
+    <div class="buttons is-right mt-5">
       <div class="control">
         <%= submit "Change Email", class: "button is-secondary" %>
       </div>
@@ -85,10 +85,91 @@
       <%= error_tag f, :current_password %>
     </div>
 
-    <div class="field is-grouped mt-5">
+    <div class="buttons is-right mt-5">
       <div class="control">
         <%= submit "Change Password", class: "button is-secondary" %>
       </div>
     </div>
+  <% end %>
+</div>
+
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Two Factor</h2>
+
+  <%= form_for @two_factor_changeset, Routes.user_settings_path(@conn, :update), fn f -> %>
+    <%= hidden_input f, :action, name: "action", value: "update_two_factor" %>
+
+    <%= if two_factor_enabled?(@two_factor_changeset) do %>
+      <%= hidden_input f, :two_factor_enabled, value: "0" %>
+
+      <%= case two_factor_method(@two_factor_changeset) do %>
+        <%= :text -> %>
+          <p>
+            Two factor authentication is enabled for your account. You will
+            receive a <strong>text message</strong> every time you try to log in.
+          </p>
+        <%= :voice -> %>
+          <p>
+            Two factor authentication is enabled for your account. You will
+            receive a <strong>phone call</strong> every time you try to log in.
+          </p>
+        <%= _ -> %>
+          <p>
+            Two factor authentication is enabled for your account. You will need
+            to enter the generated token from your favorite authentication
+            <strong>app</strong> every time you try to log in.
+          </p>
+      <% end %>
+
+      <div class="buttons is-right mt-5">
+        <div class="control">
+          <%= submit "Disable Two Factor", class: "button is-danger" %>
+        </div>
+      </div>
+    <% else %>
+      <%= hidden_input f, :two_factor_enabled, value: "1" %>
+
+      <p>
+        Two factor authentication is currently disabled for your account.
+        Enabling it will protect your account even more by requiring a token
+        every time you log in.
+      </p>
+
+      <%= inputs_for f, :notification_preference, fn n -> %>
+        <div class="label mt-4">
+          Authentication Method Preference
+        </div>
+
+        <div class="field">
+          <div class="control">
+            <%= label class: "label" do %>
+              <%= radio_button n, :two_factor, "app" %>
+              Authenticator App
+            <% end %>
+
+            <%= label class: "label" do %>
+              <%= radio_button n, :two_factor, "text" %>
+              Text Message
+            <% end %>
+
+            <%= label class: "label" do %>
+              <%= radio_button n, :two_factor, "voice" %>
+              Phone Call
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <p class="is-size-7">
+        Message and data rates may apply for text message and phone call
+        methods.
+      </p>
+
+      <div class="buttons is-right mt-5">
+        <div class="control">
+          <%= submit "Enable Two Factor", class: "button is-secondary" %>
+        </div>
+      </div>
+    <% end %>
   <% end %>
 </div>

@@ -16,11 +16,13 @@ config :recognizer, Recognizer.Repo,
   hostname: recognizer_config["DB_HOST"],
   pool_size: recognizer_config["DB_POOL"]
 
-config :recognizer, :message_queues, [
-  {Bottle.Account.V1.UserCreated, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
-  {Bottle.Account.V1.PasswordChanged, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
-  {Bottle.Account.V1.PasswordReset, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]}
-]
+config :recognizer,
+  message_queues: [
+    {Bottle.Account.V1.UserCreated, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
+    {Bottle.Account.V1.PasswordChanged, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
+    {Bottle.Account.V1.PasswordReset, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]}
+  ],
+  two_factor_issuer: recognizer_config["TWO_FACTOR_ISSUER"]
 
 config :ex_aws,
   access_key_id: recognizer_config["AWS_ACCESS_KEY_ID"],

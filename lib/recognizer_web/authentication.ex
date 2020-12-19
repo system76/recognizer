@@ -55,4 +55,37 @@ defmodule RecognizerWeb.Authentication do
   end
 
   def maybe_store_return_to(conn), do: conn
+
+  @doc """
+  Generate a user's TOTP URL for authenticator apps
+  """
+  def get_totp_app_url(user) do
+    "otpauth://totp/#{user.email}?secret=#{user.two_factor_seed}&issuer=#{two_factor_issuer()}"
+  end
+
+  @doc """
+  Generate a user's TOTP barcode for authenticator apps
+  """
+  def generate_totp_barcode(user) do
+    user
+    |> get_totp_app_url()
+    |> EQRCode.encode()
+    |> EQRCode.svg(viewbox: true)
+  end
+
+  defp two_factor_issuer, do: Application.get_env(:recognizer, :two_factor_issuer)
+
+  @doc """
+  Generate a Time Based One Time Password
+  """
+  def generate_token(user) do
+    :pot.totp(user.two_factor_seed, addwindow: 1)
+  end
+
+  @doc """
+  Validate a user provided token is valid
+  """
+  def valid_token?(token, user) do
+    :pot.valid_totp(token, user.two_factor_seed, window: 1, addwindow: 1)
+  end
 end

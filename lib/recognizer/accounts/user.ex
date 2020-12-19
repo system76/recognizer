@@ -7,6 +7,7 @@ defmodule Recognizer.Accounts.User do
 
   import Ecto.Changeset
 
+  alias Recognizer.Accounts.NotificationPreference
   alias Recognizer.Repo
   alias __MODULE__
 
@@ -19,6 +20,11 @@ defmodule Recognizer.Accounts.User do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, source: :password
+    field :two_factor_enabled, :boolean
+    field :two_factor_seed, :string
+    field :two_factor_code, :string, virtual: true, redact: true
+
+    has_one :notification_preference, NotificationPreference, on_replace: :update
 
     timestamps()
   end
@@ -173,6 +179,33 @@ defmodule Recognizer.Accounts.User do
       changeset
     else
       add_error(changeset, :current_password, "is not valid")
+    end
+  end
+
+  @doc """
+  A user changeset for changing the two factor preference.
+  """
+  def two_factor_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:two_factor_enabled])
+    |> cast_assoc(:notification_preference)
+    |> maybe_reset_two_factor_seed()
+  end
+
+  defp maybe_reset_two_factor_seed(changeset) do
+    enabled = get_change(changeset, :two_factor_enabled)
+    preference = get_change(changeset, :notification_preference)
+
+    cond do
+      enabled == true or preference ->
+        seed = 5 |> :crypto.strong_rand_bytes() |> Base.encode32()
+        put_change(changeset, :two_factor_seed, seed)
+
+      enabled == false ->
+        put_change(changeset, :two_factor_seed, nil)
+
+      true ->
+        changeset
     end
   end
 end

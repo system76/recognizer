@@ -1,12 +1,20 @@
 <div class="box">
   <h2 class="title is-2 mb-5 has-text-centered-mobile">Log In</h2>
 
-  <%= form_for @conn, Routes.user_session_path(@conn, :create), [as: :user], fn f -> %>
+  <%= form_for @conn, Routes.user_session_path(@conn, :create), [novalidate: true, as: :user], fn f -> %>
     <div class="field">
       <%= label f, :email, "Email Address", class: "label" %>
 
       <div class="control">
-        <%= email_input f, :email, class: input_classes(f, :email), required: true %>
+        <%= email_input f, :email,
+          autocapitalize: "none",
+          autocomplete: "username",
+          autocorrect: "off",
+          autofocus: true,
+          class: input_classes(f, :email),
+          required: true,
+          spellcheck: "false"
+        %>
       </div>
 
       <%= error_tag f, :email %>
@@ -16,7 +24,14 @@
       <%= label f, :password, class: "label" %>
 
       <div class="control">
-        <%= password_input f, :password, class: input_classes(f, :password), required: true %>
+        <%= password_input f, :password,
+          autocapitalize: "none",
+          autocomplete: "current-password",
+          autocorrect: "off",
+          class: input_classes(f, :password),
+          required: true,
+          spellcheck: "false"
+        %>
       </div>
 
       <%= error_tag f, :password %>
@@ -31,11 +46,11 @@
     <div class="content oauth mb-6">
       <p>Or log in with</p>
       <div class="buttons is-centered">
-        <%= link to: Routes.o_auth_path(@conn, :request, "github"), class: "github" do %>
+        <%= link to: Routes.user_oauth_path(@conn, :request, "github"), class: "github" do %>
           <i class="fa fa-github"></i>
         <% end %>
 
-        <%= link to: Routes.o_auth_path(@conn, :request, "google"), class: "google" do %>
+        <%= link to: Routes.user_oauth_path(@conn, :request, "google"), class: "google" do %>
           <i class="fa fa-google"></i>
         <% end %>
       </div>
