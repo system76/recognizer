@@ -102,6 +102,23 @@
       <%= error_tag f, :email %>
     </div>
 
+    <div class="field">
+      <%= label f, :phone_number, "Phone Number", class: "label" %>
+
+      <div class="control">
+        <%= email_input f, :phone_number,
+          autocapitalize: "none",
+          autocomplete: "tel",
+          autocorrect: "off",
+          class: input_classes(f, :phone_number),
+          spellcheck: "false",
+          type: "tel"
+        %>
+      </div>
+
+      <%= error_tag f, :phone_number %>
+    </div>
+
     <div class="field mt-5">
       <div class="control">
         <%= label class: "label" do %>
