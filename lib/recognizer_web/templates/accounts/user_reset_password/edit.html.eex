@@ -6,7 +6,15 @@
       <%= label f, :password, "New password", class: "label" %>
 
       <div class="control">
-        <%= password_input f, :password, class: "input", required: true %>
+        <%= password_input f, :password,
+          autocapitalize: "none",
+          autocomplete: "new-password",
+          autocorrect: "off",
+          autofocus: true,
+          class: input_classes(f, :password),
+          required: true,
+          spellcheck: "false"
+        %>
       </div>
 
       <%= error_tag f, :password %>
@@ -16,7 +24,14 @@
       <%= label f, :password_confirmation, "Confirm new password", class: "label" %>
 
       <div class="control">
-        <%= password_input f, :password_confirmation, class: "input", required: true %>
+        <%= password_input f, :password_confirmation,
+          autocapitalize: "none",
+          autocomplete: "new-password",
+          autocorrect: "off",
+          class: input_classes(f, :password_confirmation),
+          required: true,
+          spellcheck: "false"
+        %>
       </div>
 
       <%= error_tag f, :password_confirmation %>

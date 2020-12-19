@@ -24,7 +24,7 @@ defmodule Recognizer.Accounts.User do
     field :two_factor_seed, :string
     field :two_factor_code, :string, virtual: true, redact: true
 
-    has_one :notification_preference, NotificationPreference
+    has_one :notification_preference, NotificationPreference, on_replace: :update
 
     timestamps()
   end

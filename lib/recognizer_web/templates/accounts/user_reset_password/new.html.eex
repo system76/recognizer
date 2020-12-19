@@ -6,12 +6,21 @@
     password.
   </p>
 
-  <%= form_for :user, Routes.user_reset_password_path(@conn, :create), fn f -> %>
+  <%= form_for :user, Routes.user_reset_password_path(@conn, :create), [novalidate: true], fn f -> %>
     <div class="field">
       <%= label f, :email, "Email Address", class: "label" %>
 
       <div class="control">
-        <%= email_input f, :email, class: "input", value: @email, required: true %>
+        <%= email_input f, :email,
+          autocapitalize: "none",
+          autocomplete: "username",
+          autocorrect: "off",
+          autofocus: true,
+          class: input_classes(f, :email),
+          value: @email,
+          required: true,
+          spellcheck: "false"
+        %>
       </div>
 
       <%= error_tag f, :email %>

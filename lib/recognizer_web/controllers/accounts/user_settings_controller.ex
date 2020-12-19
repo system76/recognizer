@@ -55,7 +55,10 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       false ->
         conn
         |> put_flash(:error, "Authenticator app security code is invalid.")
-        |> render("confirm_authenticator.html", barcode: Authentication.generate_totp_barcode(user))
+        |> render("confirm_authenticator.html",
+          barcode: Authentication.generate_totp_barcode(user),
+          totp_app_url: Authentication.get_totp_app_url(user)
+        )
     end
   end
 
