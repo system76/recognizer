@@ -12,7 +12,7 @@ defmodule Recognizer.Application do
 
     children = [
       # Start the Datadog APM server
-      {SpandexDatadog.ApiServer, [http: :httpoison]},
+      {SpandexDatadog.ApiServer, [http: HTTPoison]},
       # Start the Ecto repository
       Recognizer.Repo,
       # Start the Telemetry supervisor
