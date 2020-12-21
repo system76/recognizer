@@ -39,6 +39,10 @@ defmodule RecognizerWeb.Router do
     post "/oauth/token", TokenController, :create
   end
 
+  scope "/api", RecognizerWeb.Api, as: :api do
+    get "/profile", ProfileController, :show
+  end
+
   scope "/", RecognizerWeb.OauthProvider, as: :oauth do
     pipe_through [:browser, :auth, :user]
 
