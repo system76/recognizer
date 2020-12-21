@@ -189,41 +189,35 @@ defmodule Recognizer.Accounts do
   ## Settings
 
   @doc """
-  Returns an `%Ecto.Changeset{}` for changing the user email.
+  Returns an `%Ecto.Changeset{}` for changing the user's basic profile settings.
 
   ## Examples
 
-      iex> change_user_email(user, %{email: "new@example.com"})
+      iex> change_user(user, %{email: "new@example.com"})
       %User{}
 
   """
-  def change_user_email(user, attrs \\ %{}) do
-    User.email_changeset(user, attrs)
+  def change_user(user, attrs \\ %{}) do
+    User.changeset(user, attrs)
   end
 
   @doc """
-  Updates the user email.
+  Updates the user's basic profile settings. This does not touch more advanced
+  things like notification preferences, or password.
 
   ## Examples
 
-      iex> update_user_email(user, %{email: "valid@example.com"})
+      iex> update_user(user, %{email: "valid@example.com"})
       {:ok, %User{}}
 
-      iex> update_user_email(user, %{email: "invalid"})
+      iex> update_user(user, %{email: "invalid"})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_user_email(user, attrs) do
-    changeset = User.email_changeset(user, attrs)
-
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, user_and_contexts_query(user, :all))
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
-    end
+  def update_user(user, attrs) do
+    user
+    |> User.changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """

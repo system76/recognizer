@@ -5,7 +5,7 @@ defmodule Recognizer.Server do
 
   use GRPC.Server, service: Bottle.Account.V1.Service
 
-  alias Bottle.Account.V1.{NotificationMethodResponse, User}
+  alias Bottle.Account.V1.NotificationMethodResponse
   alias Recognizer.Accounts
 
   def notification_method(%{event_type: event_type, user: req_user} = request, _stream) do
@@ -17,23 +17,8 @@ defmodule Recognizer.Server do
 
     %NotificationMethodResponse{
       request_id: Bottle.RequestId.write(:rpc),
-      notification_method: convert_notification_method(preference),
-      user: convert_user(user)
+      notification_method: Recognizer.Bottle.convert_notification_method(preference),
+      user: Recognizer.Bottle.convert_user(user)
     }
-  end
-
-  defp convert_notification_method(:app), do: :NOTIFICATION_METHOD_APP
-  defp convert_notification_method(:email), do: :NOTIFICATION_METHOD_EMAIL
-  defp convert_notification_method(:text), do: :NOTIFICATION_METHOD_TEXT
-  defp convert_notification_method(:voice), do: :NOTIFICATION_METHOD_VOICE
-  defp convert_notification_method(_), do: :NOTIFICATION_METHOD_UNSPECIFIED
-
-  defp convert_user(user) do
-    User.new(
-      email: user.email,
-      first_name: user.first_name,
-      id: to_string(user.id),
-      last_name: user.last_name
-    )
   end
 end

@@ -57,29 +57,28 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
     end
   end
 
-  describe "PUT /users/settings (change email form)" do
-    @tag :capture_log
+  describe "PUT /users/settings (change profile form)" do
     test "updates the user email", %{conn: conn, user: user} do
       conn =
         put(conn, Routes.user_settings_path(conn, :update), %{
-          "action" => "update_email",
+          "action" => "update",
           "user" => %{"email" => unique_user_email()}
         })
 
       assert redirected_to(conn) == Routes.user_settings_path(conn, :edit)
-      assert get_flash(conn, :info) =~ "Email has been updated"
+      assert get_flash(conn, :info) =~ "Settings has been updated"
       refute Accounts.get_user_by_email(user.email)
     end
 
     test "does not update email on invalid data", %{conn: conn} do
       conn =
         put(conn, Routes.user_settings_path(conn, :update), %{
-          "action" => "update_email",
+          "action" => "update",
           "user" => %{"email" => "with spaces"}
         })
 
       response = html_response(conn, 200)
-      assert response =~ "Change Email</h2>"
+      assert response =~ "Change Profile</h2>"
       assert response =~ "must have the @ sign and no spaces"
     end
   end

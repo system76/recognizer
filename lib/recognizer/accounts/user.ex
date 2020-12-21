@@ -17,9 +17,18 @@ defmodule Recognizer.Accounts.User do
     field :first_name, :string
     field :last_name, :string
     field :username, :string
+
     field :email, :string
+    field :phone_number, :string
+
+    field :type, Recognizer.UserType, default: :individual
+    field :company_name, :string
+
+    field :newsletter, :boolean, default: true
+
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, source: :password
+
     field :two_factor_enabled, :boolean
     field :two_factor_seed, :string
     field :two_factor_code, :string, virtual: true, redact: true
@@ -27,6 +36,21 @@ defmodule Recognizer.Accounts.User do
     has_one :notification_preference, NotificationPreference, on_replace: :update
 
     timestamps()
+  end
+
+  @doc """
+  A user changeset for changing basic profile fields. This does not change
+  the password, or notification settings. If you need to do that, you can use
+  the other changeset functions.
+  """
+  def changeset(user, attrs \\ %{}) do
+    user
+    |> cast(attrs, [:first_name, :last_name, :email, :phone_number, :type, :company_name])
+    |> validate_required([:first_name, :last_name, :type])
+    |> validate_email()
+    |> EctoEnum.validate_enum(:type)
+    |> validate_company_name()
+    |> generate_username()
   end
 
   @doc """
@@ -48,10 +72,13 @@ defmodule Recognizer.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:first_name, :last_name, :email, :password])
-    |> validate_required([:first_name, :last_name])
+    |> cast(attrs, [:first_name, :last_name, :email, :phone_number, :type, :company_name, :password])
+    |> validate_required([:first_name, :last_name, :type])
     |> validate_email()
+    |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
+    |> EctoEnum.validate_enum(:type)
+    |> validate_company_name()
     |> generate_username()
   end
 
@@ -84,6 +111,14 @@ defmodule Recognizer.Accounts.User do
       message: "must contain a symbol or space"
     )
     |> maybe_hash_password(opts)
+  end
+
+  defp validate_company_name(changeset) do
+    if get_field(changeset, :type, :individual) == :individual do
+      put_change(changeset, :company_name, "")
+    else
+      validate_required(changeset, :company_name)
+    end
   end
 
   defp maybe_hash_password(changeset, opts) do
@@ -119,21 +154,6 @@ defmodule Recognizer.Accounts.User do
     |> div(2)
     |> :crypto.strong_rand_bytes()
     |> Base.encode16(case: :lower)
-  end
-
-  @doc """
-  A user changeset for changing the email.
-
-  It requires the email to change otherwise an error is added.
-  """
-  def email_changeset(user, attrs) do
-    user
-    |> cast(attrs, [:email])
-    |> validate_email()
-    |> case do
-      %{changes: %{email: _}} = changeset -> changeset
-      %{} = changeset -> add_error(changeset, :email, "did not change")
-    end
   end
 
   @doc """

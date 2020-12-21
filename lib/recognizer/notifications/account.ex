@@ -15,7 +15,7 @@ defmodule Recognizer.Notifications.Account do
   """
   def deliver_user_created_message(user) do
     user
-    |> convert_user()
+    |> Recognizer.Bottle.convert_user()
     |> create_message(Account.UserCreated)
     |> send_message(:user_created)
   end
@@ -25,7 +25,7 @@ defmodule Recognizer.Notifications.Account do
   """
   def deliver_user_password_changed_notification(user) do
     user
-    |> convert_user()
+    |> Recognizer.Bottle.convert_user()
     |> create_message(Account.PasswordChanged)
     |> send_message(:password_changed)
   end
@@ -35,23 +35,16 @@ defmodule Recognizer.Notifications.Account do
   """
   def deliver_reset_password_instructions(user, url) do
     user
-    |> convert_user()
+    |> Recognizer.Bottle.convert_user()
     |> create_message(Account.PasswordReset, reset_url: url)
     |> send_message(:password_reset)
   end
 
   def deliver_two_factor_token(user, token) do
     user
-    |> convert_user()
+    |> Recognizer.Bottle.convert_user()
     |> create_message(Account.TwoFactorRequested, token: token)
     |> send_message(:two_factor_requested)
-  end
-
-  defp convert_user(user) do
-    user
-    |> Map.take([:email, :first_name, :last_name])
-    |> Map.put(:id, to_string(user.id))
-    |> Account.User.new()
   end
 
   defp create_message(user, type, args \\ []) do

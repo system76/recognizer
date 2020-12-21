@@ -37,6 +37,36 @@
       <%= error_tag f, :last_name %>
     </div>
 
+    <div class="field my-5">
+      <div class="control">
+        <%= label class: "label" do %>
+          <%= radio_button f, :type, :individual %>
+          Personal Account
+        <% end %>
+
+        <%= label class: "label" do %>
+          <%= radio_button f, :type, :business %>
+          Organization Account
+        <% end %>
+      </div>
+    </div>
+
+    <div class="field company_name" style="display:<%= business_type_class(@changeset) %>;">
+      <%= label f, :email, "Company Name", class: "label" %>
+
+      <div class="control">
+        <%= text_input f, :company_name,
+          autocapitalize: "none",
+          autocomplete: "organization",
+          autocorrect: "off",
+          class: input_classes(f, :company_name),
+          spellcheck: "false"
+        %>
+      </div>
+
+      <%= error_tag f, :company_name %>
+    </div>
+
     <div class="field">
       <%= label f, :email, "Email Address", class: "label" %>
 
@@ -69,6 +99,32 @@
       </div>
 
       <%= error_tag f, :password %>
+    </div>
+
+    <div class="field">
+      <%= label f, :password_confirmation, "Confirm password", class: "label" %>
+
+      <div class="control">
+        <%= password_input f, :password_confirmation,
+          autocapitalize: "none",
+          autocomplete: "new-password",
+          autocorrect: "off",
+          class: input_classes(f, :password_confirmation),
+          required: true,
+          spellcheck: "false"
+        %>
+      </div>
+
+      <%= error_tag f, :password_confirmation %>
+    </div>
+
+    <div class="field mt-5">
+      <div class="control">
+        <%= label class: "label" do %>
+          <%= checkbox f, :newsletter %>
+          Subscribe to our newsletter
+        <% end %>
+      </div>
     </div>
 
     <div class="buttons is-right mt-5">

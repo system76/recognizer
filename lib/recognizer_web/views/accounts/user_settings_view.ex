@@ -1,6 +1,13 @@
 defmodule RecognizerWeb.Accounts.UserSettingsView do
   use RecognizerWeb, :view
 
+  def business_type_class(changeset) do
+    case Ecto.Changeset.get_field(changeset, :type) do
+      :individual -> "none"
+      :business -> "block"
+    end
+  end
+
   def two_factor_enabled?(changeset) do
     Ecto.Changeset.get_field(changeset, :two_factor_enabled)
   end
