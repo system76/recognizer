@@ -48,8 +48,15 @@ defmodule Recognizer.Accounts do
         where: o.service == ^service and o.service_guid == ^service_guid,
         preload: [user: {u, notification_preference: n}]
 
-    with %OAuth{user: user} <- Repo.one(query) do
-      user
+    with %OAuth{user: user} <- Repo.one(query),
+         %User{two_factor_enabled: false} <- user do
+      {:ok, user}
+    else
+      %User{two_factor_enabled: true} = user ->
+        {:two_factor, user}
+
+      _ ->
+        nil
     end
   end
 

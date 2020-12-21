@@ -12,14 +12,19 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
 
   Upon successful authentication we have 2 possible paths for a request:
 
-  1. If it is determined this is the first time we're seeing this user from this provider, 
+  1. If it is determined this is the first time we're seeing this user from this provider,
      we need to create a User record and a record for our OAuth credentials.
   2. If the user exists authenticate them
   """
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
     case get_or_create_user_from_auth(auth) do
-      %User{} = user ->
+      {:ok, user} ->
         Authentication.log_in_user(conn, user)
+
+      {:two_factor, user} ->
+        conn
+        |> put_session(:current_user, user)
+        |> redirect(to: Routes.user_two_factor_path(conn, :new))
 
       {:error, %Ecto.Changeset{}} ->
         conn
@@ -60,7 +65,7 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
     Repo.transaction(fn ->
       with {:ok, user} <- Accounts.register_oauth_user(user_params),
            {:ok, _oauth} <- Accounts.create_oauth(user, provider, uid) do
-        user
+        {:ok, user}
       else
         {:error, changeset} ->
           Repo.rollback(changeset)
@@ -72,7 +77,7 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
     Map.take(info, [:email, :first_name, :last_name])
   end
 
-  # Github doesn't return `first_name` and `last_name` like other providers, 
+  # Github doesn't return `first_name` and `last_name` like other providers,
   # they use `name` which is the full name.
   # We need to make a best guess at dividing it into first and last.
   defp provider_params(%{provider: :github, info: info}) do
