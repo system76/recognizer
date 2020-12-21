@@ -22,11 +22,9 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
         Authentication.log_in_user(conn, user)
 
       {:two_factor, user} ->
-        # We bypass two factor authentication if you log in with a third party
-        # account because we assume you will also have two factor setup for that
-        # third party account. Showing two two factor screens would be horrible
-        # flow for users.
-        Authentication.log_in_user(conn, user)
+        conn
+        |> put_session(:current_user, user)
+        |> redirect(to: Routes.user_two_factor_path(conn, :new))
 
       {:error, %Ecto.Changeset{}} ->
         conn
