@@ -8,7 +8,11 @@ defmodule Recognizer.Application do
   import Supervisor.Spec
 
   def start(_type, _args) do
+    SpandexPhoenix.Telemetry.install()
+
     children = [
+      # Start the Datadog APM server
+      {SpandexDatadog.ApiServer, [http: :httpoison]},
       # Start the Ecto repository
       Recognizer.Repo,
       # Start the Telemetry supervisor

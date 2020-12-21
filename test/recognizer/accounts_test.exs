@@ -108,7 +108,7 @@ defmodule Recognizer.AccountsTest do
   describe "change_user_registration/2" do
     test "returns a changeset" do
       assert %Ecto.Changeset{} = changeset = Accounts.change_user_registration(%User{})
-      assert changeset.required == [:password, :email, :first_name, :last_name]
+      assert changeset.required == [:password, :email, :first_name, :last_name, :type]
     end
 
     test "allows fields to be set" do
@@ -134,26 +134,33 @@ defmodule Recognizer.AccountsTest do
     end
   end
 
-  describe "change_user_email/2" do
+  describe "change_user/2" do
     test "returns a user changeset" do
-      assert %Ecto.Changeset{} = changeset = Accounts.change_user_email(%User{})
-      assert changeset.required == [:email]
+      assert %Ecto.Changeset{} = changeset = Accounts.change_user(%User{})
+      assert changeset.required == [:email, :first_name, :last_name, :type]
     end
   end
 
-  describe "update_user_email/2" do
+  describe "update_user/2" do
     setup do
       user = user_fixture()
-      email = unique_user_email()
 
-      %{user: user, email: email}
+      %{user: user}
     end
 
-    test "updates the email with a valid token", %{user: user, email: email} do
-      assert {:ok, _user} = Accounts.update_user_email(user, %{email: email})
+    test "updates the email", %{user: user} do
+      email = unique_user_email()
+      assert {:ok, _user} = Accounts.update_user(user, %{email: email})
       changed_user = Repo.get!(User, user.id)
       assert changed_user.email != user.email
       assert changed_user.email == email
+    end
+
+    test "clears company name for individual accounts", %{user: user} do
+      assert {:ok, _user} = Accounts.update_user(user, %{type: :individual, company_name: "test"})
+      changed_user = Repo.get!(User, user.id)
+      assert changed_user.type == :individual
+      assert changed_user.company_name == ""
     end
   end
 

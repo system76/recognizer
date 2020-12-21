@@ -18,7 +18,7 @@ config :recognizer, RecognizerWeb.Endpoint,
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  metadata: [:request_id, :trace_id, :span_id]
 
 config :grpc, start_server: true
 
@@ -59,12 +59,15 @@ config :recognizer, ExOauth2Provider,
 
 config :recognizer, Recognizer.Guardian,
   issuer: "system76",
-  secret_key: "g6Ddv3l/3cYkgtOwkhspAAcw0cjL3Pg23rnmt69UVYHi4WrU1smdFykZa0GfY4xl"
+  secret_key: "g6Ddv3l/3cYkgtOwkhspAAcw0cjL3Pg23rnmt69UVYHi4WrU1smdFykZa0GfY4xl",
+  token_ttl: %{
+    "access" => {24, :hours},
+    "reset_password" => {15, :minutes}
+  }
 
 config :guardian, Guardian.DB,
   repo: Recognizer.Repo,
   schema_name: "users_tokens",
-  token_types: ["access"],
   sweep_interval: 60
 
 config :ueberauth, Ueberauth,
@@ -81,5 +84,13 @@ config :ueberauth, Ueberauth.Strategy.Github.OAuth,
 config :ueberauth, Ueberauth.Strategy.Google.OAuth,
   client_id: "",
   client_secret: ""
+
+config :recognizer, Recognizer.Tracer,
+  service: :recognizer,
+  adapter: SpandexDatadog.Adapter,
+  disabled?: true
+
+config :spandex_ecto, SpandexEcto.EctoLogger, tracer: Recognizer.Tracer
+config :spandex_phoenix, tracer: Recognizer.Tracer
 
 import_config "#{Mix.env()}.exs"
