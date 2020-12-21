@@ -65,7 +65,7 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
     Repo.transaction(fn ->
       with {:ok, user} <- Accounts.register_oauth_user(user_params),
            {:ok, _oauth} <- Accounts.create_oauth(user, provider, uid) do
-        user
+        {:ok, user}
       else
         {:error, changeset} ->
           Repo.rollback(changeset)
