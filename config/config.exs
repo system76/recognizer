@@ -87,7 +87,7 @@ config :ueberauth, Ueberauth.Strategy.Google.OAuth,
 
 config :recognizer, Recognizer.Tracer,
   service: :recognizer,
-  adapter: Spandex.Adapters.Datadog,
+  adapter: SpandexDatadog.Adapter,
   disabled?: true
 
 config :spandex_ecto, SpandexEcto.EctoLogger, tracer: Recognizer.Tracer

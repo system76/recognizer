@@ -11,6 +11,8 @@ defmodule Recognizer.Application do
     SpandexPhoenix.Telemetry.install()
 
     children = [
+      # Start the Datadog APM server
+      {SpandexDatadog.ApiServer, [http: :httpoison]},
       # Start the Ecto repository
       Recognizer.Repo,
       # Start the Telemetry supervisor
