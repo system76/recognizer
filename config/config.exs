@@ -18,7 +18,7 @@ config :recognizer, RecognizerWeb.Endpoint,
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  metadata: [:request_id, :trace_id, :span_id]
 
 config :grpc, start_server: true
 
@@ -86,5 +86,8 @@ config :recognizer, Recognizer.Tracer,
   service: :recognizer,
   adapter: Spandex.Adapters.Datadog,
   disabled?: true
+
+config :spandex_ecto, SpandexEcto.EctoLogger, tracer: Recognizer.Tracer
+config :spandex_phoenix, tracer: Recognizer.Tracer
 
 import_config "#{Mix.env()}.exs"
