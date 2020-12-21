@@ -49,9 +49,18 @@ defmodule Recognizer.Notifications.Account do
 
   defp convert_user(user) do
     user
-    |> Map.take([:email, :first_name, :last_name])
+    |> Map.take([:first_name, :last_name, :email, :phone_number, :company_name, :newsletter])
     |> Map.put(:id, to_string(user.id))
+    |> Map.put(:account_type, convert_type(user.type))
     |> Account.User.new()
+  end
+
+  defp convert_type(type) do
+    case type do
+      :individual -> :ACCOUNT_TYPE_INDIVIDUAL
+      :business -> :ACCOUNT_TYPE_BUSINESS
+      _ -> :ACCOUNT_TYPE_UNSPECIFIED
+    end
   end
 
   defp create_message(user, type, args \\ []) do
