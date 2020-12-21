@@ -45,3 +45,7 @@ config :ueberauth, Ueberauth.Strategy.Github.OAuth,
 config :ueberauth, Ueberauth.Strategy.Google.OAuth,
   client_id: recognizer_config["GOOGLE_CLIENT_ID"],
   client_secret: recognizer_config["GOOGLE_CLIENT_SECRET"]
+
+config :recognizer, Recognizer.Tracer,
+  disabled?: false,
+  env: recognizer_config["APPSIGNAL_ENV"]

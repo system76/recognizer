@@ -82,4 +82,9 @@ config :ueberauth, Ueberauth.Strategy.Google.OAuth,
   client_id: "",
   client_secret: ""
 
+config :recognizer, Recognizer.Tracer,
+  service: :recognizer,
+  adapter: Spandex.Adapters.Datadog,
+  disabled?: true
+
 import_config "#{Mix.env()}.exs"
