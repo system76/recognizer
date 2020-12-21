@@ -15,7 +15,7 @@ defmodule Recognizer.Notifications.Account do
   """
   def deliver_user_created_message(user) do
     user
-    |> convert_user()
+    |> Recognizer.Bottle.convert_user()
     |> create_message(Account.UserCreated)
     |> send_message(:user_created)
   end
@@ -25,7 +25,7 @@ defmodule Recognizer.Notifications.Account do
   """
   def deliver_user_password_changed_notification(user) do
     user
-    |> convert_user()
+    |> Recognizer.Bottle.convert_user()
     |> create_message(Account.PasswordChanged)
     |> send_message(:password_changed)
   end
@@ -35,32 +35,16 @@ defmodule Recognizer.Notifications.Account do
   """
   def deliver_reset_password_instructions(user, url) do
     user
-    |> convert_user()
+    |> Recognizer.Bottle.convert_user()
     |> create_message(Account.PasswordReset, reset_url: url)
     |> send_message(:password_reset)
   end
 
   def deliver_two_factor_token(user, token) do
     user
-    |> convert_user()
+    |> Recognizer.Bottle.convert_user()
     |> create_message(Account.TwoFactorRequested, token: token)
     |> send_message(:two_factor_requested)
-  end
-
-  defp convert_user(user) do
-    user
-    |> Map.take([:first_name, :last_name, :email, :phone_number, :company_name, :newsletter])
-    |> Map.put(:id, to_string(user.id))
-    |> Map.put(:account_type, convert_type(user.type))
-    |> Account.User.new()
-  end
-
-  defp convert_type(type) do
-    case type do
-      :individual -> :ACCOUNT_TYPE_INDIVIDUAL
-      :business -> :ACCOUNT_TYPE_BUSINESS
-      _ -> :ACCOUNT_TYPE_UNSPECIFIED
-    end
   end
 
   defp create_message(user, type, args \\ []) do
