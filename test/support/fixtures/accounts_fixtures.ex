@@ -15,6 +15,9 @@ defmodule Recognizer.AccountsFixtures do
         first_name: unique_name(),
         last_name: unique_name(),
         email: unique_user_email(),
+        phone_number: "+18001234567",
+        type: :individual,
+        newsletter: false,
         password: valid_user_password()
       })
       |> Recognizer.Accounts.register_user()
