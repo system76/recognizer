@@ -31,7 +31,7 @@ config :ex_aws,
 
 config :appsignal, :config,
   push_api_key: recognizer_config["APPSIGNAL_KEY"],
-  env: recognizer_config["APPSIGNAL_ENV"]
+  env: recognizer_config["ENVIRONMENT"]
 
 config :recognizer, ExOauth2Provider,
   force_ssl_in_redirect_uri: Map.get(recognizer_config, "FORCE_SSL_OAUTH_APPLICATIONS", true)
@@ -45,3 +45,7 @@ config :ueberauth, Ueberauth.Strategy.Github.OAuth,
 config :ueberauth, Ueberauth.Strategy.Google.OAuth,
   client_id: recognizer_config["GOOGLE_CLIENT_ID"],
   client_secret: recognizer_config["GOOGLE_CLIENT_SECRET"]
+
+config :recognizer, Recognizer.Tracer,
+  disabled?: false,
+  env: recognizer_config["ENVIRONMENT"]

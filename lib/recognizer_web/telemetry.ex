@@ -27,6 +27,14 @@ defmodule RecognizerWeb.Telemetry do
         :debug
       )
 
+    :ok =
+      :telemetry.attach(
+        "spandex-query-tracer-repo_name",
+        [:recognizer, :repo, :query],
+        &SpandexEcto.TelemetryAdapter.handle_event/4,
+        nil
+      )
+
     Supervisor.init(children, strategy: :one_for_one)
   end
 
