@@ -10,17 +10,17 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     render(conn, "edit.html")
   end
 
-  def update(conn, %{"action" => "update_email", "user" => user_params}) do
+  def update(conn, %{"action" => "update", "user" => user_params}) do
     user = Authentication.fetch_current_user(conn)
 
-    case Accounts.update_user_email(user, user_params) do
+    case Accounts.update_user(user, user_params) do
       {:ok, _updated_user} ->
         conn
-        |> put_flash(:info, "Email has been updated.")
+        |> put_flash(:info, "Settings has been updated.")
         |> redirect(to: Routes.user_settings_path(conn, :edit))
 
       {:error, changeset} ->
-        render(conn, "edit.html", email_changeset: changeset)
+        render(conn, "edit.html", changeset: changeset)
     end
   end
 
@@ -100,7 +100,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     user = Authentication.fetch_current_user(conn)
 
     conn
-    |> assign(:email_changeset, Accounts.change_user_email(user))
+    |> assign(:changeset, Accounts.change_user(user))
     |> assign(:password_changeset, Accounts.change_user_password(user))
     |> assign(:two_factor_changeset, Accounts.change_user_two_factor(user))
   end
