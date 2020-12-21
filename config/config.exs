@@ -59,12 +59,15 @@ config :recognizer, ExOauth2Provider,
 
 config :recognizer, Recognizer.Guardian,
   issuer: "system76",
-  secret_key: "g6Ddv3l/3cYkgtOwkhspAAcw0cjL3Pg23rnmt69UVYHi4WrU1smdFykZa0GfY4xl"
+  secret_key: "g6Ddv3l/3cYkgtOwkhspAAcw0cjL3Pg23rnmt69UVYHi4WrU1smdFykZa0GfY4xl",
+  token_ttl: %{
+    "access" => {24, :hours},
+    "reset_password" => {15, :minutes}
+  }
 
 config :guardian, Guardian.DB,
   repo: Recognizer.Repo,
   schema_name: "users_tokens",
-  token_types: ["access"],
   sweep_interval: 60
 
 config :ueberauth, Ueberauth,
