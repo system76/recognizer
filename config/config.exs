@@ -90,7 +90,10 @@ config :recognizer, Recognizer.Tracer,
   adapter: SpandexDatadog.Adapter,
   disabled?: true
 
-config :spandex_ecto, SpandexEcto.EctoLogger, tracer: Recognizer.Tracer
+config :spandex_ecto, SpandexEcto.EctoLogger,
+  service: :system76,
+  tracer: Recognizer.Tracer
+
 config :spandex_phoenix, tracer: Recognizer.Tracer
 
 import_config "#{Mix.env()}.exs"
