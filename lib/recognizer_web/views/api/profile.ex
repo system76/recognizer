@@ -1,6 +1,8 @@
 defmodule RecognizerWeb.Api.ProfileView do
   use RecognizerWeb, :view
 
+  alias Recognizer.Accounts.Role
+
   def render("show.json", %{user: user}) do
     %{
       id: user.id,
@@ -16,6 +18,7 @@ defmodule RecognizerWeb.Api.ProfileView do
 
       newsletter: user.newsletter,
 
+      admin: Role.admin?(user),
       notification_preferences: render("notification_preferences.json", user)
     }
   end
