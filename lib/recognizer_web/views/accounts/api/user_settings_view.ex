@@ -1,7 +1,14 @@
-defmodule RecognizerWeb.Api.ProfileView do
+defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
   use RecognizerWeb, :view
 
   alias Recognizer.Accounts.Role
+
+  def render("confirm_authenticator.json", %{barcode: barcode, totp_app_url: totp_app_url}) do
+    %{
+      barcode: barcode,
+      totp_app_url: totp_app_url
+    }
+  end
 
   def render("show.json", %{user: user}) do
     %{
