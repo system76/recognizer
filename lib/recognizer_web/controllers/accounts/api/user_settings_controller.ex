@@ -2,7 +2,7 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
   use RecognizerWeb, :controller
 
   alias Recognizer.Accounts
-  alias RecognizerWeb.{Authentication, ErroView}
+  alias RecognizerWeb.{Authentication, ErrorView}
 
   def update(conn, %{"action" => "update", "user" => user_params}) do
     user = Authentication.fetch_current_user(conn)
@@ -12,7 +12,7 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
         render(conn, "show.json", user: update_user)
 
       {:error, changeset} ->
-        render(conn, ErroView, "error.json", changeset: changeset)
+        render(conn, ErrorView, "error.json", changeset: changeset)
     end
   end
 
@@ -30,7 +30,7 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
         render(conn, "session.json", user: updated_user, access_token: access_token)
 
       {:error, changeset} ->
-        render(conn, ErroView, "error.json", changeset: changeset)
+        render(conn, ErrorView, "error.json", changeset: changeset)
     end
   end
 
@@ -44,7 +44,7 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
         render(conn, "show.json", user: user)
 
       false ->
-        render(conn, ErroView, "error.json",
+        render(conn, ErrorView, "error.json",
           field: :two_factor_token,
           reason: "Authenticator app security code is invalid."
         )
