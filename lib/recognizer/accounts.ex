@@ -5,10 +5,12 @@ defmodule Recognizer.Accounts do
 
   import Ecto.Query, warn: false
 
-  alias Recognizer.Accounts.{User, OAuth}
+  alias Recognizer.Accounts.{User, OAuth, Role}
   alias Recognizer.Guardian
   alias Recognizer.Notifications.Account, as: Notification
   alias Recognizer.Repo
+
+  @admin_role_id 2
 
   ## Database getters
 
@@ -45,11 +47,19 @@ defmodule Recognizer.Accounts do
       from o in OAuth,
         join: u in assoc(o, :user),
         join: n in assoc(u, :notification_preference),
+        join: r in assoc(u, :roles),
         where: o.service == ^service and o.service_guid == ^service_guid,
-        preload: [user: {u, notification_preference: n}]
+        preload: [user: {u, [notification_preference: n, roles: r]}]
 
-    with %OAuth{user: user} <- Repo.one(query) do
-      user
+    with %OAuth{user: user} <- Repo.one(query),
+         %User{two_factor_enabled: false} <- user do
+      {:ok, user}
+    else
+      %User{two_factor_enabled: true} = user ->
+        {:two_factor, user}
+
+      _ ->
+        nil
     end
   end
 
@@ -81,8 +91,9 @@ defmodule Recognizer.Accounts do
     query =
       from u in User,
         join: n in assoc(u, :notification_preference),
+        join: r in assoc(u, :roles),
         where: u.email == ^email,
-        preload: [notification_preference: n]
+        preload: [notification_preference: n, roles: r]
 
     with %User{} = user <- Repo.one(query),
          true <- User.valid_password?(user, password),
@@ -115,8 +126,9 @@ defmodule Recognizer.Accounts do
     query =
       from u in User,
         join: n in assoc(u, :notification_preference),
+        join: r in assoc(u, :roles),
         where: u.id == ^id,
-        preload: [notification_preference: n]
+        preload: [notification_preference: n, roles: r]
 
     Repo.one!(query)
   end

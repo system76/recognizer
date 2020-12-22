@@ -7,7 +7,7 @@ defmodule Recognizer.Accounts.User do
 
   import Ecto.Changeset
 
-  alias Recognizer.Accounts.NotificationPreference
+  alias Recognizer.Accounts.{NotificationPreference, Role}
   alias Recognizer.Repo
   alias __MODULE__
 
@@ -34,6 +34,7 @@ defmodule Recognizer.Accounts.User do
     field :two_factor_code, :string, virtual: true, redact: true
 
     has_one :notification_preference, NotificationPreference, on_replace: :update
+    has_many :roles, Role
 
     timestamps()
   end
@@ -78,6 +79,7 @@ defmodule Recognizer.Accounts.User do
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
     |> EctoEnum.validate_enum(:type)
+    |> put_assoc(:roles, Role.default_role_changeset())
     |> validate_company_name()
     |> generate_username()
   end
@@ -88,6 +90,7 @@ defmodule Recognizer.Accounts.User do
     |> validate_required([:first_name, :last_name])
     |> put_change(:hashed_password, "")
     |> validate_email()
+    |> put_assoc(:roles, Role.default_role_changeset())
     |> generate_username()
   end
 
