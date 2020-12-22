@@ -16,10 +16,10 @@ defmodule RecognizerWeb.ErrorView do
         end)
       end)
 
-    %{error: reasons}
+    %{errors: reasons}
   end
 
-  def render("error.json", %{reason: reason}) do
-    %{error: reason}
+  def render("error.json", %{field: field, reason: reason}) do
+    %{errors: [%{field => reason}]}
   end
 end

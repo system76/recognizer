@@ -39,7 +39,10 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
         render(conn, "show.json", user: user)
 
       false ->
-        render(conn, ErroView, "error.json", reason: "Authenticator app security code is invalid.")
+        render(conn, ErroView, "error.json",
+          field: :two_factor_token,
+          reason: "Authenticator app security code is invalid."
+        )
     end
   end
 
