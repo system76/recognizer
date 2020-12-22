@@ -24,10 +24,10 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
       {:ok, updated_user} ->
         {:ok, access_token, refresh_token} =
           conn
-          |> Authentication.log_out_api_user()
+          |> Authentication.revoke_all_tokens()
           |> Authentication.log_in_api_user(user)
 
-        render(conn, "session.json", user: updated_user, access_token: access_token, refresh_token: refresh_token}
+        render(conn, "session.json", user: updated_user, access_token: access_token, refresh_token: refresh_token)
 
       {:error, changeset} ->
         render(conn, ErroView, "error.json", changeset: changeset)

@@ -33,6 +33,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
         conn
         |> put_flash(:info, "Password updated successfully.")
         |> put_session(:user_return_to, Routes.user_settings_path(conn, :edit))
+        |> Authentication.revoke_all_tokens()
         |> Authentication.log_in_user(user)
 
       {:error, changeset} ->

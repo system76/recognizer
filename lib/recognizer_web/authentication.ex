@@ -54,10 +54,10 @@ defmodule RecognizerWeb.Authentication do
   end
 
   @doc """
-  Logs the user out via the API
+  Revokes all tokens issued to a given resource 
   """
-  def log_out_user(conn) do
-    Guardian.Plug.sign_out(conn)
+  def revoke_all_tokens(resource) do
+    Guardian.DB.revoke_all_(resource)
   end
 
   @doc """
