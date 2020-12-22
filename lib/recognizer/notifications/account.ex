@@ -79,11 +79,21 @@ defmodule Recognizer.Notifications.Account do
 
     resource
     |> message_queue_url()
-    |> ExAws.SQS.send_message(encoded_message)
+    |> send_message_to_queue(encoded_message)
     |> ExAws.request()
   end
 
   defp send_message(resource, _atom) do
     {:ok, resource}
+  end
+
+  defp send_message_to_queue(queues, message) when is_list(queues) do
+    Enum.each(queues, &send_message_to_queue(&1, message))
+  end
+
+  defp send_message_to_queue(queue, message) do
+    queue
+    |> ExAws.SQS.send_message(message)
+    |> ExAws.request()
   end
 end

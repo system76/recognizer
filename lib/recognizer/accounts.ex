@@ -5,12 +5,10 @@ defmodule Recognizer.Accounts do
 
   import Ecto.Query, warn: false
 
-  alias Recognizer.Accounts.{User, OAuth, Role}
+  alias Recognizer.Accounts.{User, OAuth}
   alias Recognizer.Guardian
   alias Recognizer.Notifications.Account, as: Notification
   alias Recognizer.Repo
-
-  @admin_role_id 2
 
   ## Database getters
 
