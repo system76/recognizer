@@ -12,12 +12,11 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
     }
   end
 
-  def render("session.json", %{user: user, access_token: access_token, refresh_token: refresh_token}) do
+  def render("session.json", %{user: user, access_token: access_token}) do
     "show.json"
     |> render(%{user: user})
     |> Map.put(:session, %{
-      token: access_token,
-      refresh_token: refresh_token
+      token: access_token
     })
   end
 
