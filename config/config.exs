@@ -62,6 +62,7 @@ config :recognizer, Recognizer.Guardian,
   secret_key: "g6Ddv3l/3cYkgtOwkhspAAcw0cjL3Pg23rnmt69UVYHi4WrU1smdFykZa0GfY4xl",
   token_ttl: %{
     "access" => {24, :hours},
+    "refresh" => {7, :days},
     "reset_password" => {15, :minutes}
   }
 

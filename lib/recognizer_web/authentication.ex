@@ -22,6 +22,28 @@ defmodule RecognizerWeb.Authentication do
   end
 
   @doc """
+  Logs the user in.
+  """
+  def log_in_user(conn, user, params \\ %{}) do
+    redirect = return_to(conn)
+
+    conn
+    |> clear_session()
+    |> Guardian.Plug.sign_in(user, params)
+    |> redirect(to: redirect)
+  end
+
+  @doc """
+  Logs the user in via the API.
+  """
+  def log_in_api_user(conn, user, params \\ %{}) do
+    {:ok, access_token, _} = Guardian.encode_and_sign(user, token_type: "access")
+    {:ok, refresh_token, _} = Guardian.encode_and_sign(user, token_type: "refresh")
+
+    {:ok, access_token, refresh_token}
+  end
+
+  @doc """
   Logs the user out.
   """
   def log_out_user(conn) do
@@ -29,6 +51,13 @@ defmodule RecognizerWeb.Authentication do
     |> Guardian.Plug.sign_out()
     |> clear_session()
     |> redirect(to: Routes.homepage_path(conn, :index))
+  end
+
+  @doc """
+  Logs the user out via the API
+  """
+  def log_out_user(conn) do
+    Guardian.Plug.sign_out(conn)
   end
 
   @doc """
