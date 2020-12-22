@@ -40,6 +40,8 @@ defmodule RecognizerWeb.Router do
   end
 
   scope "/api", RecognizerWeb.Api, as: :api do
+    pipe_through [:api, :auth, :user]
+
     get "/profile", ProfileController, :show
   end
 
