@@ -4,12 +4,29 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
   alias Recognizer.Accounts
   alias RecognizerWeb.{Authentication, ErrorView}
 
+  def confirm_authenticator(conn, params) do
+    two_factor_code = Map.get(params, "two_factor_code", "")
+    user = Authentication.fetch_current_user(conn)
+
+    case Authentication.valid_token?(two_factor_code, user) do
+      true ->
+        {:ok, _} = Accounts.update_user_two_factor(user, %{"notification_preference" => %{"two_factor" => "app"}})
+        render(conn, "show.json", user: user)
+
+      false ->
+        render(conn, ErrorView, "error.json",
+          field: :two_factor_token,
+          reason: "Authenticator app security code is invalid."
+        )
+    end
+  end
+
   def update(conn, %{"action" => "update", "user" => user_params}) do
     user = Authentication.fetch_current_user(conn)
 
     case Accounts.update_user(user, user_params) do
       {:ok, updated_user} ->
-        render(conn, "show.json", user: update_user)
+        render(conn, "show.json", user: updated_user)
 
       {:error, changeset} ->
         render(conn, ErrorView, "error.json", changeset: changeset)
@@ -25,29 +42,12 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
         {:ok, access_token} =
           conn
           |> Authentication.revoke_all_tokens()
-          |> Authentication.log_in_api_user(user)
+          |> Authentication.log_in_api_user(updated_user)
 
         render(conn, "session.json", user: updated_user, access_token: access_token)
 
       {:error, changeset} ->
         render(conn, ErrorView, "error.json", changeset: changeset)
-    end
-  end
-
-  def confirm_authenticator(conn, params) do
-    two_factor_code = Map.get(params, "two_factor_code", "")
-    user = Authentication.fetch_current_user(conn)
-
-    case Authentication.valid_token?(two_factor_code, user) do
-      true ->
-        {:ok, _} = Accounts.update_user_two_factor(user, %{"notification_preference" => %{"two_factor" => "app"}})
-        render(conn, "show.json", user: user)
-
-      false ->
-        render(conn, ErrorView, "error.json",
-          field: :two_factor_token,
-          reason: "Authenticator app security code is invalid."
-        )
     end
   end
 
@@ -86,7 +86,7 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
   end
 
   def show(conn, _params) do
-    user = authentication.fetch_current_user(conn)
+    user = Authentication.fetch_current_user(conn)
     render(conn, "show.json", user: user)
   end
 end
