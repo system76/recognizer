@@ -19,7 +19,6 @@ defmodule RecognizerWeb.Api.ProfileView do
   end
 
   def render("notification_preferences.json", %{notification_preference: preferences}) do
-    preferences
-    |> Map.take([:two_factor])
+    Map.take(preferences, [:two_factor])
   end
 end
