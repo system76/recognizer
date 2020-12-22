@@ -36,7 +36,7 @@ defmodule RecognizerWeb.Authentication do
   @doc """
   Logs the user in via the API.
   """
-  def log_in_api_user(conn, user, params \\ %{}) do
+  def log_in_api_user(conn, user) do
     {:ok, access_token, _} = Guardian.encode_and_sign(user, token_type: "access")
     {:ok, refresh_token, _} = Guardian.encode_and_sign(user, token_type: "refresh")
 
