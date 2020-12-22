@@ -28,14 +28,4 @@
       </div>
     </div>
   <% end %>
-
-  <hr class="has-background-grey-lighter" />
-
-  <p class="content">
-    <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
-  </p>
-
-  <p class="content">
-    New to System76? <%= link "Create Account", to: Routes.user_registration_path(@conn, :new) %>
-  </p>
 </div>
