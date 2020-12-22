@@ -5,6 +5,8 @@ defmodule Recognizer.Notifications.Account do
   notification microservice to deliver.
   """
 
+  use Spandex.Decorators
+
   alias Bottle.Account.V1, as: Account
 
   # credo:disable-for-next-line
@@ -71,6 +73,7 @@ defmodule Recognizer.Notifications.Account do
     |> Keyword.get(message_type)
   end
 
+  @decorate span(service: :bullhorn, type: :function)
   defp send_message(resource, atom) when @enabled do
     encoded_message = encode_message(resource, atom)
 

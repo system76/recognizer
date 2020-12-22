@@ -40,6 +40,7 @@ defmodule Recognizer.MixProject do
       {:cowboy, "~> 2.8", override: true},
       {:cowlib, "~> 2.9.1", override: true},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:decorator, "~> 1.2"},
       {:ecto_enum, "~> 1.4"},
       {:ecto_sql, "~> 3.4"},
       {:eqrcode, "~> 0.1.7"},
