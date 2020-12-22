@@ -19,6 +19,7 @@ defmodule Recognizer.Accounts.NotificationPreference do
   def changeset(%NotificationPreference{} = oauth, attrs \\ %{}) do
     oauth
     |> cast(attrs, [:two_factor, :user_id])
+    |> unique_constraint(:user_id)
     |> assoc_constraint(:user)
   end
 end
