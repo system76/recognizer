@@ -103,6 +103,18 @@ defmodule Recognizer.AccountsTest do
       assert is_binary(user.hashed_password)
       assert is_nil(user.password)
     end
+
+    test "adds login role" do
+      {:ok, user} =
+        Accounts.register_user(%{
+          first_name: unique_name(),
+          last_name: unique_name(),
+          email: unique_user_email(),
+          password: valid_user_password()
+        })
+
+      assert Enum.any?(user.roles, fn r -> r.role_id == 1 end)
+    end
   end
 
   describe "change_user_registration/2" do
