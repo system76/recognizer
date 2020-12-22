@@ -19,6 +19,7 @@ config :recognizer, Recognizer.Repo,
 config :recognizer,
   message_queues: [
     {Bottle.Account.V1.UserCreated, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
+    {Bottle.Account.V1.TwoFactorRequested, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
     {Bottle.Account.V1.PasswordChanged, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
     {Bottle.Account.V1.PasswordReset, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]}
   ],
