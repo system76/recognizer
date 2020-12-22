@@ -95,5 +95,6 @@ config :spandex_ecto, SpandexEcto.EctoLogger,
   tracer: Recognizer.Tracer
 
 config :spandex_phoenix, tracer: Recognizer.Tracer
+config :spandex, :decorators, tracer: Recognizer.Tracer
 
 import_config "#{Mix.env()}.exs"

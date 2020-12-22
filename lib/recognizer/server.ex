@@ -4,10 +4,12 @@ defmodule Recognizer.Server do
   """
 
   use GRPC.Server, service: Bottle.Account.V1.Service
+  use Spandex.Decorators
 
   alias Bottle.Account.V1.NotificationMethodResponse
   alias Recognizer.Accounts
 
+  @decorate trace(name: "gRPC Bottle.Account.V1.NotificationMethod")
   def notification_method(%{event_type: event_type, user: req_user} = request, _stream) do
     Bottle.RequestId.read(:rpc, request)
 

@@ -4,6 +4,7 @@ defmodule Recognizer.Accounts.User do
   """
 
   use Ecto.Schema
+  use Spandex.Decorators
 
   import Ecto.Changeset
 
@@ -130,11 +131,16 @@ defmodule Recognizer.Accounts.User do
 
     if hash_password? && password && changeset.valid? do
       changeset
-      |> put_change(:hashed_password, Argon2.hash_pwd_salt(password))
+      |> put_change(:hashed_password, do_hash_password(password))
       |> delete_change(:password)
     else
       changeset
     end
+  end
+
+  @decorate span()
+  defp do_hash_password(password) do
+    Argon2.hash_pwd_salt(password)
   end
 
   defp generate_username(changeset) do
@@ -184,6 +190,7 @@ defmodule Recognizer.Accounts.User do
   If there is no user or the user doesn't have a password, we call
   `Argon2.no_user_verify/0` to avoid timing attacks.
   """
+  @decorate span()
   def valid_password?(%User{hashed_password: hashed_password}, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
     Argon2.verify_pass(password, hashed_password)
