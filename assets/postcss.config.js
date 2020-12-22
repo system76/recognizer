@@ -8,7 +8,8 @@ module.exports = (options) => {
     plugins: [
       ...(devMode ? [] : [purgecss({
         content: [
-          path.resolve(__dirname, '../lib/recognizer_web/templates/**/*.html.eex')
+          path.resolve(__dirname, '../lib/recognizer_web/templates/**/*.html.eex'),
+          path.resolve(__dirname, '../lib/recognizer_web/views/**/*.ex')
         ]
       })])
     ]
