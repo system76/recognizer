@@ -1,14 +1,8 @@
-defmodule RecognizerWeb.Accounts.UserSettingsController do
+defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
   use RecognizerWeb, :controller
 
   alias Recognizer.Accounts
-  alias RecognizerWeb.Authentication
-
-  plug :assign_email_and_password_changesets
-
-  def edit(conn, _params) do
-    render(conn, "edit.html")
-  end
+  alias RecognizerWeb.{Authentication, ErrorView}
 
   def confirm_authenticator(conn, params) do
     two_factor_code = Map.get(params, "two_factor_code", "")
@@ -17,17 +11,12 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     case Authentication.valid_token?(two_factor_code, user) do
       true ->
         {:ok, _} = Accounts.update_user_two_factor(user, %{"notification_preference" => %{"two_factor" => "app"}})
-
-        conn
-        |> put_flash(:info, "Authenticator app confirmed.")
-        |> redirect(to: Routes.user_settings_path(conn, :edit))
+        render(conn, "show.json", user: user)
 
       false ->
-        conn
-        |> put_flash(:error, "Authenticator app security code is invalid.")
-        |> render("confirm_authenticator.html",
-          barcode: Authentication.generate_totp_barcode(user),
-          totp_app_url: Authentication.get_totp_app_url(user)
+        render(conn, ErrorView, "error.json",
+          field: :two_factor_token,
+          reason: "Authenticator app security code is invalid."
         )
     end
   end
@@ -36,13 +25,11 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     user = Authentication.fetch_current_user(conn)
 
     case Accounts.update_user(user, user_params) do
-      {:ok, _updated_user} ->
-        conn
-        |> put_flash(:info, "Settings has been updated.")
-        |> redirect(to: Routes.user_settings_path(conn, :edit))
+      {:ok, updated_user} ->
+        render(conn, "show.json", user: updated_user)
 
       {:error, changeset} ->
-        render(conn, "edit.html", changeset: changeset)
+        render(conn, ErrorView, "error.json", changeset: changeset)
     end
   end
 
@@ -51,16 +38,14 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     user = Authentication.fetch_current_user(conn)
 
     case Accounts.update_user_password(user, password, user_params) do
-      {:ok, user} ->
-        Authentication.revoke_all_tokens(user)
+      {:ok, updated_user} ->
+        Authentication.revoke_all_tokens(updated_user)
+        {:ok, access_token} = Authentication.log_in_api_user(updated_user)
 
-        conn
-        |> put_flash(:info, "Password updated successfully.")
-        |> put_session(:user_return_to, Routes.user_settings_path(conn, :edit))
-        |> Authentication.log_in_user(user)
+        render(conn, "session.json", user: updated_user, access_token: access_token)
 
       {:error, changeset} ->
-        render(conn, "edit.html", password_changeset: changeset)
+        render(conn, ErrorView, "error.json", changeset: changeset)
     end
   end
 
@@ -73,13 +58,15 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
     case Accounts.update_user_two_factor(user, user_params) do
       {:ok, user} ->
-        render(conn, "confirm_authenticator.html",
+        conn
+        |> put_status(202)
+        |> render("confirm_authenticator.json",
           barcode: Authentication.generate_totp_barcode(user),
           totp_app_url: Authentication.get_totp_app_url(user)
         )
 
       {:error, changeset} ->
-        render(conn, "edit.html", two_factor_changeset: changeset)
+        render(conn, ErrorView, "error.json", changeset: changeset)
     end
   end
 
@@ -89,21 +76,15 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
     case Accounts.update_user_two_factor(user, user_params) do
       {:ok, %{notification_preference: %{two_factor: _}}} ->
-        conn
-        |> put_flash(:info, "Two-factor preferences have been updated.")
-        |> redirect(to: Routes.user_settings_path(conn, :edit))
+        render(conn, "show.json", user: user)
 
       {:error, changeset} ->
-        render(conn, "edit.html", two_factor_changeset: changeset)
+        render(conn, ErrorView, "error.json", changeset: changeset)
     end
   end
 
-  defp assign_email_and_password_changesets(conn, _opts) do
+  def show(conn, _params) do
     user = Authentication.fetch_current_user(conn)
-
-    conn
-    |> assign(:changeset, Accounts.change_user(user))
-    |> assign(:password_changeset, Accounts.change_user_password(user))
-    |> assign(:two_factor_changeset, Accounts.change_user_two_factor(user))
+    render(conn, "show.json", user: user)
   end
 end

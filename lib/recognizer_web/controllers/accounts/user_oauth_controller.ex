@@ -2,7 +2,7 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
   @moduledoc false
   use RecognizerWeb, :controller
 
-  alias Recognizer.{Accounts, Accounts.User, Repo}
+  alias Recognizer.{Accounts, Repo}
   alias RecognizerWeb.Authentication
 
   plug Ueberauth
