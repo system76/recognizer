@@ -15,7 +15,7 @@ defmodule Recognizer.Server do
 
     event_type = String.to_existing_atom(event_type)
     user = Accounts.get_user!(req_user.id)
-    preference = get_in(user, [:notification_preference, event_type])
+    preference = Map.get(user.notification_preference, event_type)
 
     %NotificationMethodResponse{
       request_id: Bottle.RequestId.write(:rpc),
