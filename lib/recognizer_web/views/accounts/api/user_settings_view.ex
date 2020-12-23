@@ -31,7 +31,7 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
         type: user.type,
         company_name: user.company_name,
         newsletter: user.newsletter,
-        admin: role.admin?(user),
+        admin: Role.admin?(user),
         notification_preferences: render("notification_preferences.json", user)
       }
     }
