@@ -23,7 +23,7 @@ defmodule Recognizer.Bottle do
 
   def convert_notification_method(:app), do: :NOTIFICATION_METHOD_APP
   def convert_notification_method(:email), do: :NOTIFICATION_METHOD_EMAIL
-  def convert_notification_method(:text), do: :NOTIFICATION_METHOD_TEXT
+  def convert_notification_method(:text), do: :NOTIFICATION_METHOD_SMS
   def convert_notification_method(:voice), do: :NOTIFICATION_METHOD_VOICE
   def convert_notification_method(_), do: :NOTIFICATION_METHOD_UNSPECIFIED
 end
