@@ -39,10 +39,8 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
 
     case Accounts.update_user_password(user, password, user_params) do
       {:ok, updated_user} ->
-        {:ok, access_token} =
-          conn
-          |> Authentication.revoke_all_tokens()
-          |> Authentication.log_in_api_user(updated_user)
+        Authentication.revoke_all_tokens(updated_user)
+        {:ok, access_token} = Authentication.log_in_api_user(updated_user)
 
         render(conn, "session.json", user: updated_user, access_token: access_token)
 

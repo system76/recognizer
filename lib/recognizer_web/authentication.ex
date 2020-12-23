@@ -6,6 +6,7 @@ defmodule RecognizerWeb.Authentication do
   import Plug.Conn
   import Phoenix.Controller
 
+  alias Guardian.DB, as: GuardianDB
   alias RecognizerWeb.Router.Helpers, as: Routes
   alias Recognizer.Guardian
 
@@ -24,7 +25,7 @@ defmodule RecognizerWeb.Authentication do
   @doc """
   Logs the user in via the API.
   """
-  def log_in_api_user(conn, user) do
+  def log_in_api_user(user) do
     {:ok, access_token, _} = Guardian.encode_and_sign(user, token_type: "access")
 
     {:ok, access_token}
@@ -43,8 +44,10 @@ defmodule RecognizerWeb.Authentication do
   @doc """
   Revokes all tokens issued to a given resource 
   """
-  def revoke_all_tokens(resource) do
-    Guardian.DB.revoke_all(resource)
+  def revoke_all_tokens(resource, claims \\ %{}) do
+    {:ok, subject} = Guardian.subject_for_token(resource, claims)
+
+    GuardianDB.revoke_all(subject)
   end
 
   @doc """

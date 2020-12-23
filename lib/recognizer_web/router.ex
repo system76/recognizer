@@ -42,7 +42,8 @@ defmodule RecognizerWeb.Router do
   scope "/api", RecognizerWeb.Accounts.Api, as: :api do
     pipe_through [:api, :auth, :user]
 
-    resources "/settings", UserSettingsController, only: [:show, :update]
+    get "/settings", UserSettingsController, :show
+    put "/settings", UserSettingsController, :update
     post "/confirm_authenticator", UserSettingsController, :confirm_authenticator
   end
 

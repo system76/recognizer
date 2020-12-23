@@ -10,6 +10,28 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     render(conn, "edit.html")
   end
 
+  def confirm_authenticator(conn, params) do
+    two_factor_code = Map.get(params, "two_factor_code", "")
+    user = Authentication.fetch_current_user(conn)
+
+    case Authentication.valid_token?(two_factor_code, user) do
+      true ->
+        {:ok, _} = Accounts.update_user_two_factor(user, %{"notification_preference" => %{"two_factor" => "app"}})
+
+        conn
+        |> put_flash(:info, "Authenticator app confirmed.")
+        |> redirect(to: Routes.user_settings_path(conn, :edit))
+
+      false ->
+        conn
+        |> put_flash(:error, "Authenticator app security code is invalid.")
+        |> render("confirm_authenticator.html",
+          barcode: Authentication.generate_totp_barcode(user),
+          totp_app_url: Authentication.get_totp_app_url(user)
+        )
+    end
+  end
+
   def update(conn, %{"action" => "update", "user" => user_params}) do
     user = Authentication.fetch_current_user(conn)
 
@@ -30,36 +52,15 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
     case Accounts.update_user_password(user, password, user_params) do
       {:ok, user} ->
+        Authentication.revoke_all_tokens(user)
+
         conn
         |> put_flash(:info, "Password updated successfully.")
         |> put_session(:user_return_to, Routes.user_settings_path(conn, :edit))
-        |> Authentication.revoke_all_tokens()
         |> Authentication.log_in_user(user)
 
       {:error, changeset} ->
         render(conn, "edit.html", password_changeset: changeset)
-    end
-  end
-
-  def confirm_authenticator(conn, params) do
-    two_factor_code = Map.get(params, "two_factor_code", "")
-    user = Authentication.fetch_current_user(conn)
-
-    case Authentication.valid_token?(two_factor_code, user) do
-      true ->
-        {:ok, _} = Accounts.update_user_two_factor(user, %{"notification_preference" => %{"two_factor" => "app"}})
-
-        conn
-        |> put_flash(:info, "Authenticator app confirmed.")
-        |> redirect(to: Routes.user_settings_path(conn, :edit))
-
-      false ->
-        conn
-        |> put_flash(:error, "Authenticator app security code is invalid.")
-        |> render("confirm_authenticator.html",
-          barcode: Authentication.generate_totp_barcode(user),
-          totp_app_url: Authentication.get_totp_app_url(user)
-        )
     end
   end
 
