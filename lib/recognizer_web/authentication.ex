@@ -44,7 +44,7 @@ defmodule RecognizerWeb.Authentication do
   Revokes all tokens issued to a given resource 
   """
   def revoke_all_tokens(resource) do
-    Guardian.DB.revoke_all_(resource)
+    Guardian.DB.revoke_all(resource)
   end
 
   @doc """
