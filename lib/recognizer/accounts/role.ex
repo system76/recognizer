@@ -10,7 +10,6 @@ defmodule Recognizer.Accounts.Role do
   import Ecto.Changeset
 
   alias Recognizer.Accounts.User
-  alias __MODULE__
 
   @admin_role_id 2
   @login_role_id 1
