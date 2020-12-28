@@ -25,7 +25,13 @@ defmodule Recognizer.Accounts do
 
   """
   def get_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, email: email)
+    query =
+      from u in User,
+        join: n in assoc(u, :notification_preference),
+        where: u.email == ^email,
+        preload: [notification_preference: n, roles: []]
+
+    Repo.one(query)
   end
 
   @doc """
@@ -45,9 +51,8 @@ defmodule Recognizer.Accounts do
       from o in OAuth,
         join: u in assoc(o, :user),
         join: n in assoc(u, :notification_preference),
-        join: r in assoc(u, :roles),
         where: o.service == ^service and o.service_guid == ^service_guid,
-        preload: [user: {u, [notification_preference: n, roles: r]}]
+        preload: [user: {u, [notification_preference: n, roles: []]}]
 
     with %OAuth{user: user} <- Repo.one(query),
          %User{two_factor_enabled: false} <- user do
@@ -89,9 +94,8 @@ defmodule Recognizer.Accounts do
     query =
       from u in User,
         join: n in assoc(u, :notification_preference),
-        join: r in assoc(u, :roles),
         where: u.email == ^email,
-        preload: [notification_preference: n, roles: r]
+        preload: [notification_preference: n, roles: []]
 
     with %User{} = user <- Repo.one(query),
          true <- User.valid_password?(user, password),
@@ -124,9 +128,8 @@ defmodule Recognizer.Accounts do
     query =
       from u in User,
         join: n in assoc(u, :notification_preference),
-        join: r in assoc(u, :roles),
         where: u.id == ^id,
-        preload: [notification_preference: n, roles: r]
+        preload: [notification_preference: n, roles: []]
 
     Repo.one!(query)
   end
