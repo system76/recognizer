@@ -8,7 +8,7 @@ defmodule Recognizer.Accounts.User do
 
   import Ecto.Changeset
 
-  alias Recognizer.Accounts.{NotificationPreference, Role}
+  alias Recognizer.Accounts.{NotificationPreference, PreviousPassword, Role}
   alias Recognizer.Repo
   alias __MODULE__
 
@@ -36,6 +36,7 @@ defmodule Recognizer.Accounts.User do
 
     has_one :notification_preference, NotificationPreference, on_replace: :update
     has_many :roles, Role
+    has_many :previous_passwords, PreviousPassword
 
     timestamps()
   end
@@ -114,7 +115,36 @@ defmodule Recognizer.Accounts.User do
     |> validate_format(:password, ~r/[ \!\$\*\+\[\{\]\}\\\|\.\/\?,!@#%^&-=,.<>'";:]/,
       message: "must contain a symbol or space"
     )
+    |> maybe_validate_no_password_reuse()
     |> maybe_hash_password(opts)
+  end
+
+  defp maybe_validate_no_password_reuse(changeset) do
+    staff? =
+      changeset
+      |> get_field(:roles)
+      |> Role.admin?()
+
+    if staff? && changeset.valid? do
+      validate_password_reuse(changeset)
+    else
+      changeset
+    end
+  end
+
+  defp validate_password_reuse(%{data: user} = changeset) do
+    current_password = get_field(changeset, :password)
+    %{previous_passwords: previous_passwords} = Repo.preload(user, :previous_passwords)
+
+    if Enum.any?(previous_passwords, &check_previous_password(user, current_password, &1)) do
+      add_error(changeset, :password, "cannot have been used previously")
+    else
+      put_assoc(changeset, :previous_passwords, [%{hashed_password: current_password} | previous_passwords])
+    end
+  end
+
+  defp check_previous_password(user, new_password, previous_password) do
+    Argon2.check_pass(%{user | hashed_password: previous_password}, new_password)
   end
 
   defp validate_company_name(changeset) do
