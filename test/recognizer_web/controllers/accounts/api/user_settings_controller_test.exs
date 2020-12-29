@@ -6,7 +6,7 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
 
     test "GET /api/settings", %{conn: conn, user: %{id: user_id}} do
       conn = get(conn, "/api/settings")
-      assert %{"user" => %{"id" => ^user_id}} = json_response(conn, 200)
+      assert %{"user" => %{"id" => ^user_id, "two_factor_enabled" => false}} = json_response(conn, 200)
     end
   end
 
