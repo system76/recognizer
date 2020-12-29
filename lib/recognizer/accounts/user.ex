@@ -134,7 +134,12 @@ defmodule Recognizer.Accounts.User do
 
   defp validate_password_reuse(%{data: user} = changeset) do
     current_password = get_field(changeset, :password)
-    %{previous_passwords: previous_passwords} = Repo.preload(user, :previous_passwords)
+
+    previous_passwords =
+      user
+      |> Repo.preload(:previous_passwords)
+      |> Map.get(:previous_passwords)
+      |> Enum.take(6)
 
     if Enum.any?(previous_passwords, &check_previous_password(user, current_password, &1)) do
       add_error(changeset, :password, "cannot have been used previously")
