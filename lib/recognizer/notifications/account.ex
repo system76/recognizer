@@ -80,7 +80,8 @@ defmodule Recognizer.Notifications.Account do
     resource
     |> message_queue_url()
     |> send_message_to_queue(encoded_message)
-    |> ExAws.request()
+
+    {:ok, resource}
   end
 
   defp send_message(resource, _atom) do
