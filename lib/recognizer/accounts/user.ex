@@ -8,7 +8,7 @@ defmodule Recognizer.Accounts.User do
 
   import Ecto.Changeset
 
-  alias Recognizer.Accounts.{NotificationPreference, Role}
+  alias Recognizer.Accounts.{NotificationPreference, RecoveryCode, Role}
   alias Recognizer.Repo
   alias __MODULE__
 
@@ -36,6 +36,7 @@ defmodule Recognizer.Accounts.User do
 
     has_one :notification_preference, NotificationPreference, on_replace: :update
     has_many :roles, Role
+    has_many :recovery_codes, RecoveryCode
 
     timestamps()
   end
@@ -227,9 +228,15 @@ defmodule Recognizer.Accounts.User do
     preference = get_change(changeset, :notification_preference)
 
     cond do
-      enabled == true or preference ->
-        seed = 5 |> :crypto.strong_rand_bytes() |> Base.encode32()
-        put_change(changeset, :two_factor_seed, seed)
+      enabled or preference ->
+        new_recovery_codes =
+          12
+          |> RecoveryCode.generate_codes()
+          |> Enum.into([], &%{code: &1})
+
+        changeset
+        |> put_change(:two_factor_seed, two_factor_seed())
+        |> put_assoc(:recovery_codes, new_recovery_codes)
 
       enabled == false ->
         put_change(changeset, :two_factor_seed, nil)
@@ -237,5 +244,11 @@ defmodule Recognizer.Accounts.User do
       true ->
         changeset
     end
+  end
+
+  defp two_factor_seed do
+    5
+    |> :crypto.strong_rand_bytes()
+    |> Base.encode32()
   end
 end
