@@ -14,7 +14,9 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
         render(conn, "show.json", user: user)
 
       false ->
-        render(conn, ErrorView, "error.json",
+        conn
+        |> put_view(ErrorView)
+        |> render("error.json",
           field: :two_factor_token,
           reason: "Authenticator app security code is invalid."
         )
@@ -29,7 +31,9 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
         render(conn, "show.json", user: updated_user)
 
       {:error, changeset} ->
-        render(conn, ErrorView, "error.json", changeset: changeset)
+        conn
+        |> put_view(ErrorView)
+        |> render("error.json", changeset: changeset)
     end
   end
 
@@ -45,7 +49,9 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
         render(conn, "session.json", user: updated_user, access_token: access_token)
 
       {:error, changeset} ->
-        render(conn, ErrorView, "error.json", changeset: changeset)
+        conn
+        |> put_view(ErrorView)
+        |> render("error.json", changeset: changeset)
     end
   end
 
@@ -66,7 +72,9 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
         )
 
       {:error, changeset} ->
-        render(conn, ErrorView, "error.json", changeset: changeset)
+        conn
+        |> put_view(ErrorView)
+        |> render("error.json", changeset: changeset)
     end
   end
 
@@ -79,7 +87,9 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
         render(conn, "show.json", user: user)
 
       {:error, changeset} ->
-        render(conn, ErrorView, "error.json", changeset: changeset)
+        conn
+        |> put_view(ErrorView)
+        |> render("error.json", changeset: changeset)
     end
   end
 
