@@ -8,7 +8,7 @@ defmodule RecognizerWeb.FallbackController do
   @impl Guardian.Plug.ErrorHandler
   def auth_error(conn, {:already_authenticated, _reason}, _) do
     conn
-    |> redirect(to: Routes.user_settings_path(conn, :edit))
+    |> redirect(Authentication.login_redirect(conn))
     |> halt()
   end
 
@@ -24,6 +24,14 @@ defmodule RecognizerWeb.FallbackController do
   @impl Guardian.Plug.ErrorHandler
   def auth_error(conn, {_type, _reason}, _) do
     respond(conn, :unauthorized, "401")
+  end
+
+  defp response(conn, :not_found, _template) do
+    if Application.get_env(:recognizer, :redirect_url) do
+      redirect(conn, external: Application.get_env(:recognizer, :redirect_url))
+    else
+      redirect(conn, to: Routes.homepage_path(conn, :index))
+    end
   end
 
   defp respond(conn, type, template) do
