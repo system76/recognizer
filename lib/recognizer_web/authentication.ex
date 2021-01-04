@@ -129,4 +129,14 @@ defmodule RecognizerWeb.Authentication do
   def valid_token?(token, user) do
     :pot.valid_totp(token, user.two_factor_seed, window: 1, addwindow: 1)
   end
+
+  def recover_account(user, recovery_code) do
+    case Accounts.remove_recovery_code(recovery_code, user) do
+      {:ok, updated_user} ->
+        Notifications.deliver_user_recovery_code_used_notification(updated_user)
+
+      _ ->
+        :error
+    end
+  end
 end

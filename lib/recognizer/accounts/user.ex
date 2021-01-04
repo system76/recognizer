@@ -251,4 +251,11 @@ defmodule Recognizer.Accounts.User do
     |> :crypto.strong_rand_bytes()
     |> Base.encode32()
   end
+
+  @doc """
+  A user changeset for updating the recovery codes.
+  """
+  def recovery_codes_changeset(user, codes) do
+    put_assoc(user, :recovery_codes, codes)
+  end
 end

@@ -412,4 +412,18 @@ defmodule Recognizer.Accounts do
         {:error, changeset}
     end
   end
+
+  def remove_recovery_code(recovery_code, user) do
+    %{recovery_codes: codes} = Repo.preload(user, :recovery_codes)
+
+    case Enum.split_while(codes, &(&1.code == recovery_code)) do
+      {[], _remaining_codes} ->
+        :error
+
+      {[_consumed_code], remaining_codes} ->
+        user
+        |> User.recovery_codes_changeset(remaining_codes)
+        |> Repo.insert()
+    end
+  end
 end
