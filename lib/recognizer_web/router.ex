@@ -73,6 +73,7 @@ defmodule RecognizerWeb.Router do
 
     get "/two_factor", UserTwoFactorController, :new
     post "/two_factor", UserTwoFactorController, :create
+    post "/two_factor/resend", UserTwoFactorController, :resend
   end
 
   scope "/", RecognizerWeb.Accounts do

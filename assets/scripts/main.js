@@ -1,3 +1,5 @@
+import '../../deps/phoenix_html/priv/static/phoenix_html.js'
+
 import '../styles/main.scss'
 
 function documentReady (fn) {

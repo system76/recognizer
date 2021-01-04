@@ -18,6 +18,7 @@ defmodule RecognizerWeb.Accounts.UserSessionController do
       {:two_factor, user} ->
         conn
         |> put_session(:current_user, user)
+        |> put_session(:two_factor_sent, false)
         |> redirect(to: Routes.user_two_factor_path(conn, :new))
 
       nil ->
