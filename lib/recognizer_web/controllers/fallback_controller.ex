@@ -26,6 +26,14 @@ defmodule RecognizerWeb.FallbackController do
     respond(conn, :unauthorized, "401")
   end
 
+  defp response(conn, :not_found, _template) do
+    if Application.get_env(:recognizer, :redirect_url) do
+      redirect(conn, external: Application.get_env(:recognizer, :redirect_url))
+    else
+      redirect(conn, to: Routes.homepage_path(conn, :index))
+    end
+  end
+
   defp respond(conn, type, template) do
     extension = if json?(conn), do: "json", else: "html"
 

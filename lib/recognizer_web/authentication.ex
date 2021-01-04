@@ -14,12 +14,12 @@ defmodule RecognizerWeb.Authentication do
   Logs the user in.
   """
   def log_in_user(conn, user, params \\ %{}) do
-    redirect = return_to(conn)
+    redirect_opts = login_redirect(conn)
 
     conn
     |> clear_session()
     |> Guardian.Plug.sign_in(user, params)
-    |> redirect(to: redirect)
+    |> redirect(redirect_opts)
   end
 
   @doc """
@@ -35,14 +35,16 @@ defmodule RecognizerWeb.Authentication do
   Logs the user out.
   """
   def log_out_user(conn) do
+    redirect_opts = logout_redirect(conn)
+
     conn
     |> Guardian.Plug.sign_out()
     |> clear_session()
-    |> redirect(to: Routes.homepage_path(conn, :index))
+    |> redirect(redirect_opts)
   end
 
   @doc """
-  Revokes all tokens issued to a given resource 
+  Revokes all tokens issued to a given resource
   """
   def revoke_all_tokens(resource, claims \\ %{}) do
     {:ok, subject} = Guardian.subject_for_token(resource, claims)
@@ -61,8 +63,28 @@ defmodule RecognizerWeb.Authentication do
   @doc """
   The URL to redirect the user to after authentication is done.
   """
-  def return_to(conn) do
-    get_session(conn, :user_return_to) || Routes.user_settings_path(conn, :edit)
+  def login_redirect(conn) do
+    cond do
+      get_session(conn, :user_return_to) ->
+        [to: get_session(conn, :user_return_to)]
+
+      Application.get_env(:recognizer, :redirect_url) ->
+        [external: Application.get_env(:recognizer, :redirect_url)]
+
+      true ->
+        [to: Routes.user_settings_path(conn, :edit)]
+    end
+  end
+
+  @doc """
+  The URL to redirect the user to once they are logged out.
+  """
+  def logout_redirect(conn) do
+    if Application.get_env(:recognizer, :redirect_url) do
+      [external: Application.get_env(:recognizer, :redirect_url)]
+    else
+      [to: Routes.homepage_path(conn, :index)]
+    end
   end
 
   @doc """

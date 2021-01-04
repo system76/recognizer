@@ -5,6 +5,9 @@ recognizer_config =
   |> System.fetch_env!()
   |> Jason.decode!()
 
+config :recognizer,
+  redirect_url: recognizer_config["REDIRECT_URL"]
+
 config :recognizer, RecognizerWeb.Endpoint,
   url: [host: System.get_env("DOMAIN")],
   secret_key_base: recognizer_config["SECRET_KEY_BASE"]
