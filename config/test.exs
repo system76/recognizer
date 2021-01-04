@@ -1,5 +1,8 @@
 import Config
 
+config :recognizer,
+  redis_host: System.get_env("REDIS_HOST", "localhost")
+
 config :argon2_elixir,
   t_cost: 1,
   m_cost: 8
