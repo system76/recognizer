@@ -389,6 +389,18 @@ defmodule Recognizer.Accounts do
     User.two_factor_changeset(user, attrs)
   end
 
+  def generate_new_recovery_codes do
+    12
+    |> RecoveryCode.generate_codes()
+    |> Enum.into([], &%{code: &1})
+  end
+
+  def generate_new_two_factor_seed do
+    5
+    |> :crypto.strong_rand_bytes()
+    |> Base.encode32()
+  end
+
   @doc """
   Updates the user's two factor status and preference.
 
@@ -424,6 +436,36 @@ defmodule Recognizer.Accounts do
         user
         |> User.recovery_codes_changeset(remaining_codes)
         |> Repo.insert()
+    end
+  end
+
+  def generate_and_cache_new_two_factor_settings(user, preference) do
+    attrs = %{
+      notification_preference: %{two_factor: preference},
+      recovery_codes: Accounts.generate_new_recovery_codes(),
+      two_factor_seed: Accounts.generate_new_two_factor_seed()
+    }
+
+    Redix.noreply_command(:redix, ["SET", "two_factor_settings:#{user.id}", Jason.encode!(attrs)])
+
+    if preference != "app" do
+      token = Authentication.generate_token(user)
+      Account.deliver_two_factor_token(user, token)
+    end
+
+    attrs
+  end
+
+  def confirm_and_save_two_factor_settings(code, user) do
+    {:ok, settings} = Redix.command(:redix, ["GET", "two_factor_settings:#{user.id}"])
+
+    with {:ok, %{two_factor_seed: seed} = attrs} <- Jason.decode(settings),
+         true <- Authentication.valid_token?(code, seed) do
+      user
+      |> two_factor_changeset(attrs)
+      |> Repo.insert(user)
+    else
+      _ -> :error
     end
   end
 end

@@ -26,7 +26,7 @@ defmodule Recognizer.Application do
       # Start the Endpoint (http/https)
       RecognizerWeb.Endpoint
       # Start a worker by calling: Recognizer.Worker.start_link(arg)
-      # {Recognizer.Worker, arg}
+      {Redix, name: :redix, host: Application.get_env(:recognizer, :redis_host, "localhost")}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

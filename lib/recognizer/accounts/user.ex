@@ -218,38 +218,9 @@ defmodule Recognizer.Accounts.User do
   """
   def two_factor_changeset(user, attrs) do
     user
-    |> cast(attrs, [:two_factor_enabled])
+    |> cast(attrs, [:two_factor_enabled, :two_factor_seed])
+    |> cast_assoc(:recovery_codes)
     |> cast_assoc(:notification_preference)
-    |> maybe_reset_two_factor_seed()
-  end
-
-  defp maybe_reset_two_factor_seed(changeset) do
-    enabled = get_change(changeset, :two_factor_enabled)
-    preference = get_change(changeset, :notification_preference)
-
-    cond do
-      enabled or preference ->
-        new_recovery_codes =
-          12
-          |> RecoveryCode.generate_codes()
-          |> Enum.into([], &%{code: &1})
-
-        changeset
-        |> put_change(:two_factor_seed, two_factor_seed())
-        |> put_assoc(:recovery_codes, new_recovery_codes)
-
-      enabled == false ->
-        put_change(changeset, :two_factor_seed, nil)
-
-      true ->
-        changeset
-    end
-  end
-
-  defp two_factor_seed do
-    5
-    |> :crypto.strong_rand_bytes()
-    |> Base.encode32()
   end
 
   @doc """

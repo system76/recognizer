@@ -54,6 +54,7 @@ defmodule Recognizer.MixProject do
       {:jason, "~> 1.0"},
       {:logger_json, "~> 4.0"},
       {:myxql, ">= 0.0.0"},
+      {:redix, ">= 0.0.0"},
       {:phoenix_ecto, "~> 4.1"},
       {:phoenix_html, "~> 2.11"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},

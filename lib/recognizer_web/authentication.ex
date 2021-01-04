@@ -119,15 +119,18 @@ defmodule RecognizerWeb.Authentication do
   @doc """
   Generate a Time Based One Time Password
   """
-  def generate_token(user) do
-    :pot.totp(user.two_factor_seed, addwindow: 1)
-  end
+  def generate_token(%{two_factor_seed: two_factor_seed}), do: generate_token(two_factor_seed)
+  def generate_token(two_factor_seed), do: :pot.totp(two_factor_seed, addwindow: 1)
 
   @doc """
   Validate a user provided token is valid
   """
-  def valid_token?(token, user) do
-    :pot.valid_totp(token, user.two_factor_seed, window: 1, addwindow: 1)
+  def valid_token?(token, %User{two_factor_seed: two_factor_seed}) do
+    valid_token?(token, two_factor_seed)
+  end
+
+  def valid_token?(token, two_factor_seed) do
+    :pot.valid_totp(token, two_factor_seed, window: 1, addwindow: 1)
   end
 
   def recover_account(user, recovery_code) do

@@ -3,7 +3,8 @@ import Config
 config :recognizer,
   ecto_repos: [Recognizer.Repo],
   two_factor_issuer: "System76",
-  redirect_url: false
+  redirect_url: false,
+  redis_host: "localhost"
 
 config :recognizer, RecognizerWeb.Endpoint,
   url: [host: "localhost"],

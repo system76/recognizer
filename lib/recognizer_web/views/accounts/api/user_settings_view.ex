@@ -2,12 +2,24 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
   use RecognizerWeb, :view
 
   alias Recognizer.Accounts.Role
+  alias RecognizerWeb.Authentication
 
-  def render("confirm_authenticator.json", %{barcode: barcode, totp_app_url: totp_app_url}) do
+  def render("confirm_two_factor.json", %{settings: %{notification_preferences: %{two_factor: "app"}}, user: user}) do
     %{
       two_factor: %{
-        barcode: barcode,
-        totp_app_url: totp_app_url
+        barcode: Authentication.generate_totp_barcode(user),
+        method: "app",
+        recovery_codes: Map.get(settings, :recovery_codes),
+        totp_app_url: Authentication.get_totp_app_url(user)
+      }
+    }
+  end
+
+  def render("confirm_two_factor.json", %{settings: %{notification_preferences: preference, recovery_codes: codes}}) do
+    %{
+      two_factor: %{
+        method: preference,
+        recovery_codes: codes
       }
     }
   end
