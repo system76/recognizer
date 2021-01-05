@@ -70,7 +70,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     conn
   end
 
-  defp send_two_factor_notification(conn, %{} = user) do
+  defp send_two_factor_notification(conn, user) do
     token = Authentication.generate_token(user)
     Account.deliver_two_factor_token(user, token)
     put_session(conn, :two_factor_sent, true)
