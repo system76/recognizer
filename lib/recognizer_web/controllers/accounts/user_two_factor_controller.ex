@@ -9,8 +9,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   def new(conn, _params) do
     current_user = get_session(conn, :current_user)
 
-    %{notification_preference: %{two_factor: two_factor_method}} =
-      Accounts.load_notification_preferences(current_user)
+    %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
 
     conn
     |> maybe_send_two_factor_notification(current_user)
