@@ -1,6 +1,23 @@
 <div class="box">
   <h2 class="title is-2 mb-5 has-text-centered-mobile">Enter Security Code</h2>
 
+  <div class="my-4">
+    <%= case @two_factor_method do %>
+      <% :text -> %>
+        <p>
+          We have sent a text message to your registered phone number.
+        </p>
+      <% :voice -> %>
+        <p>
+          You will receive an automated phone call with your security code.
+        </p>
+      <% _ -> %>
+        <p>
+          Please use your two factor application to generate a security code.
+        </p>
+    <% end %>
+  </div>
+
   <%= form_for @conn, Routes.user_two_factor_path(@conn, :create), [as: :user], fn f -> %>
     <div class="field">
       <%= label f, :two_factor_code, "Security Code", class: "label" %>
@@ -27,5 +44,13 @@
         <%= submit "Log in", class: "button is-secondary" %>
       </div>
     </div>
+  <% end %>
+
+  <%= if @two_factor_method != :app do %>
+    <hr class="has-background-grey-lighter" />
+
+    <p class="content">
+      <%= link "Resend Two Factor Code", to: Routes.user_two_factor_path(@conn, :resend), method: :create %>
+    </p>
   <% end %>
 </div>
