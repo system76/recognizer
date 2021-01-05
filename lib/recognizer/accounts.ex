@@ -435,8 +435,8 @@ defmodule Recognizer.Accounts do
       {[], _remaining_codes} ->
         :error
 
-      {[_consumed_code], remaining_codes} ->
-        Notification.deliver_user_recovery_code_used_notification(user)
+      {[%{code: consumed_code}], remaining_codes} ->
+        Notification.deliver_user_recovery_code_used_notification(user, consumed_code, remaining_codes)
 
         user
         |> User.recovery_codes_changeset(remaining_codes)

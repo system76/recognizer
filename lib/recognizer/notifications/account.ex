@@ -55,10 +55,13 @@ defmodule Recognizer.Notifications.Account do
   @doc """
   Deliver user recovery code used notification.
   """
-  def deliver_user_recovery_code_used_notification(user) do
+  def deliver_user_recovery_code_used_notification(user, recovery_code_used, codes_remaining) do
     user
     |> Recognizer.Bottle.convert_user()
-    |> create_message(Account.TwoFactorRecoveryCodeUsed)
+    |> create_message(Account.TwoFactorRecoveryCodeUsed,
+      recovery_code: recovery_code_used,
+      codes_remaining: length(codes_remaining)
+    )
     |> send_message(:recovery_code_used)
   end
 
