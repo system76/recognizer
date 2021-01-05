@@ -4,21 +4,21 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
   alias Recognizer.Accounts
   alias RecognizerWeb.{Authentication, ErrorView}
 
-  def confirm_authenticator(conn, params) do
-    two_factor_code = Map.get(params, "two_factor_code", "")
+  def confirm_two_factor(conn, params) do
+    two_factor_code = get_in(params, ["user", "two_factor_code"])
     user = Authentication.fetch_current_user(conn)
 
-    case Authentication.valid_token?(two_factor_code, user) do
-      true ->
-        {:ok, _} = Accounts.update_user_two_factor(user, %{"notification_preference" => %{"two_factor" => "app"}})
-        render(conn, "show.json", user: user)
+    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, user) do
+      {:ok, updated_user} ->
+        render(conn, "show.json", user: updated_user)
 
-      false ->
+      _ ->
         conn
+        |> put_status(402)
         |> put_view(ErrorView)
         |> render("error.json",
           field: :two_factor_token,
-          reason: "Authenticator app security code is invalid."
+          reason: "Failed to confirm settings."
         )
     end
   end
@@ -55,42 +55,14 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
     end
   end
 
-  def update(conn, %{
-        "action" => "update_two_factor",
-        "user" => %{"notification_preference" => %{"two_factor" => "app"}} = user_params
-      }) do
+  def update(conn, %{"action" => "update_two_factor", "user" => user_params}) do
     user = Authentication.fetch_current_user(conn)
-    user_params = Map.drop(user_params, ["notification_preference"])
+    preference = get_in(user_params, ["notification_preference", "two_factor"])
+    settings = Accounts.generate_and_cache_new_two_factor_settings(user, preference)
 
-    case Accounts.update_user_two_factor(user, user_params) do
-      {:ok, user} ->
-        conn
-        |> put_status(202)
-        |> render("confirm_authenticator.json",
-          barcode: Authentication.generate_totp_barcode(user),
-          totp_app_url: Authentication.get_totp_app_url(user)
-        )
-
-      {:error, changeset} ->
-        conn
-        |> put_view(ErrorView)
-        |> render("error.json", changeset: changeset)
-    end
-  end
-
-  def update(conn, %{"action" => "update_two_factor"} = params) do
-    %{"user" => user_params} = params
-    user = Authentication.fetch_current_user(conn)
-
-    case Accounts.update_user_two_factor(user, user_params) do
-      {:ok, %{notification_preference: %{two_factor: _}}} ->
-        render(conn, "show.json", user: user)
-
-      {:error, changeset} ->
-        conn
-        |> put_view(ErrorView)
-        |> render("error.json", changeset: changeset)
-    end
+    conn
+    |> put_status(202)
+    |> render("confirm_two_factor.json", settings: settings, user: user)
   end
 
   def show(conn, _params) do

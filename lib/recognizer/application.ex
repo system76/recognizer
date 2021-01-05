@@ -24,9 +24,9 @@ defmodule Recognizer.Application do
       # Start the DB sweeper to remove old keys
       {Guardian.DB.Token.SweeperServer, []},
       # Start the Endpoint (http/https)
-      RecognizerWeb.Endpoint
+      RecognizerWeb.Endpoint,
       # Start a worker by calling: Recognizer.Worker.start_link(arg)
-      # {Recognizer.Worker, arg}
+      {Redix, name: :redix, host: Application.get_env(:recognizer, :redis_host)}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

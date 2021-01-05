@@ -42,11 +42,27 @@ defmodule Recognizer.Notifications.Account do
     |> send_message(:password_reset)
   end
 
+  @doc """
+  Deliver the two factor two to the user.
+  """
   def deliver_two_factor_token(user, token) do
     user
     |> Recognizer.Bottle.convert_user()
     |> create_message(Account.TwoFactorRequested, token: token)
     |> send_message(:two_factor_requested)
+  end
+
+  @doc """
+  Deliver user recovery code used notification.
+  """
+  def deliver_user_recovery_code_used_notification(user, recovery_code_used, codes_remaining) do
+    user
+    |> Recognizer.Bottle.convert_user()
+    |> create_message(Account.TwoFactorRecoveryCodeUsed,
+      recovery_code: recovery_code_used,
+      codes_remaining: length(codes_remaining)
+    )
+    |> send_message(:recovery_code_used)
   end
 
   defp create_message(user, type, args \\ []) do

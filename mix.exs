@@ -35,7 +35,7 @@ defmodule Recognizer.MixProject do
     [
       {:appsignal_phoenix, "~> 2.0.0"},
       {:argon2_elixir, "~> 2.0"},
-      {:bottle, github: "system76/bottle", ref: "f9fb5c1"},
+      {:bottle, github: "system76/bottle", ref: "112fd55"},
       {:cors_plug, "~> 2.0"},
       {:cowboy, "~> 2.8", override: true},
       {:cowlib, "~> 2.9.1", override: true},
@@ -54,6 +54,7 @@ defmodule Recognizer.MixProject do
       {:jason, "~> 1.0"},
       {:logger_json, "~> 4.0"},
       {:myxql, ">= 0.0.0"},
+      {:redix, ">= 0.0.0"},
       {:phoenix_ecto, "~> 4.1"},
       {:phoenix_html, "~> 2.11"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
