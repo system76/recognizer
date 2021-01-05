@@ -39,9 +39,17 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
           "user" => %{"token" => "INVALID"}
         })
 
-      response = html_response(conn, 200)
-      assert response =~ "Security Code</h2>"
-      assert response =~ "Invalid security code"
+      assert redirected_to(conn) == "/two_factor"
+      assert get_flash(conn, :error) =~ "Invalid"
+    end
+  end
+
+  describe "POST /two_factor/resend" do
+    test "redirects with flash message", %{conn: conn} do
+      conn = post(conn, Routes.user_two_factor_path(conn, :resend))
+
+      assert redirected_to(conn) == "/two_factor"
+      assert get_flash(conn, :info) =~ "resent"
     end
   end
 end
