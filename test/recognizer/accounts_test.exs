@@ -199,6 +199,23 @@ defmodule Recognizer.AccountsTest do
       %{user: user_fixture()}
     end
 
+    test "enforces password reuse for staff", %{user: user} do
+      old_password = "0ld P@s$w0rd!"
+      role_fixture(%{user_id: user.id, role_id: 2})
+      user = Repo.preload(user, :roles, force: true)
+      previous_password_fixture(%{user_id: user.id, hashed_password: Argon2.hash_pwd_salt(old_password)})
+
+      assert {:error, changeset} =
+               Accounts.update_user_password(user, valid_user_password(), %{
+                 "password" => old_password,
+                 "password_confirmation" => old_password
+               })
+
+      assert %{
+               password: ["cannot have been used previously"]
+             } = errors_on(changeset)
+    end
+
     test "validates password", %{user: user} do
       {:error, changeset} =
         Accounts.update_user_password(user, valid_user_password(), %{

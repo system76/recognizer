@@ -4,9 +4,24 @@ defmodule Recognizer.AccountsFixtures do
   entities via the `Recognizer.Accounts` context.
   """
 
+  alias Recognizer.Accounts.{PreviousPassword, Role}
+  alias Recognizer.Repo
+
   def unique_name, do: "personnum#{System.unique_integer()}"
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
   def valid_user_password, do: "aBcD123%&^"
+
+  def role_fixture(attrs \\ %{}) do
+    %Role{}
+    |> Role.changeset(attrs)
+    |> Repo.insert!()
+  end
+
+  def previous_password_fixture(attrs \\ %{}) do
+    %PreviousPassword{}
+    |> PreviousPassword.changeset(attrs)
+    |> Repo.insert!()
+  end
 
   def user_fixture(attrs \\ %{}) do
     {:ok, user} =
