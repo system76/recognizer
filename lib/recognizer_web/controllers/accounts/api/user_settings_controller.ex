@@ -2,11 +2,10 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
   use RecognizerWeb, :controller
 
   alias Recognizer.Accounts
-  alias Recognizer.Notifications.Account
   alias RecognizerWeb.{Authentication, ErrorView}
 
   def confirm_two_factor(conn, params) do
-    two_factor_code = Map.get(params, "two_factor_code", "")
+    two_factor_code = get_in(params, ["user", "two_factor_code"])
     user = Authentication.fetch_current_user(conn)
 
     case Accounts.confirm_and_save_two_factor_settings(two_factor_code, user) do
@@ -15,6 +14,7 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
 
       _ ->
         conn
+        |> put_status(402)
         |> put_view(ErrorView)
         |> render("error.json",
           field: :two_factor_token,

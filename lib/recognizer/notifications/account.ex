@@ -58,7 +58,7 @@ defmodule Recognizer.Notifications.Account do
   def deliver_user_recovery_code_used_notification(user) do
     user
     |> Recognizer.Bottle.convert_user()
-    |> create_message(Account.RecoveryCodeUsed)
+    |> create_message(Account.TwoFactorRecoveryCodeUsed)
     |> send_message(:recovery_code_used)
   end
 

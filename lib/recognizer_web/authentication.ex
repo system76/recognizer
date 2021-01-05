@@ -125,21 +125,6 @@ defmodule RecognizerWeb.Authentication do
   @doc """
   Validate a user provided token is valid
   """
-  def valid_token?(token, %User{two_factor_seed: two_factor_seed}) do
-    valid_token?(token, two_factor_seed)
-  end
-
-  def valid_token?(token, two_factor_seed) do
-    :pot.valid_totp(token, two_factor_seed, window: 1, addwindow: 1)
-  end
-
-  def recover_account(user, recovery_code) do
-    case Accounts.remove_recovery_code(recovery_code, user) do
-      {:ok, updated_user} ->
-        Notifications.deliver_user_recovery_code_used_notification(updated_user)
-
-      _ ->
-        :error
-    end
-  end
+  def valid_token?(token, %{two_factor_seed: two_factor_seed}), do: valid_token?(token, two_factor_seed)
+  def valid_token?(token, two_factor_seed), do: :pot.valid_totp(token, two_factor_seed, window: 1, addwindow: 1)
 end

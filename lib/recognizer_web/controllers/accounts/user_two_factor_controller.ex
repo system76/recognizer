@@ -2,23 +2,28 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   @moduledoc false
   use RecognizerWeb, :controller
 
-  alias Recognizer.Accounts.User
+  alias Recognizer.Accounts
   alias Recognizer.Notifications.Account
   alias RecognizerWeb.Authentication
 
   def new(conn, _params) do
     current_user = get_session(conn, :current_user)
-    two_factor_method = current_user.notification_preference.two_factor
+
+    %{notification_preference: %{two_factor: two_factor_method}} =
+      Accounts.load_notification_preferences(current_user)
 
     conn
     |> maybe_send_two_factor_notification(current_user)
     |> render("new.html", two_factor_method: two_factor_method)
   end
 
-  def create(conn, %{"user" => %{"two_factor_code" => token}}) do
+  @doc """
+  Handle a user creating a session with a two factor code 
+  """
+  def create(conn, %{"user" => %{"two_factor_code" => two_factor_code}}) do
     current_user = get_session(conn, :current_user)
 
-    if Authentication.valid_token?(token, current_user) do
+    if Authentication.valid_token?(two_factor_code, current_user) do
       Authentication.log_in_user(conn, current_user)
     else
       conn
@@ -27,12 +32,15 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     end
   end
 
+  @doc """
+  Handle a user creating a session with a two factor recovery code
+  """
   def create(conn, %{"user" => %{"recovery_code" => recovery_code}}) do
     current_user = get_session(conn, :current_user)
 
-    case Authentication.recover_account(recovery_code, current_user) do
-      {:ok, _user} ->
-        Authentication.log_in_user(conn, current_user)
+    case Accounts.recover_account(current_user, recovery_code) do
+      {:ok, user} ->
+        Authentication.log_in_user(conn, user)
 
       :error ->
         conn
@@ -62,7 +70,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     conn
   end
 
-  defp send_two_factor_notification(conn, %User{} = user) do
+  defp send_two_factor_notification(conn, %{} = user) do
     token = Authentication.generate_token(user)
     Account.deliver_two_factor_token(user, token)
     put_session(conn, :two_factor_sent, true)

@@ -5,10 +5,10 @@ defmodule Recognizer.Accounts do
 
   import Ecto.Query, warn: false
 
-  alias Recognizer.Accounts.{User, OAuth}
-  alias Recognizer.Guardian
+  alias Recognizer.Accounts.{User, OAuth, RecoveryCode}
   alias Recognizer.Notifications.Account, as: Notification
-  alias Recognizer.Repo
+  alias Recognizer.{Guardian, Repo}
+  alias RecognizerWeb.Authentication
 
   ## Database getters
 
@@ -389,10 +389,10 @@ defmodule Recognizer.Accounts do
     User.two_factor_changeset(user, attrs)
   end
 
-  def generate_new_recovery_codes do
+  def generate_new_recovery_codes(user) do
     12
     |> RecoveryCode.generate_codes()
-    |> Enum.into([], &%{code: &1})
+    |> Enum.into([], &%{code: &1, user_id: user.id})
   end
 
   def generate_new_two_factor_seed do
@@ -425,47 +425,68 @@ defmodule Recognizer.Accounts do
     end
   end
 
-  def remove_recovery_code(recovery_code, user) do
-    %{recovery_codes: codes} = Repo.preload(user, :recovery_codes)
+  @doc """
+  Use a recovery code to recover an account. Doing so also consumes the code.
+  """
+  def recover_account(user, recovery_code) do
+    user = %{recovery_codes: codes} = Repo.preload(user, [:notification_preference, :recovery_codes])
 
     case Enum.split_while(codes, &(&1.code == recovery_code)) do
       {[], _remaining_codes} ->
         :error
 
       {[_consumed_code], remaining_codes} ->
+        Notification.deliver_user_recovery_code_used_notification(user)
+
         user
         |> User.recovery_codes_changeset(remaining_codes)
-        |> Repo.insert()
+        |> Repo.update()
     end
   end
 
+  @doc """
+  To support the flow we've been provided we need to store configuration options and recovery codes
+  before we persist them so the user can be required to download the codes and confirm the method.
+
+  This function caches the user's choices and sends a code if they're using voice or text.
+  """
   def generate_and_cache_new_two_factor_settings(user, preference) do
+    new_seed = generate_new_two_factor_seed()
+
     attrs = %{
       notification_preference: %{two_factor: preference},
-      recovery_codes: Accounts.generate_new_recovery_codes(),
-      two_factor_seed: Accounts.generate_new_two_factor_seed()
+      recovery_codes: generate_new_recovery_codes(user),
+      two_factor_seed: new_seed
     }
 
     Redix.noreply_command(:redix, ["SET", "two_factor_settings:#{user.id}", Jason.encode!(attrs)])
 
     if preference != "app" do
-      token = Authentication.generate_token(user)
-      Account.deliver_two_factor_token(user, token)
+      token = Authentication.generate_token(new_seed)
+      Notification.deliver_two_factor_token(user, token)
     end
 
     attrs
   end
 
+  @doc """
+  Confirms the user's two factor settings and persists them to the database from our cache
+  """
   def confirm_and_save_two_factor_settings(code, user) do
     {:ok, settings} = Redix.command(:redix, ["GET", "two_factor_settings:#{user.id}"])
 
-    with {:ok, %{two_factor_seed: seed} = attrs} <- Jason.decode(settings),
+    with {:ok, %{"two_factor_seed" => seed} = attrs} <- Jason.decode(settings),
          true <- Authentication.valid_token?(code, seed) do
       user
-      |> two_factor_changeset(attrs)
-      |> Repo.insert(user)
+      |> Repo.preload([:notification_preference, :recovery_codes])
+      |> User.two_factor_changeset(attrs)
+      |> Repo.update()
     else
       _ -> :error
     end
+  end
+
+  def load_notification_preferences(user) do
+    Repo.preload(user, :notification_preference)
   end
 end

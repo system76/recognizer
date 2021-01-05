@@ -36,7 +36,7 @@ defmodule Recognizer.Accounts.User do
 
     has_one :notification_preference, NotificationPreference, on_replace: :update
     has_many :roles, Role
-    has_many :recovery_codes, RecoveryCode
+    has_many :recovery_codes, RecoveryCode, on_replace: :delete
 
     timestamps()
   end
@@ -227,6 +227,8 @@ defmodule Recognizer.Accounts.User do
   A user changeset for updating the recovery codes.
   """
   def recovery_codes_changeset(user, codes) do
-    put_assoc(user, :recovery_codes, codes)
+    user
+    |> change()
+    |> put_assoc(:recovery_codes, codes)
   end
 end

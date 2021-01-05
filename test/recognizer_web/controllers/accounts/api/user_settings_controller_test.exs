@@ -1,18 +1,34 @@
 defmodule RecognizerWeb.Api.UserSettingsControllerTest do
   use RecognizerWeb.ConnCase
 
-  describe "GET /api/settings" do
-    setup [:register_and_log_in_user]
+  import Recognizer.AccountsFixtures
 
+  setup %{conn: conn} do
+    user =
+      user_fixture()
+      |> Recognizer.Repo.preload([:notification_preference, :recovery_codes])
+      |> Recognizer.Accounts.User.two_factor_changeset(%{
+        notification_preference: %{two_factor: "app"},
+        recovery_codes: [],
+        two_factor_enabled: true,
+        two_factor_seed: Recognizer.Accounts.generate_new_two_factor_seed()
+      })
+      |> Recognizer.Repo.update!()
+
+    %{
+      conn: log_in_user(conn, Map.drop(user, [:notification_preference, :recovery_codes])),
+      user: user
+    }
+  end
+
+  describe "GET /api/settings" do
     test "GET /api/settings", %{conn: conn, user: %{id: user_id}} do
       conn = get(conn, "/api/settings")
-      assert %{"user" => %{"id" => ^user_id, "two_factor_enabled" => false}} = json_response(conn, 200)
+      assert %{"user" => %{"id" => ^user_id, "two_factor_enabled" => true}} = json_response(conn, 200)
     end
   end
 
   describe "PUT /api/settings" do
-    setup [:register_and_log_in_user]
-
     test "PUT /api/settings with `update` action", %{conn: conn, user: %{id: user_id}} do
       conn = put(conn, "/api/settings", %{"action" => "update", "user" => %{"first_name" => "Updated"}})
       assert %{"user" => %{"id" => ^user_id, "first_name" => "Updated"}} = json_response(conn, 200)
@@ -34,7 +50,7 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
       refute %{hashed_password: existing_password_hash} == Recognizer.Repo.get(Recognizer.Accounts.User, user.id)
     end
 
-    test "PUT /api/settings with `update_two_factor` action and authenticator app preference", %{conn: conn} do
+    test "returns recovery codes and barcode with `update_two_factor` action", %{conn: conn} do
       conn =
         put(conn, "/api/settings", %{
           "action" => "update_two_factor",
@@ -44,7 +60,7 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
       assert %{"two_factor" => %{"barcode" => _, "totp_app_url" => _, "recovery_codes" => _}} = json_response(conn, 202)
     end
 
-    test "PUT /api/settings with `update_two_factor` action", %{conn: conn} do
+    test "returns recovery codes with `update_two_factor` action", %{conn: conn} do
       conn =
         put(conn, "/api/settings", %{
           "action" => "update_two_factor",
@@ -55,18 +71,16 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
     end
   end
 
-  describe "PUT /api/settings" do
-    setup [:register_and_log_in_user]
-
-    test "POST /api/confirm_two_factor", %{conn: conn, user: user} do
+  describe "POST /api/confirm_two_factor" do
+    test "confirms the two factor code and updates the user's settings", %{conn: conn, user: user} do
       %{recovery_codes: recovery_codes, two_factor_seed: seed} =
-        Accounts.generate_and_cache_new_two_factor_settings(user, "text")
+        Recognizer.Accounts.generate_and_cache_new_two_factor_settings(user, "text")
 
-      valid_code = Authentication.generate_token(seed)
+      valid_code = RecognizerWeb.Authentication.generate_token(seed)
 
       conn =
         post(conn, "/api/confirm_two_factor", %{
-          "two_factor" => %{"code" => valid_code}
+          "user" => %{"two_factor_code" => valid_code}
         })
 
       assert json_response(conn, 200)
@@ -76,7 +90,7 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
                |> Recognizer.Repo.get(user.id)
                |> Recognizer.Repo.preload(:recovery_codes)
 
-      assert recovery_codes == Enum.map(codes, &Map.get(&1, :code))
+      assert Enum.map(recovery_codes, &Map.get(&1, :code)) == Enum.map(codes, &Map.get(&1, :code))
     end
   end
 end
