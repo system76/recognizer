@@ -55,6 +55,14 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
     end
   end
 
+  def update(conn, %{"action" => "update_two_factor", "user" => %{"two_factor_enabled" => false}}) do
+    user = Authentication.fetch_current_user(conn)
+
+    with {:ok, updated_user} <- Accounts.update_user_two_factor(user, %{"two_factor_enabled" => false}) do
+      render(conn, "show.json", user: updated_user)
+    end
+  end
+
   def update(conn, %{"action" => "update_two_factor", "user" => user_params}) do
     user = Authentication.fetch_current_user(conn)
     preference = get_in(user_params, ["notification_preference", "two_factor"])

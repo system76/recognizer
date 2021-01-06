@@ -67,7 +67,17 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
           "user" => %{"notification_preference" => %{"two_factor" => "text"}}
         })
 
-      assert %{"two_factor" => %{"recovery_codes" => _}} = json_response(conn, 202)
+      assert %{"two_factor" => %{"method" => "text", "recovery_codes" => _}} = json_response(conn, 202)
+    end
+
+    test "returns the user with `update_two_factor` action and `two_factor_enabled` is false", %{conn: conn} do
+      conn =
+        put(conn, "/api/settings", %{
+          "action" => "update_two_factor",
+          "user" => %{"two_factor_enabled" => false}
+        })
+
+      assert %{"user" => %{"two_factor_enabled" => false}} = json_response(conn, 200)
     end
   end
 
