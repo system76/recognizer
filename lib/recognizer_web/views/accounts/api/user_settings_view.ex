@@ -18,10 +18,10 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
     }
   end
 
-  def render("confirm_two_factor.json", %{settings: %{notification_preference: preference} = settings}) do
+  def render("confirm_two_factor.json", %{settings: %{notification_preference: %{two_factor: method}} = settings}) do
     %{
       two_factor: %{
-        method: preference,
+        method: method,
         recovery_codes: recovery_codes(settings)
       }
     }
