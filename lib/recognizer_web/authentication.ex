@@ -80,10 +80,15 @@ defmodule RecognizerWeb.Authentication do
   The URL to redirect the user to once they are logged out.
   """
   def logout_redirect(conn) do
-    if Application.get_env(:recognizer, :redirect_url) do
-      [external: Application.get_env(:recognizer, :redirect_url)]
-    else
-      [to: Routes.homepage_path(conn, :index)]
+    cond do
+      Map.has_key?(conn.query_params, "redirect_uri") ->
+        [external: conn.query_params["redirect_uri"]]
+
+      Application.get_env(:recognizer, :redirect_url) ->
+        [external: Application.get_env(:recognizer, :redirect_url)]
+
+      true ->
+        [to: Routes.homepage_path(conn, :index)]
     end
   end
 
