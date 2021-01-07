@@ -93,6 +93,19 @@ defmodule RecognizerWeb.Authentication do
   end
 
   @doc """
+  Sets a flash message but only if we are going to stay inside the application.
+  If we plan to redirect externally, the function is a noop.
+  """
+  def conditional_flash(conn, type, message) do
+    cond do
+      get_session(conn, :user_return_to) -> conn
+      Map.has_key?(conn.query_params, "redirect_uri") -> conn
+      Application.get_env(:recognizer, :redirect_url) -> conn
+      true -> put_flash(conn, type, message)
+    end
+  end
+
+  @doc """
   Records the current location to be redirected to after
   authentication flow.
   """

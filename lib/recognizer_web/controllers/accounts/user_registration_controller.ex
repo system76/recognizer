@@ -15,7 +15,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationController do
     case Accounts.register_user(user_params) do
       {:ok, user} ->
         conn
-        |> put_flash(:info, "User created successfully.")
+        |> Authentication.conditional_flash(:info, "User created successfully.")
         |> Authentication.log_in_user(user)
 
       {:error, %Ecto.Changeset{} = changeset} ->
