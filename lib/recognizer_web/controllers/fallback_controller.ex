@@ -15,7 +15,6 @@ defmodule RecognizerWeb.FallbackController do
   @impl Guardian.Plug.ErrorHandler
   def auth_error(conn, {:unauthenticated, _reason}, _) do
     conn
-    |> Authentication.conditional_flash(:error, "You must log in to access this page.")
     |> Authentication.maybe_store_return_to()
     |> redirect(to: Routes.user_session_path(conn, :new))
     |> halt()
