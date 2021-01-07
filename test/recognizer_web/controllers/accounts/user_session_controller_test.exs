@@ -85,5 +85,17 @@ defmodule RecognizerWeb.Accounts.UserSessionControllerTest do
       conn = get(conn, Routes.user_session_path(conn, :delete))
       assert redirected_to(conn) == "/"
     end
+
+    test "redirects if the redirect_uri is given", %{conn: conn} do
+      conn =
+        get(
+          conn,
+          Routes.user_session_path(conn, :delete, %{
+            "redirect_uri" => "http://localhost:3000/logged-out"
+          })
+        )
+
+      assert redirected_to(conn) == "http://localhost:3000/logged-out"
+    end
   end
 end
