@@ -14,10 +14,10 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
 
       _ ->
         conn
-        |> put_status(402)
+        |> put_status(400)
         |> put_view(ErrorView)
         |> render("error.json",
-          field: :two_factor_token,
+          field: :two_factor_code,
           reason: "Failed to confirm settings."
         )
     end

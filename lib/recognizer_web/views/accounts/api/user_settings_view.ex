@@ -10,10 +10,10 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
       ) do
     %{
       two_factor: %{
-        barcode: Authentication.generate_totp_barcode(user),
+        barcode: Authentication.generate_totp_barcode(user, settings),
         method: "app",
         recovery_codes: recovery_codes(settings),
-        totp_app_url: Authentication.get_totp_app_url(user)
+        totp_app_url: Authentication.get_totp_app_url(user, settings)
       }
     }
   end

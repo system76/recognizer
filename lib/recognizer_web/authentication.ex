@@ -119,15 +119,26 @@ defmodule RecognizerWeb.Authentication do
   Generate a user's TOTP URL for authenticator apps
   """
   def get_totp_app_url(user) do
-    "otpauth://totp/#{user.email}?secret=#{user.two_factor_seed}&issuer=#{two_factor_issuer()}"
+    get_totp_app_url(user, user.two_factor_seed)
+  end
+
+  @doc """
+  Generate a user's TOTP URL with the given seed for authenticator apps
+  """
+  def get_totp_app_url(user, %{two_factor_seed: two_factor_seed}) do
+    get_totp_app_url(user, two_factor_seed)
+  end
+
+  def get_totp_app_url(user, two_factor_seed) do
+    "otpauth://totp/#{user.email}?secret=#{two_factor_seed}&issuer=#{two_factor_issuer()}"
   end
 
   @doc """
   Generate a user's TOTP barcode for authenticator apps
   """
-  def generate_totp_barcode(user) do
+  def generate_totp_barcode(user, two_factor_seed \\ nil) do
     user
-    |> get_totp_app_url()
+    |> get_totp_app_url(two_factor_seed)
     |> EQRCode.encode()
     |> EQRCode.svg(viewbox: true)
   end
@@ -144,5 +155,6 @@ defmodule RecognizerWeb.Authentication do
   Validate a user provided token is valid
   """
   def valid_token?(token, %{two_factor_seed: two_factor_seed}), do: valid_token?(token, two_factor_seed)
+  def valid_token?(token, nil), do: false
   def valid_token?(token, two_factor_seed), do: :pot.valid_totp(token, two_factor_seed, window: 1, addwindow: 1)
 end
