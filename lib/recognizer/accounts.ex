@@ -456,7 +456,8 @@ defmodule Recognizer.Accounts do
     attrs = %{
       notification_preference: %{two_factor: preference},
       recovery_codes: generate_new_recovery_codes(user),
-      two_factor_seed: new_seed
+      two_factor_seed: new_seed,
+      two_factor_enabled: true
     }
 
     Redix.noreply_command(:redix, ["SET", "two_factor_settings:#{user.id}", Jason.encode!(attrs)])
