@@ -7,7 +7,8 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   alias RecognizerWeb.Authentication
 
   def new(conn, _params) do
-    current_user = get_session(conn, :current_user)
+    current_user_id = get_session(conn, :current_user_id)
+    current_user = Accounts.get_user!(current_user_id)
 
     %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
 
@@ -17,10 +18,11 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   end
 
   @doc """
-  Handle a user creating a session with a two factor code 
+  Handle a user creating a session with a two factor code
   """
   def create(conn, %{"user" => %{"two_factor_code" => two_factor_code}}) do
-    current_user = get_session(conn, :current_user)
+    current_user_id = get_session(conn, :current_user_id)
+    current_user = Accounts.get_user!(current_user_id)
 
     if Authentication.valid_token?(two_factor_code, current_user) do
       Authentication.log_in_user(conn, current_user)
@@ -35,7 +37,8 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   Handle a user creating a session with a two factor recovery code
   """
   def create(conn, %{"user" => %{"recovery_code" => recovery_code}}) do
-    current_user = get_session(conn, :current_user)
+    current_user_id = get_session(conn, :current_user_id)
+    current_user = Accounts.get_user!(current_user_id)
 
     case Accounts.recover_account(current_user, recovery_code) do
       {:ok, user} ->
@@ -49,7 +52,8 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   end
 
   def resend(conn, _params) do
-    current_user = get_session(conn, :current_user)
+    current_user_id = get_session(conn, :current_user_id)
+    current_user = Accounts.get_user!(current_user_id)
 
     conn
     |> send_two_factor_notification(current_user)

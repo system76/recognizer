@@ -24,7 +24,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
     %{
       conn:
         Phoenix.ConnTest.init_test_session(conn, %{
-          current_user: %{user | two_factor_enabled: true, two_factor_seed: seed}
+          current_user_id: user.id
         }),
       user: updated_user
     }
