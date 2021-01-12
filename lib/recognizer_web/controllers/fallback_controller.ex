@@ -47,7 +47,7 @@ defmodule RecognizerWeb.FallbackController do
   defp json?(conn) do
     conn
     |> Plug.Conn.get_req_header("accept")
-    |> String.contains?("json")
+    |> Enum.any?(&String.contains?(&1, "json"))
   rescue
     _ -> false
   end

@@ -19,6 +19,15 @@ Recognizer.Repo.insert!(%Recognizer.Accounts.User{
   hashed_password: Argon2.hash_pwd_salt("System76")
 })
 
+Recognizer.Repo.insert!(%Recognizer.Accounts.Role{
+  role_id: 1,
+  user_id: 1
+})
+
+Recognizer.Repo.insert!(%Recognizer.Accounts.NotificationPreference{
+  user_id: 1
+})
+
 Recognizer.Repo.insert!(%Recognizer.OauthProvider.Application{
   name: "Privileged Application",
   uid: "privileged",
