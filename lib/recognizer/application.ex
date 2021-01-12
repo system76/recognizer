@@ -5,8 +5,6 @@ defmodule Recognizer.Application do
 
   use Application
 
-  import Supervisor.Spec
-
   def start(_type, _args) do
     SpandexPhoenix.Telemetry.install()
 
@@ -19,8 +17,6 @@ defmodule Recognizer.Application do
       RecognizerWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: Recognizer.PubSub},
-      # Start the gRPC server for internal requests
-      supervisor(GRPC.Server.Supervisor, [{Recognizer.Endpoint, 50_051}]),
       # Start the DB sweeper to remove old keys
       {Guardian.DB.Token.SweeperServer, []},
       # Start the Endpoint (http/https)

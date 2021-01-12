@@ -14,7 +14,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
       user
       |> Recognizer.Repo.preload([:notification_preference, :recovery_codes])
       |> Accounts.User.two_factor_changeset(%{
-        notification_preference: %{two_factor: "app"},
+        notification_preference: %{two_factor: "text"},
         recovery_codes: Recognizer.Accounts.generate_new_recovery_codes(user),
         two_factor_enabled: true,
         two_factor_seed: seed

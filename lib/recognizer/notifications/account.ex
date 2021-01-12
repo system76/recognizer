@@ -45,12 +45,15 @@ defmodule Recognizer.Notifications.Account do
   @doc """
   Deliver the two factor two to the user.
   """
-  def deliver_two_factor_token(user, token) do
+  def deliver_two_factor_token(user, token, method) do
     user
     |> Recognizer.Bottle.convert_user()
-    |> create_message(Account.TwoFactorRequested, token: token)
+    |> create_message(Account.TwoFactorRequested, token: token, method: two_factor_method(method))
     |> send_message(:two_factor_requested)
   end
+
+  def two_factor_method(:text), do: :TWO_FACTOR_METHOD_SMS
+  def two_factor_method(:voice), do: :TWO_FACTOR_METHOD_VOICE
 
   @doc """
   Deliver user recovery code used notification.
