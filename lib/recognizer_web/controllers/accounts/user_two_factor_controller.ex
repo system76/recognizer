@@ -13,7 +13,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
 
     conn
-    |> maybe_send_two_factor_notification(current_user)
+    |> maybe_send_two_factor_notification(current_user, two_factor_method)
     |> render("new.html", two_factor_method: two_factor_method)
   end
 
@@ -61,21 +61,21 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     |> redirect(to: Routes.user_two_factor_path(conn, :new))
   end
 
-  defp maybe_send_two_factor_notification(conn, current_user) do
-    if get_session(conn, :two_factor_sent) != true do
-      send_two_factor_notification(conn, current_user)
-    else
-      conn
-    end
+  defp send_two_factor_notification(conn, %{notification_preference: %{two_factor: method}} = current_user) do
+    send_two_factor_notification(conn, current_user, method)
   end
 
-  defp send_two_factor_notification(conn, %{notification_preference: %{two_factor: :app}}) do
-    conn
-  end
-
-  defp send_two_factor_notification(conn, user) do
-    token = Authentication.generate_token(user)
-    Account.deliver_two_factor_token(user, token)
+  defp send_two_factor_notification(conn, current_user, method) do
+    token = Authentication.generate_token(current_user)
+    Account.deliver_two_factor_token(current_user, token, method)
     put_session(conn, :two_factor_sent, true)
+  end
+
+  defp maybe_send_two_factor_notification(conn, current_user, method) do
+    if get_session(conn, :two_factor_sent) == false and :app != method do
+      send_two_factor_notification(conn, current_user, method)
+    end
+
+    conn
   end
 end

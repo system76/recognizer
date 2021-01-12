@@ -464,7 +464,7 @@ defmodule Recognizer.Accounts do
 
     if preference != "app" do
       token = Authentication.generate_token(new_seed)
-      Notification.deliver_two_factor_token(user, token)
+      Notification.deliver_two_factor_token(user, token, String.to_existing_atom(preference))
     end
 
     attrs

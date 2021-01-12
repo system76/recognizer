@@ -155,6 +155,6 @@ defmodule RecognizerWeb.Authentication do
   Validate a user provided token is valid
   """
   def valid_token?(token, %{two_factor_seed: two_factor_seed}), do: valid_token?(token, two_factor_seed)
-  def valid_token?(token, nil), do: false
+  def valid_token?(_token, nil), do: false
   def valid_token?(token, two_factor_seed), do: :pot.valid_totp(token, two_factor_seed, window: 1, addwindow: 1)
 end
