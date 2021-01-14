@@ -34,6 +34,13 @@ defmodule RecognizerWeb.Accounts.UserRecoveryCodeControllerTest do
       assert length(remaining_codes) == length(tail)
     end
 
+    test "allow using a recovery code out of order", %{conn: conn, user: user} do
+      recovery_code = Enum.at(user.recovery_codes, 4).code
+
+      conn = post(conn, Routes.user_recovery_code_path(conn, :create), %{"user" => %{"recovery_code" => recovery_code}})
+      assert redirected_to(conn) == "/settings"
+    end
+
     test "emits error message with invalid recovery code", %{conn: conn} do
       conn =
         post(conn, Routes.user_recovery_code_path(conn, :create), %{

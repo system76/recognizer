@@ -20,8 +20,6 @@ defmodule RecognizerWeb.Accounts.UserRecoveryCodeController do
   Handle a user creating a session with a two factor recovery code
   """
   def create(conn, %{"user" => %{"recovery_code" => recovery_code}}) do
-    IO.inspect(recovery_code)
-
     current_user_id = get_session(conn, :current_user_id)
     current_user = Accounts.get_user!(current_user_id)
 
