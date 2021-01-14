@@ -3,7 +3,8 @@
 
   <div class="my-4">
     <p>
-
+      Please use one of the generated recovery codes you saved. After you use
+      it, you will no longer be able to use it again.
     </p>
   </div>
 
@@ -14,13 +15,10 @@
       <div class="control">
         <%= text_input f, :recovery_code,
           autocapitalize: "none",
-          autocomplete: "on",
-          autocomplete: "one-time-code",
+          autocomplete: "off",
           autocorrect: "off",
           autofocus: true,
-          class: "is-medium #{input_classes(f, :two_factor_code)}",
-          inputmode: "numeric",
-          pattern: "[0-9]*",
+          class: "is-medium #{input_classes(f, :recovery_code)}",
           required: true
         %>
       </div>
