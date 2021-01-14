@@ -1,4 +1,4 @@
-defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
+defmodule RecognizerWeb.Accounts.UserRecoveryCodeControllerTest do
   use RecognizerWeb.ConnCase
 
   import Recognizer.AccountsFixtures
@@ -7,30 +7,11 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
   alias RecognizerWeb.Authentication
 
   setup %{conn: conn} do
-    user = user_fixture()
-    seed = Recognizer.Accounts.generate_new_two_factor_seed()
-
-    updated_user =
-      user
-      |> Recognizer.Repo.preload([:notification_preference, :recovery_codes])
-      |> Accounts.User.two_factor_changeset(%{
-        notification_preference: %{two_factor: "text"},
-        recovery_codes: Recognizer.Accounts.generate_new_recovery_codes(user),
-        two_factor_enabled: true,
-        two_factor_seed: seed
-      })
-      |> Recognizer.Repo.update!()
-
-    %{
-      conn:
-        Phoenix.ConnTest.init_test_session(conn, %{
-          current_user_id: user.id
-        }),
-      user: updated_user
-    }
+    user = user_fixture() |> add_two_factor()
+    %{user: user}
   end
 
-  describe "GET /two-factor" do
+  describe "GET /two_factor" do
     test "renders the two factor input page", %{conn: conn} do
       conn = get(conn, Routes.user_two_factor_path(conn, :new))
       response = html_response(conn, 200)
@@ -38,7 +19,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
     end
   end
 
-  describe "POST /two-factor" do
+  describe "POST /two_factor" do
     test "redirects to user settings for successful security codes", %{conn: conn, user: user} do
       token = Authentication.generate_token(user)
       conn = post(conn, Routes.user_two_factor_path(conn, :create), %{"user" => %{"two_factor_code" => token}})
@@ -56,7 +37,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
     end
   end
 
-  describe "POST /two-factor/resend" do
+  describe "POST /two_factor/resend" do
     test "redirects with flash message", %{conn: conn} do
       conn = post(conn, Routes.user_two_factor_path(conn, :resend))
 

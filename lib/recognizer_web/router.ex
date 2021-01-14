@@ -71,9 +71,12 @@ defmodule RecognizerWeb.Router do
     get "/oauth/:provider", UserOAuthController, :request, as: :user_oauth
     get "/oauth/:provider/callback", UserOAuthController, :callback, as: :user_oauth
 
-    get "/two_factor", UserTwoFactorController, :new
-    post "/two_factor", UserTwoFactorController, :create
-    post "/two_factor/resend", UserTwoFactorController, :resend
+    get "/two-factor", UserTwoFactorController, :new
+    post "/two-factor", UserTwoFactorController, :create
+    post "/two-factor/resend", UserTwoFactorController, :resend
+
+    get "/recovery-code", UserRecoveryCodeController, :new
+    post "/recovery-code", UserRecoveryCodeController, :create
   end
 
   scope "/", RecognizerWeb.Accounts do
@@ -81,6 +84,7 @@ defmodule RecognizerWeb.Router do
 
     get "/settings", UserSettingsController, :edit
     put "/settings", UserSettingsController, :update
-    post "/confirm_authenicator", UserSettingsController, :confirm_authenticator
+    get "/settings/two-factor", UserSettingsController, :two_factor
+    post "/settings/two-factor", UserSettingsController, :two_factor_confirm
   end
 end

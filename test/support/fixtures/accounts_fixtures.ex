@@ -25,6 +25,20 @@ defmodule Recognizer.AccountsFixtures do
     user
   end
 
+  def add_two_factor(user) do
+    seed = Recognizer.Accounts.generate_new_two_factor_seed()
+
+    user
+    |> Recognizer.Repo.preload([:notification_preference, :recovery_codes])
+    |> Accounts.User.two_factor_changeset(%{
+      notification_preference: %{two_factor: "text"},
+      recovery_codes: Recognizer.Accounts.generate_new_recovery_codes(user),
+      two_factor_enabled: true,
+      two_factor_seed: seed
+    })
+    |> Recognizer.Repo.update!()
+  end
+
   def extract_user_token(fun) do
     {:ok, captured} = fun.(&"[TOKEN]#{&1}[TOKEN]")
     [_, token, _] = String.split(captured.reset_url, "[TOKEN]")
