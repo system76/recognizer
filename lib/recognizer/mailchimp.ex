@@ -1,4 +1,8 @@
 defmodule Recognizer.Mailchimp do
+  @moduledoc """
+  A simple API client for the Mailchimp API
+  """
+
   require Logger
 
   alias Recognizer.Accounts.User
