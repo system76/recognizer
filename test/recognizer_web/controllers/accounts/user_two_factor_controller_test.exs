@@ -30,7 +30,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
     }
   end
 
-  describe "GET /two_factor" do
+  describe "GET /two-factor" do
     test "renders the two factor input page", %{conn: conn} do
       conn = get(conn, Routes.user_two_factor_path(conn, :new))
       response = html_response(conn, 200)
@@ -38,7 +38,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
     end
   end
 
-  describe "POST /two_factor" do
+  describe "POST /two-factor" do
     test "redirects to user settings for successful security codes", %{conn: conn, user: user} do
       token = Authentication.generate_token(user)
       conn = post(conn, Routes.user_two_factor_path(conn, :create), %{"user" => %{"two_factor_code" => token}})
@@ -51,16 +51,16 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
           "user" => %{"two_factor_code" => "INVALID"}
         })
 
-      assert redirected_to(conn) == "/two_factor"
+      assert redirected_to(conn) == "/two-factor"
       assert get_flash(conn, :error) =~ "Invalid"
     end
   end
 
-  describe "POST /two_factor/resend" do
+  describe "POST /two-factor/resend" do
     test "redirects with flash message", %{conn: conn} do
       conn = post(conn, Routes.user_two_factor_path(conn, :resend))
 
-      assert redirected_to(conn) == "/two_factor"
+      assert redirected_to(conn) == "/two-factor"
       assert get_flash(conn, :info) =~ "resent"
     end
 

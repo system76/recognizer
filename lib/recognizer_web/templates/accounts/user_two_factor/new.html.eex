@@ -46,9 +46,13 @@
     </div>
   <% end %>
 
-  <%= if @two_factor_method != :app do %>
-    <hr class="has-background-grey-lighter" />
+  <hr class="has-background-grey-lighter" />
 
+  <p class="content">
+    <%= link "Use Recovery Code Instead", to: Routes.user_recovery_code_path(@conn, :new) %>
+  </p>
+
+  <%= if @two_factor_method != :app do %>
     <p class="content">
       <%= link "Resend Two Factor Code", to: Routes.user_two_factor_path(@conn, :resend), method: :create %>
     </p>

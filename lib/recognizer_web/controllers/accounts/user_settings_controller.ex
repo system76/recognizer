@@ -14,25 +14,30 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
-  def confirm_authenticator(conn, params) do
+  def two_factor(conn, _params) do
+    user = Authentication.fetch_current_user(conn)
+    {:ok, %{"two_factor_seed" => seed}} = Accounts.get_new_two_factor_settings(user)
+
+    render(conn, "confirm_two_factor.html",
+      barcode: Authentication.generate_totp_barcode(user, seed),
+      totp_app_url: Authentication.get_totp_app_url(user, seed)
+    )
+  end
+
+  def two_factor_confirm(conn, params) do
     two_factor_code = Map.get(params, "two_factor_code", "")
     user = Authentication.fetch_current_user(conn)
 
-    case Authentication.valid_token?(two_factor_code, user) do
-      true ->
-        {:ok, _} = Accounts.update_user_two_factor(user, %{"notification_preference" => %{"two_factor" => "app"}})
-
+    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, user) do
+      {:ok, _updated_user} ->
         conn
-        |> put_flash(:info, "Authenticator app confirmed.")
+        |> put_flash(:info, "Two factor code verified.")
         |> redirect(to: Routes.user_settings_path(conn, :edit))
 
-      false ->
+      _ ->
         conn
-        |> put_flash(:error, "Authenticator app security code is invalid.")
-        |> render("confirm_authenticator.html",
-          barcode: Authentication.generate_totp_barcode(user),
-          totp_app_url: Authentication.get_totp_app_url(user)
-        )
+        |> put_flash(:error, "Two factor code is invalid.")
+        |> redirect(to: Routes.user_settings_path(conn, :confirm_two_factor))
     end
   end
 
@@ -68,38 +73,23 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
-  def update(conn, %{
-        "action" => "update_two_factor",
-        "user" => %{"notification_preference" => %{"two_factor" => "app"}} = user_params
-      }) do
+  def update(conn, %{"action" => "update_two_factor", "user" => %{"two_factor_enabled" => "0"}}) do
     user = Authentication.fetch_current_user(conn)
-    user_params = Map.drop(user_params, ["notification_preference"])
 
-    case Accounts.update_user_two_factor(user, user_params) do
-      {:ok, user} ->
-        render(conn, "confirm_authenticator.html",
-          barcode: Authentication.generate_totp_barcode(user),
-          totp_app_url: Authentication.get_totp_app_url(user)
-        )
-
-      {:error, changeset} ->
-        render(conn, "edit.html", two_factor_changeset: changeset)
+    with {:ok, updated_user} <- Accounts.update_user_two_factor(user, %{"two_factor_enabled" => false}) do
+      conn
+      |> put_flash(:info, "Two factor has been disabled.")
+      |> redirect(to: Routes.user_settings_path(conn, :edit))
     end
   end
 
-  def update(conn, %{"action" => "update_two_factor"} = params) do
-    %{"user" => user_params} = params
+  def update(conn, %{"action" => "update_two_factor", "user" => user_params}) do
     user = Authentication.fetch_current_user(conn)
+    preference = get_in(user_params, ["notification_preference", "two_factor"])
 
-    case Accounts.update_user_two_factor(user, user_params) do
-      {:ok, %{notification_preference: %{two_factor: _}}} ->
-        conn
-        |> put_flash(:info, "Two-factor preferences have been updated.")
-        |> redirect(to: Routes.user_settings_path(conn, :edit))
+    settings = Accounts.generate_and_cache_new_two_factor_settings(user, preference)
 
-      {:error, changeset} ->
-        render(conn, "edit.html", two_factor_changeset: changeset)
-    end
+    redirect(conn, to: Routes.user_settings_path(conn, :two_factor))
   end
 
   defp assign_email_and_password_changesets(conn, _opts) do

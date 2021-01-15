@@ -1,0 +1,41 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Enter Recovery Code</h2>
+
+  <div class="my-4">
+    <p>
+      Please use one of the generated recovery codes you saved. After you use
+      it, you will no longer be able to use it again.
+    </p>
+  </div>
+
+  <%= form_for @conn, Routes.user_recovery_code_path(@conn, :create), [as: :user], fn f -> %>
+    <div class="field">
+      <%= label f, :recovery_code, "Recovery Code", class: "label" %>
+
+      <div class="control">
+        <%= text_input f, :recovery_code,
+          autocapitalize: "none",
+          autocomplete: "off",
+          autocorrect: "off",
+          autofocus: true,
+          class: "is-medium #{input_classes(f, :recovery_code)}",
+          required: true
+        %>
+      </div>
+
+      <%= error_tag f, :recovery_code %>
+    </div>
+
+    <div class="buttons is-right mt-5">
+      <div class="control">
+        <%= submit "Log in", class: "button is-secondary" %>
+      </div>
+    </div>
+  <% end %>
+
+  <hr class="has-background-grey-lighter" />
+
+  <p class="content">
+    <%= link "Use Two Factor Code Instead", to: Routes.user_two_factor_path(@conn, :new) %>
+  </p>
+</div>

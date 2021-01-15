@@ -454,7 +454,7 @@ defmodule Recognizer.Accounts do
   def recover_account(user, recovery_code) do
     user = %{recovery_codes: codes} = Repo.preload(user, [:notification_preference, :recovery_codes])
 
-    case Enum.split_while(codes, &(&1.code == recovery_code)) do
+    case Enum.split_with(codes, &(&1.code == recovery_code)) do
       {[], _remaining_codes} ->
         :error
 
@@ -494,12 +494,20 @@ defmodule Recognizer.Accounts do
   end
 
   @doc """
+  Retreives the new user's two factor settings from our cache. These settings
+  are not yet active, but are in the process of being verified.
+  """
+  def get_new_two_factor_settings(user) do
+    with {:ok, settings} <- Redix.command(:redix, ["GET", "two_factor_settings:#{user.id}"]) do
+      Jason.decode(settings)
+    end
+  end
+
+  @doc """
   Confirms the user's two factor settings and persists them to the database from our cache
   """
   def confirm_and_save_two_factor_settings(code, user) do
-    {:ok, settings} = Redix.command(:redix, ["GET", "two_factor_settings:#{user.id}"])
-
-    with {:ok, %{"two_factor_seed" => seed} = attrs} <- Jason.decode(settings),
+    with {:ok, %{"two_factor_seed" => seed} = attrs} <- get_new_two_factor_settings(user),
          true <- Authentication.valid_token?(code, seed) do
       user
       |> Repo.preload([:notification_preference, :recovery_codes])
