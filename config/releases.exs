@@ -33,7 +33,8 @@ config :recognizer,
      ]},
     {Bottle.Account.V1.TwoFactorRequested, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
     {Bottle.Account.V1.PasswordChanged, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
-    {Bottle.Account.V1.PasswordReset, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]}
+    {Bottle.Account.V1.PasswordReset, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
+    {Bottle.Account.V1.TwoFactorRecoveryCodeUsed, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]}
   ],
   two_factor_issuer: recognizer_config["TWO_FACTOR_ISSUER"],
   redis_host: recognizer_config["REDIS_HOST"]
