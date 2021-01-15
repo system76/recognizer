@@ -1,6 +1,7 @@
 defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
   use RecognizerWeb.ConnCase
 
+  import Mox
   import Recognizer.AccountsFixtures
 
   alias Recognizer.Accounts
@@ -58,7 +59,13 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
   end
 
   describe "PUT /users/settings (change profile form)" do
+    setup :verify_on_exit!
+
     test "updates the user email", %{conn: conn, user: user} do
+      expect(Recognizer.MockMailchimp, :update_user, fn user ->
+        {:ok, user}
+      end)
+
       conn =
         put(conn, Routes.user_settings_path(conn, :update), %{
           "action" => "update",

@@ -1,6 +1,7 @@
 defmodule RecognizerWeb.Api.UserSettingsControllerTest do
   use RecognizerWeb.ConnCase
 
+  import Mox
   import Recognizer.AccountsFixtures
 
   setup %{conn: conn} do
@@ -29,7 +30,13 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
   end
 
   describe "PUT /api/settings" do
+    setup :verify_on_exit!
+
     test "PUT /api/settings with `update` action", %{conn: conn, user: %{id: user_id}} do
+      expect(Recognizer.MockMailchimp, :update_user, fn user ->
+        {:ok, user}
+      end)
+
       conn = put(conn, "/api/settings", %{"action" => "update", "user" => %{"first_name" => "Updated"}})
       assert %{"user" => %{"id" => ^user_id, "first_name" => "Updated"}} = json_response(conn, 200)
     end

@@ -70,7 +70,8 @@ defmodule Recognizer.MixProject do
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"},
       {:ueberauth_github, "~> 0.8"},
-      {:ueberauth_google, "~> 0.10"}
+      {:ueberauth_google, "~> 0.10"},
+      {:mox, "~> 1.0", only: :test}
     ]
   end
 
