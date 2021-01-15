@@ -96,20 +96,52 @@ defmodule Recognizer.Accounts do
     query =
       from u in User,
         join: n in assoc(u, :notification_preference),
+        left_join: o in assoc(u, :organization),
         where: u.email == ^email,
-        preload: [notification_preference: n, roles: []]
+        preload: [notification_preference: n, roles: [], organization: o]
 
     with %User{} = user <- Repo.one(query),
          true <- User.valid_password?(user, password),
+         {:ok, user} <- enforce_org_policies(user),
          %User{two_factor_enabled: false} <- user do
       {:ok, user}
     else
       %User{two_factor_enabled: true} = user ->
         {:two_factor, user}
 
-      _ ->
+      false ->
+        nil
+
+      nil ->
         nil
     end
+  end
+
+  defp enforce_org_policies(%{organization: org} = user) do
+    with nil <- Enum.find(org, &enforce_org_policy(&1, user)) do
+      {:ok, user}
+    end
+  end
+
+  defp enforce_org_policy({_policy, nil}, _user) do
+    false
+  end
+
+  defp enforce_org_policy({:password_expiration, days}, user) do
+    password_date = DateTime.add(user.password_changed_at, days, :days)
+
+    case DateTime.compare(password_date, DateTime.utc_now()) do
+      :lt -> {:password_change, user}
+      _ -> false
+    end
+  end
+
+  defp enforce_org_policy({:enable_two_factor, true}, %{two_factor_enabled: false} = user) do
+    {:enable_two_factor, user}
+  end
+
+  defp enforce_org_policy(_, _user) do
+    false
   end
 
   @doc """

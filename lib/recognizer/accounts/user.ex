@@ -8,7 +8,7 @@ defmodule Recognizer.Accounts.User do
 
   import Ecto.Changeset
 
-  alias Recognizer.Accounts.{NotificationPreference, RecoveryCode, Role}
+  alias Recognizer.Accounts.{NotificationPreference, RecoveryCode, Role, Organization}
   alias Recognizer.Repo
   alias __MODULE__
 
@@ -29,12 +29,16 @@ defmodule Recognizer.Accounts.User do
 
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, source: :password
+    field :password_changed_at, :naive_datetime
 
     field :two_factor_enabled, :boolean
     field :two_factor_seed, :string
     field :two_factor_code, :string, virtual: true, redact: true
 
     has_one :notification_preference, NotificationPreference, on_replace: :update
+
+    belongs_to :organization, Organization
+
     has_many :roles, Role
     has_many :recovery_codes, RecoveryCode, on_replace: :delete
 

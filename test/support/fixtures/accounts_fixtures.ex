@@ -39,6 +39,14 @@ defmodule Recognizer.AccountsFixtures do
     |> Recognizer.Repo.update!()
   end
 
+  def add_organization_policy(user, attrs \\ []) do
+    attrs = Keyword.put(attrs, :name, "organization#{System.unique_integer()}")
+
+    with %{id: org_id} <- Recognizer.Repo.insert!(Recognizer.Accounts.Organization, attrs) do
+      Recognizer.Repo.update!(user, %{organization_id: org_id})
+    end
+  end
+
   def extract_user_token(fun) do
     {:ok, captured} = fun.(&"[TOKEN]#{&1}[TOKEN]")
     [_, token, _] = String.split(captured.reset_url, "[TOKEN]")

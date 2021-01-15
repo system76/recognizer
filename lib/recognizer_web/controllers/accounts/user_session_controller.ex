@@ -15,6 +15,16 @@ defmodule RecognizerWeb.Accounts.UserSessionController do
       {:ok, user} ->
         Authentication.log_in_user(conn, user, user_params)
 
+      {:password_change, user} ->
+        conn
+        |> put_session(:current_user_id, user.id)
+        |> redirect(to: Routes.user_two_factor_path(conn, :new))
+
+      {:two_factor_required, user} ->
+        conn
+        |> put_session(:current_user_id, user.id)
+        |> redirect(to: Routes.user_two_factor_path(conn, :new))
+
       {:two_factor, user} ->
         conn
         |> put_session(:current_user_id, user.id)

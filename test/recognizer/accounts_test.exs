@@ -35,6 +35,35 @@ defmodule Recognizer.AccountsTest do
 
       assert {:ok, %User{id: ^id}} = Accounts.get_user_by_email_and_password(user.email, valid_user_password())
     end
+
+    test "returns the {:two_factor, user} if the email and password are valid with two factor enabled" do
+      %{id: id} = user = user_fixture(two_factor_enabled: true)
+
+      assert {:two_factor, %User{id: ^id}} = Accounts.get_user_by_email_and_password(user.email, valid_user_password())
+    end
+
+    test "returns the {:password_change, user} if password has expired with a policy" do
+      %{id: id} =
+        user =
+        [password_changed_at: DateTime.add(DateTime.utc_now(), -10, :days)]
+        |> user_fixture()
+        |> add_two_factor()
+        |> add_organization_policy(password_expiration: 1)
+
+      assert {:password_change, %User{id: ^id}} =
+               Accounts.get_user_by_email_and_password(user.email, valid_user_password())
+    end
+
+    test "returns the {:two_factor_required, user} if 2FA is not enabled and is in the policy" do
+      %{id: id} =
+        user =
+        user_fixture()
+        |> add_two_factor()
+        |> add_organization_policy(two_factor_required: true)
+
+      assert {:two_factor_required, %User{id: ^id}} =
+               Accounts.get_user_by_email_and_password(user.email, valid_user_password())
+    end
   end
 
   describe "get_user!/1" do
