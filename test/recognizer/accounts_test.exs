@@ -1,6 +1,7 @@
 defmodule Recognizer.AccountsTest do
   use Recognizer.DataCase
 
+  import Mox
   import Recognizer.AccountsFixtures
 
   alias Recognizer.Accounts
@@ -154,6 +155,8 @@ defmodule Recognizer.AccountsTest do
   end
 
   describe "update_user/2" do
+    setup :verify_on_exit!
+
     setup do
       user = user_fixture()
 
@@ -161,6 +164,10 @@ defmodule Recognizer.AccountsTest do
     end
 
     test "updates the email", %{user: user} do
+      expect(Recognizer.MockMailchimp, :update_user, fn user ->
+        {:ok, user}
+      end)
+
       email = unique_user_email()
       assert {:ok, _user} = Accounts.update_user(user, %{email: email})
       changed_user = Repo.get!(User, user.id)

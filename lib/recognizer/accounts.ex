@@ -3,6 +3,8 @@ defmodule Recognizer.Accounts do
   The Accounts context.
   """
 
+  require Logger
+
   import Ecto.Query, warn: false
 
   alias Recognizer.Accounts.{User, OAuth, RecoveryCode}
@@ -228,9 +230,30 @@ defmodule Recognizer.Accounts do
 
   """
   def update_user(user, attrs) do
-    user
-    |> User.changeset(attrs)
+    changeset = User.changeset(user, attrs)
+
+    changeset
     |> Repo.update()
+    |> maybe_update_mailchimp_subscription(changeset)
+  end
+
+  defp maybe_update_mailchimp_subscription({:ok, updated_user}, changeset) do
+    with true <- Enum.any?([:email, :newsletter, :first_name, :last_name], &Ecto.Changeset.get_change(changeset, &1)),
+         {:error, reason} <- apply(mailchimp_module(), :update_user, [updated_user]) do
+      Logger.error(reason)
+    else
+      _ -> {:ok, updated_user}
+    end
+  end
+
+  defp maybe_update_mailchimp_subscription(err, _changeset) do
+    err
+  end
+
+  defp mailchimp_module do
+    :recognizer
+    |> Application.get_env(:mailchimp)
+    |> Keyword.get(:module, Recognizer.Mailchimp)
   end
 
   @doc """

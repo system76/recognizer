@@ -1,7 +1,10 @@
 import Config
 
 config :recognizer,
-  redis_host: System.get_env("REDIS_HOST", "localhost")
+  redis_host: System.get_env("REDIS_HOST", "localhost"),
+  mailchimp: [
+    module: Recognizer.MockMailchimp
+  ]
 
 config :argon2_elixir,
   t_cost: 1,

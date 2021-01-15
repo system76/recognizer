@@ -27,16 +27,6 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
     }
   end
 
-  defp recovery_codes(%{recovery_codes: recovery_codes}), do: Enum.map(recovery_codes, &Map.get(&1, :code))
-
-  def render("session.json", %{user: user, access_token: access_token}) do
-    "show.json"
-    |> render(%{user: user})
-    |> Map.put(:session, %{
-      token: access_token
-    })
-  end
-
   def render("show.json", %{user: user}) do
     %{
       user: %{
@@ -57,5 +47,15 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
 
   def render("notification_preferences.json", %{notification_preference: preferences}) do
     Map.take(preferences, [:two_factor])
+  end
+
+  defp recovery_codes(%{recovery_codes: recovery_codes}), do: Enum.map(recovery_codes, &Map.get(&1, :code))
+
+  def render("session.json", %{user: user, access_token: access_token}) do
+    "show.json"
+    |> render(%{user: user})
+    |> Map.put(:session, %{
+      token: access_token
+    })
   end
 end
