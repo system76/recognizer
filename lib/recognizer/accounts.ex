@@ -128,7 +128,7 @@ defmodule Recognizer.Accounts do
   end
 
   defp enforce_org_policy({:password_expiration, days}, user) do
-    password_date = DateTime.add(user.password_changed_at, days, :days)
+    password_date = DateTime.add(user.password_changed_at, days * 86400, :second)
 
     case DateTime.compare(password_date, DateTime.utc_now()) do
       :lt -> {:password_change, user}
