@@ -111,9 +111,6 @@ defmodule Recognizer.Accounts do
 
       false ->
         nil
-
-      nil ->
-        nil
     end
   end
 
