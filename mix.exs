@@ -33,7 +33,7 @@ defmodule Recognizer.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:appsignal_phoenix, "~> 2.0.0"},
+      {:appsignal_phoenix, "~> 2.0.4"},
       {:argon2_elixir, "~> 2.0"},
       {:bottle, github: "system76/bottle", ref: "1621c66"},
       {:cors_plug, "~> 2.0"},
@@ -52,7 +52,7 @@ defmodule Recognizer.MixProject do
       {:guardian_db, "~> 2.1"},
       {:httpoison, "~> 0.13"},
       {:jason, "~> 1.0"},
-      {:logger_json, "~> 4.0"},
+      {:logger_json, github: "Nebo15/logger_json", ref: "8e4290a"},
       {:myxql, ">= 0.0.0"},
       {:redix, ">= 0.0.0"},
       {:phoenix_ecto, "~> 4.1"},
@@ -64,7 +64,7 @@ defmodule Recognizer.MixProject do
       {:pot, "~> 1.0"},
       {:saxy, "~> 1.1"},
       {:spandex, "~> 3.0.3"},
-      {:spandex_datadog, "~> 1.0.0"},
+      {:spandex_datadog, "~> 1.1.0"},
       {:spandex_ecto, "~> 0.6.2"},
       {:spandex_phoenix, "~> 1.0.5"},
       {:telemetry_metrics, "~> 0.4"},
