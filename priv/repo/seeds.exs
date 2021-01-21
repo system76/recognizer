@@ -33,7 +33,7 @@ Recognizer.Repo.insert!(%Recognizer.Accounts.Organization{
   name: "Strict Organization",
   password_reuse: 4,
   password_expiration: 1,
-  two_factor_required: true
+  two_factor_app_required: true
 })
 
 Recognizer.Repo.insert!(%Recognizer.Accounts.User{

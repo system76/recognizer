@@ -12,7 +12,7 @@ defmodule Recognizer.Accounts.Organization do
 
     field :password_reuse, :integer
     field :password_expiration, :integer
-    field :two_factor_required, :boolean, default: false
+    field :two_factor_app_required, :boolean, default: false
 
     has_many :users, User
 
@@ -21,7 +21,7 @@ defmodule Recognizer.Accounts.Organization do
 
   def changeset(%Organization{} = org, attrs) do
     org
-    |> cast(attrs, [:name, :password_expiration, :password_reuse, :two_factor_required])
+    |> cast(attrs, [:name, :password_expiration, :password_reuse, :two_factor_app_required])
     |> validate_required([:name])
   end
 end

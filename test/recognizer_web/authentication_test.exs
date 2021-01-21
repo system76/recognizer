@@ -40,7 +40,7 @@ defmodule RecognizerWeb.AuthenticationTest do
       user =
         :user
         |> build()
-        |> add_organization_policy(two_factor_required: true)
+        |> add_organization_policy(two_factor_app_required: true)
         |> insert()
 
       conn = conn |> Authentication.log_in_user(user)

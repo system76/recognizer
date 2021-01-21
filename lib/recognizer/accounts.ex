@@ -356,8 +356,15 @@ defmodule Recognizer.Accounts do
     end
   end
 
-  defp user_prompts({:two_factor_required, true}, %{two_factor_enabled: false} = user) do
-    {:two_factor, user}
+  defp user_prompts({:two_factor_app_required, true}, user) do
+    two_factor_enabled? = user.two_factor_enabled
+    two_factor_method = user.notification_preference.two_factor
+
+    if not two_factor_enabled? or two_factor_method !== :app do
+      {:two_factor, user}
+    else
+      false
+    end
   end
 
   defp user_prompts(_, _user) do

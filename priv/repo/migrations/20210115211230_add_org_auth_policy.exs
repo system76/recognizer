@@ -4,16 +4,19 @@ defmodule Recognizer.Repo.Migrations.AddOrgAuthPolicy do
   def change do
     create table(:organizations) do
       add :name, :string, null: false
+
       add :password_reuse, :integer, default: nil
       add :password_expiration, :integer, default: nil
-      add :two_factor_required, :boolean, default: false
+      add :two_factor_app_required, :boolean, default: false
+
       timestamps()
     end
 
     # alter table(:organizations) do
     #   add :password_reuse, :integer, default: 6
     #   add :password_expiration, :integer, default: 90
-    #   add :two_factor_required, :boolean, default: false
+    #   add :two_factor_app_required, :boolean, default: false
+    #
     #   timestamps()
     # end
 

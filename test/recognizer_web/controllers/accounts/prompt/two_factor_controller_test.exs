@@ -7,7 +7,7 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorControllerTest do
     user =
       :user
       |> build()
-      |> add_organization_policy(two_factor_required: true)
+      |> add_organization_policy(two_factor_app_required: true)
       |> insert()
 
     %{

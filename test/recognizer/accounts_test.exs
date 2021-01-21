@@ -123,7 +123,19 @@ defmodule Recognizer.AccountsTest do
         user =
         :user
         |> build()
-        |> add_organization_policy(two_factor_required: true)
+        |> add_organization_policy(two_factor_app_required: true)
+        |> insert()
+
+      assert {:two_factor, %User{id: ^id}} = Accounts.user_prompts(user)
+    end
+
+    test "returns the {:two_factor, user} if 2FA is enabled to non app method" do
+      %{id: id} =
+        user =
+        :user
+        |> build()
+        |> add_two_factor(:text)
+        |> add_organization_policy(two_factor_app_required: true)
         |> insert()
 
       assert {:two_factor, %User{id: ^id}} = Accounts.user_prompts(user)

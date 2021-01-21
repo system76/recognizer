@@ -3,7 +3,8 @@
 
   <div class="my-4">
     <p>
-      Your organization requires you to have two factor authentication enabled.
+      Your organization requires you to have <strong>app based two factor
+      authentication</strong> enabled.
     </p>
   </div>
 
@@ -11,34 +12,8 @@
     <%= hidden_input f, :two_factor_enabled, value: "1" %>
 
     <%= inputs_for f, :notification_preference, fn n -> %>
-      <div class="label mt-4">
-        Authentication Method Preference
-      </div>
-
-      <div class="field">
-        <div class="control">
-          <%= label class: "label" do %>
-            <%= radio_button n, :two_factor, "app" %>
-            Authenticator App
-          <% end %>
-
-          <%= label class: "label" do %>
-            <%= radio_button n, :two_factor, "text" %>
-            Text Message
-          <% end %>
-
-          <%= label class: "label" do %>
-            <%= radio_button n, :two_factor, "voice" %>
-            Phone Call
-          <% end %>
-        </div>
-      </div>
+      <%= hidden_input n, :two_factor, value: "app" %>
     <% end %>
-
-    <p class="is-size-7">
-      Message and data rates may apply for text message and phone call
-      methods.
-    </p>
 
     <div class="buttons is-right mt-5">
       <div class="control">
