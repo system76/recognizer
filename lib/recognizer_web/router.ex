@@ -79,6 +79,18 @@ defmodule RecognizerWeb.Router do
     post "/recovery-code", UserRecoveryCodeController, :create
   end
 
+  scope "/", RecognizerWeb.Accounts.Prompt, as: :prompt do
+    pipe_through [:browser, :auth, :guest]
+
+    get "/prompt/update-password", PasswordChangeController, :edit
+    put "/prompt/update-password", PasswordChangeController, :update
+
+    get "/prompt/setup-two-factor", TwoFactorController, :new
+    put "/prompt/setup-two-factor", TwoFactorController, :create
+    get "/prompt/setup-two-factor/confirm", TwoFactorController, :edit
+    post "/prompt/setup-two-factor/confirm", TwoFactorController, :update
+  end
+
   scope "/", RecognizerWeb.Accounts do
     pipe_through [:browser, :auth, :user]
 

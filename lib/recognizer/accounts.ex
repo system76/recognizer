@@ -327,6 +327,10 @@ defmodule Recognizer.Accounts do
       {:two_factor, %User{}}
 
   """
+  def user_prompts(%{organization_id: nil} = user) do
+    {:ok, user}
+  end
+
   def user_prompts(%{organization: %Ecto.Association.NotLoaded{}} = user) do
     user |> Repo.preload(:organization) |> user_prompts()
   end
@@ -344,7 +348,8 @@ defmodule Recognizer.Accounts do
   end
 
   defp user_prompts({:password_expiration, days}, user) do
-    password_date = NaiveDateTime.add(user.password_changed_at, days * 86400, :second)
+    password_changed_at = if user.password_changed_at != nil, do: user.password_changed_at, else: user.inserted_at
+    password_date = NaiveDateTime.add(password_changed_at, days * 86400, :second)
 
     case NaiveDateTime.compare(password_date, NaiveDateTime.utc_now()) do
       :lt -> {:password_change, user}

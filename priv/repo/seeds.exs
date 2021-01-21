@@ -28,6 +28,34 @@ Recognizer.Repo.insert!(%Recognizer.Accounts.NotificationPreference{
   user_id: 1
 })
 
+Recognizer.Repo.insert!(%Recognizer.Accounts.Organization{
+  id: 1,
+  name: "Strict Organization",
+  password_reuse: 4,
+  password_expiration: 1,
+  two_factor_required: true
+})
+
+Recognizer.Repo.insert!(%Recognizer.Accounts.User{
+  id: 2,
+  first_name: "Company",
+  last_name: "Person",
+  username: "test-at-example768c07eb5dab28aed",
+  email: "company@example.com",
+  hashed_password: Argon2.hash_pwd_salt("System76"),
+  password_changed_at: ~N[2021-01-01 01:01:01],
+  organization_id: 1
+})
+
+Recognizer.Repo.insert!(%Recognizer.Accounts.Role{
+  role_id: 1,
+  user_id: 2
+})
+
+Recognizer.Repo.insert!(%Recognizer.Accounts.NotificationPreference{
+  user_id: 2
+})
+
 Recognizer.Repo.insert!(%Recognizer.OauthProvider.Application{
   name: "Privileged Application",
   uid: "privileged",
