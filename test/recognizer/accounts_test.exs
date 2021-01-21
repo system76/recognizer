@@ -83,7 +83,7 @@ defmodule Recognizer.AccountsTest do
     end
 
     test "validates email uniqueness" do
-      user_params = Map.take(insert(:user), [:first_name, :last_name, :email])
+      user_params = :user |> insert() |> Map.take([:first_name, :last_name, :email])
       {:error, changeset} = Accounts.register_user(user_params)
       assert "has already been taken" in errors_on(changeset).email
 
