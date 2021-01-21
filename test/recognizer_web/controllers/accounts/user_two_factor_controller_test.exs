@@ -50,15 +50,5 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
       assert redirected_to(conn) == "/two-factor"
       assert get_flash(conn, :info) =~ "resent"
     end
-
-    test "redirects to user settings for successful recovery code", %{conn: conn, user: user} do
-      %{recovery_codes: [%{code: recovery_code} | tail]} = user
-
-      conn = post(conn, Routes.user_two_factor_path(conn, :create), %{"user" => %{"recovery_code" => recovery_code}})
-      assert redirected_to(conn) == "/settings"
-
-      %{recovery_codes: remaining_codes} = Recognizer.Repo.preload(user, :recovery_codes, force: true)
-      assert length(remaining_codes) == length(tail)
-    end
   end
 end

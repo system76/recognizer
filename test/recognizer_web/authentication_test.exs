@@ -25,6 +25,28 @@ defmodule RecognizerWeb.AuthenticationTest do
       refute get_session(conn, :to_be_removed)
     end
 
+    test "redirects to change password prompt if organization requirement", %{conn: conn} do
+      user =
+        :user
+        |> build(inserted_at: NaiveDateTime.add(NaiveDateTime.utc_now(), -999_999, :second))
+        |> add_organization_policy(password_expiration: 1)
+        |> insert()
+
+      conn = conn |> Authentication.log_in_user(user)
+      assert redirected_to(conn) == "/prompt/update-password"
+    end
+
+    test "redirects to two factor prompt if organization requirement", %{conn: conn} do
+      user =
+        :user
+        |> build()
+        |> add_organization_policy(two_factor_required: true)
+        |> insert()
+
+      conn = conn |> Authentication.log_in_user(user)
+      assert redirected_to(conn) == "/prompt/setup-two-factor"
+    end
+
     test "redirects to the configured path", %{conn: conn, user: user} do
       conn = conn |> put_session(:user_return_to, "/hello") |> Authentication.log_in_user(user)
       assert redirected_to(conn) == "/hello"

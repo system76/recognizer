@@ -16,12 +16,10 @@ defmodule RecognizerWeb.Accounts.Prompt.PasswordChangeController do
 
     case Accounts.update_user_password(user, password, user_params) do
       {:ok, user} ->
-        IO.inspect(user, label: "updated user")
         Authentication.revoke_all_tokens(user)
         Authentication.log_in_user(conn, user, params)
 
       {:error, changeset} ->
-        IO.inspect(changeset, label: "error")
         render(conn, "edit.html", password_changeset: changeset)
     end
   end

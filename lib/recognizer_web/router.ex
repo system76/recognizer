@@ -86,7 +86,7 @@ defmodule RecognizerWeb.Router do
     put "/prompt/update-password", PasswordChangeController, :update
 
     get "/prompt/setup-two-factor", TwoFactorController, :new
-    put "/prompt/setup-two-factor", TwoFactorController, :create
+    post "/prompt/setup-two-factor", TwoFactorController, :create
     get "/prompt/setup-two-factor/confirm", TwoFactorController, :edit
     post "/prompt/setup-two-factor/confirm", TwoFactorController, :update
   end
