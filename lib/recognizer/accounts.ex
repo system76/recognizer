@@ -348,8 +348,7 @@ defmodule Recognizer.Accounts do
   end
 
   defp user_prompts({:password_expiration, days}, user) do
-    password_changed_at = if user.password_changed_at != nil, do: user.password_changed_at, else: user.inserted_at
-    password_date = NaiveDateTime.add(password_changed_at, days * 86_400, :second)
+    password_date = NaiveDateTime.add(user.password_changed_at, days * 86_400, :second)
 
     case NaiveDateTime.compare(password_date, NaiveDateTime.utc_now()) do
       :lt -> {:password_change, user}

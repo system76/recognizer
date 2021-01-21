@@ -28,7 +28,7 @@ defmodule RecognizerWeb.AuthenticationTest do
     test "redirects to change password prompt if organization requirement", %{conn: conn} do
       user =
         :user
-        |> build(inserted_at: NaiveDateTime.add(NaiveDateTime.utc_now(), -999_999, :second))
+        |> build(password_changed_at: ~N[2020-01-01 01:01:01])
         |> add_organization_policy(password_expiration: 1)
         |> insert()
 

@@ -88,6 +88,7 @@ defmodule Recognizer.Accounts.User do
     |> put_assoc(:roles, Role.default_role_changeset())
     |> validate_company_name()
     |> generate_username()
+    |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
   end
 
   def oauth_registration_changeset(user, attrs) do
@@ -98,6 +99,7 @@ defmodule Recognizer.Accounts.User do
     |> validate_email()
     |> put_assoc(:roles, Role.default_role_changeset())
     |> generate_username()
+    |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
   end
 
   defp validate_email(changeset) do

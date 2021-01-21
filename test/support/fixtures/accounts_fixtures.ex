@@ -25,7 +25,7 @@ defmodule Recognizer.AccountsFixtures do
 
   def user_factory(attrs) do
     password = Map.get(attrs, :password, build(:password))
-    inserted_at = Map.get(attrs, :inserted_at, NaiveDateTime.utc_now())
+    password_changed_at = Map.get(attrs, :password_changed_at, NaiveDateTime.utc_now())
 
     %Accounts.User{
       first_name: sequence(:first_name, &"first-name-#{&1}"),
@@ -38,8 +38,7 @@ defmodule Recognizer.AccountsFixtures do
       password: password,
       hashed_password: Argon2.hash_pwd_salt(password),
       notification_preference: build(:notification_preference),
-      inserted_at: inserted_at,
-      password_changed_at: inserted_at
+      password_changed_at: password_changed_at
     }
   end
 
