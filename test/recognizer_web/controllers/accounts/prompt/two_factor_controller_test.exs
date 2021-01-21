@@ -33,10 +33,10 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorControllerTest do
     end
   end
 
-  describe "POST /prompt/setup-two-factor" do
+  describe "PUT /prompt/setup-two-factor" do
     test "updates the user notification settings", %{conn: conn} do
       new_conn =
-        post(conn, Routes.prompt_two_factor_path(conn, :create), %{
+        put(conn, Routes.prompt_two_factor_path(conn, :create), %{
           "user" => %{
             "notification_preference" => %{
               "two_factor" => "app"
