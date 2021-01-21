@@ -22,6 +22,7 @@ defmodule RecognizerWeb.FallbackController do
     respond(conn, :unauthorized, "401")
   end
 
+  @impl true
   def call(conn, {:error, :unauthenticated}) do
     conn
     |> Authentication.maybe_store_return_to()
