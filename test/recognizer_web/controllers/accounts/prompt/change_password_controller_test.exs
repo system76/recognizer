@@ -17,6 +17,7 @@ defmodule RecognizerWeb.Accounts.Prompt.ChangePasswordControllerTest do
         Phoenix.ConnTest.init_test_session(conn, %{
           prompt_user_id: user.id
         }),
+      empty_conn: conn,
       user: user
     }
   end
@@ -26,6 +27,11 @@ defmodule RecognizerWeb.Accounts.Prompt.ChangePasswordControllerTest do
       conn = get(conn, Routes.prompt_password_change_path(conn, :edit))
       response = html_response(conn, 200)
       assert response =~ "Update Password</h2>"
+    end
+
+    test "renders unauthenticated error if not logged in", %{empty_conn: conn} do
+      conn = get(conn, Routes.prompt_password_change_path(conn, :edit))
+      assert redirected_to(conn) == "/login"
     end
   end
 

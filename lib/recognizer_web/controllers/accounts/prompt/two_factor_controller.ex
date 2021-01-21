@@ -4,6 +4,7 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorController do
   alias Recognizer.Accounts
   alias RecognizerWeb.Authentication
 
+  plug :ensure_user
   plug :assign_changesets
 
   def new(conn, _params) do
@@ -47,13 +48,20 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorController do
     end
   end
 
-  defp assign_changesets(conn, _opts) do
+  defp ensure_user(conn, _opts) do
     user_id = get_session(conn, :prompt_user_id)
-    user = Accounts.get_user!(user_id)
 
+    if user_id == nil do
+      RecognizerWeb.FallbackController.call(conn, {:error, :unauthenticated})
+    else
+      user = Accounts.get_user!(user_id)
+      assign(conn, :user, user)
+    end
+  end
+
+  defp assign_changesets(conn, _opts) do
     conn
-    |> assign(:user, user)
-    |> assign(:changeset, Accounts.change_user(user))
-    |> assign(:two_factor_changeset, Accounts.change_user_two_factor(user))
+    |> assign(:changeset, Accounts.change_user(conn.assigns.user))
+    |> assign(:two_factor_changeset, Accounts.change_user_two_factor(conn.assigns.user))
   end
 end

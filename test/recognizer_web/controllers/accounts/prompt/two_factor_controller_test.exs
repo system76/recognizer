@@ -15,6 +15,7 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorControllerTest do
         Phoenix.ConnTest.init_test_session(conn, %{
           prompt_user_id: user.id
         }),
+      empty_conn: conn,
       user: user
     }
   end
@@ -24,6 +25,11 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorControllerTest do
       conn = get(conn, Routes.prompt_two_factor_path(conn, :new))
       response = html_response(conn, 200)
       assert response =~ "Two Factor</h2>"
+    end
+
+    test "renders unauthenticated error if not logged in", %{empty_conn: conn} do
+      conn = get(conn, Routes.prompt_two_factor_path(conn, :new))
+      assert redirected_to(conn) == "/login"
     end
   end
 
