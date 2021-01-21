@@ -12,7 +12,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
     end
 
     test "redirects if already logged in", %{conn: conn} do
-      conn = conn |> log_in_user(user_fixture()) |> get(Routes.user_registration_path(conn, :new))
+      conn = conn |> log_in_user(insert(:user)) |> get(Routes.user_registration_path(conn, :new))
       assert redirected_to(conn) == "/settings"
     end
   end
@@ -20,16 +20,9 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
   describe "POST /users/register" do
     @tag :capture_log
     test "creates account and logs the user in", %{conn: conn} do
-      email = unique_user_email()
-
       conn =
         post(conn, Routes.user_registration_path(conn, :create), %{
-          "user" => %{
-            "first_name" => unique_name(),
-            "last_name" => unique_name(),
-            "email" => email,
-            "password" => valid_user_password()
-          }
+          "user" => params_for(:user)
         })
 
       assert Recognizer.Guardian.Plug.current_resource(conn)

@@ -9,20 +9,15 @@ defmodule Recognizer.Accounts.Organization do
 
   schema "organizations" do
     field :name, :string
+
     field :password_reuse, :integer
     field :password_expiration, :integer
-    field :two_factor_required, :boolean
+    field :two_factor_required, :boolean, default: false
 
     has_many :users, User
 
     timestamps()
   end
-
-  @type t :: %Organization{
-          id: Schema.id(),
-          name: String.t(),
-          users: Schema.many(User)
-        }
 
   def changeset(%Organization{} = org, attrs) do
     org

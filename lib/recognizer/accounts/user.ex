@@ -31,7 +31,7 @@ defmodule Recognizer.Accounts.User do
     field :hashed_password, :string, source: :password
     field :password_changed_at, :naive_datetime
 
-    field :two_factor_enabled, :boolean
+    field :two_factor_enabled, :boolean, default: false
     field :two_factor_seed, :string
     field :two_factor_code, :string, virtual: true, redact: true
 

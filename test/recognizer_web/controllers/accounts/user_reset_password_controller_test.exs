@@ -6,7 +6,7 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
   alias Recognizer.Accounts
 
   setup do
-    %{user: user_fixture()}
+    %{user: insert(:user)}
   end
 
   describe "GET /users/reset_password" do

@@ -11,7 +11,7 @@ defmodule RecognizerWeb.AuthenticationTest do
       |> Map.replace!(:secret_key_base, RecognizerWeb.Endpoint.config(:secret_key_base))
       |> init_test_session(%{})
 
-    %{user: user_fixture(), conn: conn}
+    %{user: insert(:user), conn: conn}
   end
 
   describe "log_in_user/3" do
