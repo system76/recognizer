@@ -17,12 +17,12 @@ defmodule RecognizerWeb.Authentication do
     case Recognizer.Accounts.user_prompts(user) do
       {:password_change, _user} ->
         conn
-        |> put_session(:current_user_id, user.id)
+        |> put_session(:prompt_user_id, user.id)
         |> redirect(to: Routes.prompt_password_change_path(conn, :edit))
 
       {:two_factor, _user} ->
         conn
-        |> put_session(:current_user_id, user.id)
+        |> put_session(:prompt_user_id, user.id)
         |> redirect(to: Routes.prompt_two_factor_path(conn, :new))
 
       {:ok, _user} ->

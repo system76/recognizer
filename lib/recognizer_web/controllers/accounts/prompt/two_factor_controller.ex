@@ -11,10 +11,7 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorController do
   end
 
   def create(conn, %{"user" => user_params}) do
-    user_id = get_session(conn, :current_user_id)
-    user = Accounts.get_user!(user_id)
-
-    case Accounts.update_user(user, user_params) do
+    case Accounts.update_user(conn.assigns.user, user_params) do
       {:ok, updated_user} ->
         preference = get_in(user_params, ["notification_preference", "two_factor"])
         Accounts.generate_and_cache_new_two_factor_settings(updated_user, preference)
@@ -26,9 +23,7 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorController do
   end
 
   def edit(conn, _params) do
-    user_id = get_session(conn, :current_user_id)
-    user = Accounts.get_user!(user_id)
-
+    user = conn.assigns.user
     {:ok, %{"two_factor_seed" => seed}} = Accounts.get_new_two_factor_settings(user)
 
     render(conn, "confirm.html",
@@ -38,9 +33,7 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorController do
   end
 
   def update(conn, params) do
-    user_id = get_session(conn, :current_user_id)
-    user = Accounts.get_user!(user_id)
-
+    user = conn.assigns.user
     two_factor_code = Map.get(params, "two_factor_code", "")
 
     case Accounts.confirm_and_save_two_factor_settings(two_factor_code, user) do
@@ -55,10 +48,11 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorController do
   end
 
   defp assign_changesets(conn, _opts) do
-    user_id = get_session(conn, :current_user_id)
+    user_id = get_session(conn, :prompt_user_id)
     user = Accounts.get_user!(user_id)
 
     conn
+    |> assign(:user, user)
     |> assign(:changeset, Accounts.change_user(user))
     |> assign(:two_factor_changeset, Accounts.change_user_two_factor(user))
   end

@@ -13,7 +13,7 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorControllerTest do
     %{
       conn:
         Phoenix.ConnTest.init_test_session(conn, %{
-          current_user_id: user.id
+          prompt_user_id: user.id
         }),
       user: user
     }
