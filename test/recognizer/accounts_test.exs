@@ -225,6 +225,12 @@ defmodule Recognizer.AccountsTest do
       assert "should be at most 80 character(s)" in errors_on(changeset).password
     end
 
+    test "validates password is not the same as current", %{user: user} do
+      updatable_user = Accounts.get_user!(user.id)
+      {:error, changeset} = Accounts.update_user_password(updatable_user, user.password, %{password: user.password})
+      assert "must be a new password" in errors_on(changeset).password
+    end
+
     test "validates current password", %{user: user} do
       {:error, changeset} = Accounts.update_user_password(user, "invalid", %{password: build(:password)})
 
