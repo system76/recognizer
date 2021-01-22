@@ -8,7 +8,7 @@ defmodule Recognizer.Accounts.User do
 
   import Ecto.Changeset
 
-  alias Recognizer.Accounts.{NotificationPreference, RecoveryCode, Role}
+  alias Recognizer.Accounts.{NotificationPreference, RecoveryCode, Role, Organization}
   alias Recognizer.Repo
   alias __MODULE__
 
@@ -29,12 +29,16 @@ defmodule Recognizer.Accounts.User do
 
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, source: :password
+    field :password_changed_at, :naive_datetime
 
-    field :two_factor_enabled, :boolean
+    field :two_factor_enabled, :boolean, default: false
     field :two_factor_seed, :string
     field :two_factor_code, :string, virtual: true, redact: true
 
     has_one :notification_preference, NotificationPreference, on_replace: :update
+
+    belongs_to :organization, Organization
+
     has_many :roles, Role
     has_many :recovery_codes, RecoveryCode, on_replace: :delete
 
@@ -84,6 +88,7 @@ defmodule Recognizer.Accounts.User do
     |> put_assoc(:roles, Role.default_role_changeset())
     |> validate_company_name()
     |> generate_username()
+    |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
   end
 
   def oauth_registration_changeset(user, attrs) do
@@ -94,6 +99,7 @@ defmodule Recognizer.Accounts.User do
     |> validate_email()
     |> put_assoc(:roles, Role.default_role_changeset())
     |> generate_username()
+    |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
   end
 
   defp validate_email(changeset) do
@@ -115,6 +121,7 @@ defmodule Recognizer.Accounts.User do
     |> validate_format(:password, ~r/[ \!\$\*\+\[\{\]\}\\\|\.\/\?,!@#%^&-=,.<>'";:]/,
       message: "must contain a symbol or space"
     )
+    |> validate_new_password(opts)
     |> maybe_hash_password(opts)
   end
 
@@ -123,6 +130,18 @@ defmodule Recognizer.Accounts.User do
       put_change(changeset, :company_name, "")
     else
       validate_required(changeset, :company_name)
+    end
+  end
+
+  defp validate_new_password(changeset, opts) do
+    hash_password? = Keyword.get(opts, :hash_password, true)
+    password = get_change(changeset, :password)
+    hashed_password = get_field(changeset, :hashed_password)
+
+    if hash_password? && password && changeset.valid? && valid_password?(hashed_password, password) do
+      add_error(changeset, :password, "must be a new password")
+    else
+      changeset
     end
   end
 
@@ -183,6 +202,7 @@ defmodule Recognizer.Accounts.User do
     |> cast(attrs, [:password])
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
+    |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
   end
 
   @doc """
@@ -193,6 +213,11 @@ defmodule Recognizer.Accounts.User do
   """
   @decorate span()
   def valid_password?(%User{hashed_password: hashed_password}, password)
+      when is_binary(hashed_password) and byte_size(password) > 0 do
+    Argon2.verify_pass(password, hashed_password)
+  end
+
+  def valid_password?(hashed_password, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
     Argon2.verify_pass(password, hashed_password)
   end

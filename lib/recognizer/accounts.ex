@@ -30,8 +30,9 @@ defmodule Recognizer.Accounts do
     query =
       from u in User,
         join: n in assoc(u, :notification_preference),
+        left_join: o in assoc(u, :organization),
         where: u.email == ^email,
-        preload: [notification_preference: n, roles: []]
+        preload: [notification_preference: n, roles: [], organization: o]
 
     Repo.one(query)
   end
@@ -53,8 +54,9 @@ defmodule Recognizer.Accounts do
       from o in OAuth,
         join: u in assoc(o, :user),
         join: n in assoc(u, :notification_preference),
+        left_join: org in assoc(u, :organization),
         where: o.service == ^service and o.service_guid == ^service_guid,
-        preload: [user: {u, [notification_preference: n, roles: []]}]
+        preload: [user: {u, [notification_preference: n, roles: [], organization: org]}]
 
     with %OAuth{user: user} <- Repo.one(query),
          %User{two_factor_enabled: false} <- user do
@@ -87,6 +89,9 @@ defmodule Recognizer.Accounts do
       iex> get_user_by_email_and_password("foo@example.com", "correct_password")
       {:ok, %User{}}
 
+      iex> get_user_by_email_and_password("foo@example.com", "two_factor_enabled")
+      {:two_factor, %User{}}
+
       iex> get_user_by_email_and_password("foo@example.com", "invalid_password")
       nil
 
@@ -96,8 +101,9 @@ defmodule Recognizer.Accounts do
     query =
       from u in User,
         join: n in assoc(u, :notification_preference),
+        left_join: o in assoc(u, :organization),
         where: u.email == ^email,
-        preload: [notification_preference: n, roles: []]
+        preload: [notification_preference: n, roles: [], organization: o]
 
     with %User{} = user <- Repo.one(query),
          true <- User.valid_password?(user, password),
@@ -130,8 +136,9 @@ defmodule Recognizer.Accounts do
     query =
       from u in User,
         join: n in assoc(u, :notification_preference),
+        left_join: o in assoc(u, :organization),
         where: u.id == ^id,
-        preload: [notification_preference: n, roles: []]
+        preload: [notification_preference: n, roles: [], organization: o]
 
     Repo.one!(query)
   end
@@ -299,6 +306,69 @@ defmodule Recognizer.Accounts do
       {:error, :user, changeset, _} ->
         {:error, changeset}
     end
+  end
+
+  ## Prompts / Organization
+
+  @doc """
+  Checks if we need to prompt the user with anything between logins. This could
+  be an organization security requirement, like needing to enable two factor,
+  or requiring a password reset.
+
+  ## Examples
+
+      iex> user_prompts(user)
+      {:ok, %User{}}
+
+      iex> user_prompts(old_password_user)
+      {:password_change, %User{}}
+
+      iex> user_prompts(two_factorless_user)
+      {:two_factor, %User{}}
+
+  """
+  def user_prompts(%{organization_id: nil} = user) do
+    {:ok, user}
+  end
+
+  def user_prompts(%{organization: %Ecto.Association.NotLoaded{}} = user) do
+    user |> Repo.preload(:organization) |> user_prompts()
+  end
+
+  def user_prompts(%{organization: org} = user) do
+    fields = Map.from_struct(org)
+
+    with nil <- Enum.find_value(fields, &user_prompts(&1, user)) do
+      {:ok, user}
+    end
+  end
+
+  defp user_prompts({_policy, nil}, _user) do
+    false
+  end
+
+  defp user_prompts({:password_expiration, days}, user) do
+    password_date = NaiveDateTime.add(user.password_changed_at, days * 86_400, :second)
+
+    case NaiveDateTime.compare(password_date, NaiveDateTime.utc_now()) do
+      :lt -> {:password_change, user}
+      _ -> false
+    end
+  end
+
+  defp user_prompts({:two_factor_app_required, true}, user) do
+    two_factor_enabled? = user.two_factor_enabled
+    two_factor_method = user.notification_preference.two_factor
+
+    if not two_factor_enabled? or two_factor_method !== :app do
+      {:two_factor, user}
+    else
+      false
+    end
+  end
+
+  defp user_prompts(_, _user) do
+    false
   end
 
   ## Session

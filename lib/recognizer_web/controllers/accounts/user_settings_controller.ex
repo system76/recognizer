@@ -76,7 +76,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   def update(conn, %{"action" => "update_two_factor", "user" => %{"two_factor_enabled" => "0"}}) do
     user = Authentication.fetch_current_user(conn)
 
-    with {:ok, updated_user} <- Accounts.update_user_two_factor(user, %{"two_factor_enabled" => false}) do
+    with {:ok, _updated_user} <- Accounts.update_user_two_factor(user, %{"two_factor_enabled" => false}) do
       conn
       |> put_flash(:info, "Two factor has been disabled.")
       |> redirect(to: Routes.user_settings_path(conn, :edit))
@@ -87,7 +87,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     user = Authentication.fetch_current_user(conn)
     preference = get_in(user_params, ["notification_preference", "two_factor"])
 
-    settings = Accounts.generate_and_cache_new_two_factor_settings(user, preference)
+    Accounts.generate_and_cache_new_two_factor_settings(user, preference)
 
     redirect(conn, to: Routes.user_settings_path(conn, :two_factor))
   end

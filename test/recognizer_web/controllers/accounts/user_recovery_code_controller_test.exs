@@ -4,7 +4,7 @@ defmodule RecognizerWeb.Accounts.UserRecoveryCodeControllerTest do
   import Recognizer.AccountsFixtures
 
   setup %{conn: conn} do
-    user = user_fixture() |> add_two_factor()
+    user = :user |> build() |> add_two_factor() |> insert()
 
     %{
       conn:

@@ -49,8 +49,6 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
     Map.take(preferences, [:two_factor])
   end
 
-  defp recovery_codes(%{recovery_codes: recovery_codes}), do: Enum.map(recovery_codes, &Map.get(&1, :code))
-
   def render("session.json", %{user: user, access_token: access_token}) do
     "show.json"
     |> render(%{user: user})
@@ -58,4 +56,6 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
       token: access_token
     })
   end
+
+  defp recovery_codes(%{recovery_codes: recovery_codes}), do: Enum.map(recovery_codes, &Map.get(&1, :code))
 end

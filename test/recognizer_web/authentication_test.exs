@@ -11,7 +11,7 @@ defmodule RecognizerWeb.AuthenticationTest do
       |> Map.replace!(:secret_key_base, RecognizerWeb.Endpoint.config(:secret_key_base))
       |> init_test_session(%{})
 
-    %{user: user_fixture(), conn: conn}
+    %{user: insert(:user), conn: conn}
   end
 
   describe "log_in_user/3" do
@@ -23,6 +23,28 @@ defmodule RecognizerWeb.AuthenticationTest do
     test "clears everything previously stored in the session", %{conn: conn, user: user} do
       conn = conn |> put_session(:to_be_removed, "value") |> Authentication.log_in_user(user)
       refute get_session(conn, :to_be_removed)
+    end
+
+    test "redirects to change password prompt if organization requirement", %{conn: conn} do
+      user =
+        :user
+        |> build(password_changed_at: ~N[2020-01-01 01:01:01])
+        |> add_organization_policy(password_expiration: 1)
+        |> insert()
+
+      conn = conn |> Authentication.log_in_user(user)
+      assert redirected_to(conn) == "/prompt/update-password"
+    end
+
+    test "redirects to two factor prompt if organization requirement", %{conn: conn} do
+      user =
+        :user
+        |> build()
+        |> add_organization_policy(two_factor_app_required: true)
+        |> insert()
+
+      conn = conn |> Authentication.log_in_user(user)
+      assert redirected_to(conn) == "/prompt/setup-two-factor"
     end
 
     test "redirects to the configured path", %{conn: conn, user: user} do

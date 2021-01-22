@@ -3,30 +3,17 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
 
   import Recognizer.AccountsFixtures
 
-  alias Recognizer.Accounts
   alias RecognizerWeb.Authentication
 
   setup %{conn: conn} do
-    user = user_fixture()
-    seed = Recognizer.Accounts.generate_new_two_factor_seed()
-
-    updated_user =
-      user
-      |> Recognizer.Repo.preload([:notification_preference, :recovery_codes])
-      |> Accounts.User.two_factor_changeset(%{
-        notification_preference: %{two_factor: "text"},
-        recovery_codes: Recognizer.Accounts.generate_new_recovery_codes(user),
-        two_factor_enabled: true,
-        two_factor_seed: seed
-      })
-      |> Recognizer.Repo.update!()
+    user = :user |> build() |> add_two_factor() |> insert()
 
     %{
       conn:
         Phoenix.ConnTest.init_test_session(conn, %{
-          current_user_id: user.id
+          two_factor_user_id: user.id
         }),
-      user: updated_user
+      user: user
     }
   end
 
@@ -62,16 +49,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
 
       assert redirected_to(conn) == "/two-factor"
       assert get_flash(conn, :info) =~ "resent"
-    end
-
-    test "redirects to user settings for successful recovery code", %{conn: conn, user: user} do
-      %{recovery_codes: [%{code: recovery_code} | tail]} = user
-
-      conn = post(conn, Routes.user_two_factor_path(conn, :create), %{"user" => %{"recovery_code" => recovery_code}})
-      assert redirected_to(conn) == "/settings"
-
-      %{recovery_codes: remaining_codes} = Recognizer.Repo.preload(user, :recovery_codes, force: true)
-      assert length(remaining_codes) == length(tail)
     end
   end
 end

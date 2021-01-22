@@ -1,0 +1,48 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Update Password</h2>
+
+  <div class="my-4">
+    <p>
+      Your organization requires you to change your password every <strong><%=
+      @user.organization.password_expiration %></strong> days.
+    </p>
+  </div>
+
+  <%= form_for @password_changeset, Routes.prompt_password_change_path(@conn, :update), [as: :user], fn f -> %>
+    <div class="field">
+      <%= label f, :current_password, class: "label" %>
+
+      <div class="control">
+        <%= password_input f, :current_password, class: input_classes(f, :current_password), required: true, name: "current_password" %>
+      </div>
+
+      <%= error_tag f, :current_password %>
+    </div>
+
+    <div class="field">
+      <%= label f, :password, "New Password", class: "label" %>
+
+      <div class="control">
+        <%= password_input f, :password, class: input_classes(f, :password), required: true %>
+      </div>
+
+      <%= error_tag f, :password %>
+    </div>
+
+    <div class="field">
+      <%= label f, :password_confirmation, "Confirm new password", class: "label" %>
+
+      <div class="control">
+        <%= password_input f, :password_confirmation, class: input_classes(f, :password_confirmation), required: true %>
+      </div>
+
+      <%= error_tag f, :password_confirmation %>
+    </div>
+
+    <div class="buttons is-right mt-5">
+      <div class="control">
+        <%= submit "Update Password", class: "button is-secondary" %>
+      </div>
+    </div>
+  <% end %>
+</div>

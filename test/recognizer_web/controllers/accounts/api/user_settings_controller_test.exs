@@ -5,19 +5,10 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
   import Recognizer.AccountsFixtures
 
   setup %{conn: conn} do
-    user =
-      user_fixture()
-      |> Recognizer.Repo.preload([:notification_preference, :recovery_codes])
-      |> Recognizer.Accounts.User.two_factor_changeset(%{
-        notification_preference: %{two_factor: "app"},
-        recovery_codes: [],
-        two_factor_enabled: true,
-        two_factor_seed: Recognizer.Accounts.generate_new_two_factor_seed()
-      })
-      |> Recognizer.Repo.update!()
+    user = :user |> build() |> add_two_factor(:app) |> insert()
 
     %{
-      conn: log_in_user(conn, Map.drop(user, [:notification_preference, :recovery_codes])),
+      conn: log_in_user(conn, user),
       user: user
     }
   end
@@ -45,7 +36,7 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
       conn =
         put(conn, "/api/settings", %{
           "action" => "update_password",
-          "current_password" => Recognizer.AccountsFixtures.valid_user_password(),
+          "current_password" => user.password,
           "user" => %{
             "password" => "Rec0gnizer!",
             "password_confirmation" => "Rec0gnizer!"

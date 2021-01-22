@@ -14,12 +14,25 @@ defmodule RecognizerWeb.Authentication do
   Logs the user in.
   """
   def log_in_user(conn, user, params \\ %{}) do
-    redirect_opts = login_redirect(conn)
+    case Recognizer.Accounts.user_prompts(user) do
+      {:password_change, _user} ->
+        conn
+        |> put_session(:prompt_user_id, user.id)
+        |> redirect(to: Routes.prompt_password_change_path(conn, :edit))
 
-    conn
-    |> clear_session()
-    |> Guardian.Plug.sign_in(user, params)
-    |> redirect(redirect_opts)
+      {:two_factor, _user} ->
+        conn
+        |> put_session(:prompt_user_id, user.id)
+        |> redirect(to: Routes.prompt_two_factor_path(conn, :new))
+
+      {:ok, _user} ->
+        redirect_opts = login_redirect(conn)
+
+        conn
+        |> clear_session()
+        |> Guardian.Plug.sign_in(user, params)
+        |> redirect(redirect_opts)
+    end
   end
 
   @doc """

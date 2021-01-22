@@ -1,42 +1,62 @@
 defmodule Recognizer.AccountsFixtures do
   @moduledoc """
-  This module defines test helpers for creating
-  entities via the `Recognizer.Accounts` context.
+  This module defines test helpers for creating entities via the
+  `Recognizer.Accounts` context.
   """
 
-  def unique_name, do: "personnum#{System.unique_integer()}"
-  def unique_user_email, do: "user#{System.unique_integer()}@example.com"
-  def valid_user_password, do: "aBcD123%&^"
+  use ExMachina.Ecto, repo: Recognizer.Repo
 
-  def user_fixture(attrs \\ %{}) do
-    {:ok, user} =
-      attrs
-      |> Enum.into(%{
-        first_name: unique_name(),
-        last_name: unique_name(),
-        email: unique_user_email(),
-        phone_number: "+18001234567",
-        type: :individual,
-        newsletter: false,
-        password: valid_user_password()
-      })
-      |> Recognizer.Accounts.register_user()
+  alias Recognizer.Accounts
 
-    user
+  def email_factory(_attrs), do: sequence(:email, &"example#{&1}@example.com")
+  def password_factory(_attrs), do: sequence(:password, &"aBcD123%&^#{&1}")
+
+  def notification_preference_factory do
+    %Accounts.NotificationPreference{
+      two_factor: :text
+    }
   end
 
-  def add_two_factor(user) do
+  def organization_factory do
+    %Accounts.Organization{
+      name: sequence(:name, &"organization-#{&1}")
+    }
+  end
+
+  def user_factory(attrs) do
+    password = Map.get(attrs, :password, build(:password))
+    password_changed_at = Map.get(attrs, :password_changed_at, NaiveDateTime.utc_now())
+
+    %Accounts.User{
+      first_name: sequence(:first_name, &"first-name-#{&1}"),
+      last_name: sequence(:last_name, &"last-name-#{&1}"),
+      email: build(:email),
+      username: sequence(:username, &"example-at-examp#{&1}"),
+      phone_number: sequence(:phone_number, &"+18000000000-#{&1}"),
+      type: :individual,
+      newsletter: false,
+      password: password,
+      hashed_password: Argon2.hash_pwd_salt(password),
+      notification_preference: build(:notification_preference),
+      password_changed_at: password_changed_at
+    }
+  end
+
+  def add_two_factor(user, type \\ :text) do
     seed = Recognizer.Accounts.generate_new_two_factor_seed()
 
-    user
-    |> Recognizer.Repo.preload([:notification_preference, :recovery_codes])
-    |> Recognizer.Accounts.User.two_factor_changeset(%{
-      notification_preference: %{two_factor: "text"},
-      recovery_codes: Recognizer.Accounts.generate_new_recovery_codes(user),
-      two_factor_enabled: true,
-      two_factor_seed: seed
-    })
-    |> Recognizer.Repo.update!()
+    %{
+      user
+      | notification_preference: build(:notification_preference, two_factor: type),
+        recovery_codes: Recognizer.Accounts.generate_new_recovery_codes(user),
+        two_factor_enabled: true,
+        two_factor_seed: seed
+    }
+  end
+
+  def add_organization_policy(user, attrs \\ []) do
+    %{id: org_id} = insert(:organization, attrs)
+    %{user | organization_id: org_id}
   end
 
   def extract_user_token(fun) do

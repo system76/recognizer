@@ -1,0 +1,24 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Setup Two Factor</h2>
+
+  <div class="my-4">
+    <p>
+      Your organization requires you to have <strong>app based two factor
+      authentication</strong> enabled.
+    </p>
+  </div>
+
+  <%= form_for @changeset, Routes.prompt_two_factor_path(@conn, :create), fn f -> %>
+    <%= hidden_input f, :two_factor_enabled, value: "1" %>
+
+    <%= inputs_for f, :notification_preference, fn n -> %>
+      <%= hidden_input n, :two_factor, value: "app" %>
+    <% end %>
+
+    <div class="buttons is-right mt-5">
+      <div class="control">
+        <%= submit "Enable Two Factor", class: "button is-secondary" %>
+      </div>
+    </div>
+  <% end %>
+</div>

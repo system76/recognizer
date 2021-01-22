@@ -27,7 +27,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       new_password_conn =
         put(conn, Routes.user_settings_path(conn, :update), %{
           "action" => "update_password",
-          "current_password" => valid_user_password(),
+          "current_password" => user.password,
           "user" => %{
             "password" => "NeWVa3!pa33wor@d",
             "password_confirmation" => "NeWVa3!pa33wor@d"
@@ -69,7 +69,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       conn =
         put(conn, Routes.user_settings_path(conn, :update), %{
           "action" => "update",
-          "user" => %{"email" => unique_user_email()}
+          "user" => %{"email" => build(:email)}
         })
 
       assert redirected_to(conn) == Routes.user_settings_path(conn, :edit)

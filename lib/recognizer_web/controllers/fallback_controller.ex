@@ -14,15 +14,20 @@ defmodule RecognizerWeb.FallbackController do
 
   @impl Guardian.Plug.ErrorHandler
   def auth_error(conn, {:unauthenticated, _reason}, _) do
-    conn
-    |> Authentication.maybe_store_return_to()
-    |> redirect(to: Routes.user_session_path(conn, :new))
-    |> halt()
+    call(conn, {:error, :unauthenticated})
   end
 
   @impl Guardian.Plug.ErrorHandler
   def auth_error(conn, {_type, _reason}, _) do
     respond(conn, :unauthorized, "401")
+  end
+
+  @impl true
+  def call(conn, {:error, :unauthenticated}) do
+    conn
+    |> Authentication.maybe_store_return_to()
+    |> redirect(to: Routes.user_session_path(conn, :new))
+    |> halt()
   end
 
   defp respond(conn, :not_found, _template) do
