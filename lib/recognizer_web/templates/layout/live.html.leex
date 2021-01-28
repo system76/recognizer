@@ -5,17 +5,21 @@
         <%= render("logo.html") %>
       </header>
 
-      <%= if get_flash(@conn, :info) do %>
-        <div class="notification is-info">
-          <%= get_flash(@conn, :info) %>
-        </div>
-      <% end %>
+      <div
+        class="notification is-info"
+        phx-click="lv:clear-flash"
+        phx-value-key="info"
+      >
+        <%= live_flash(@flash, :info) %>
+      </div>
 
-      <%= if get_flash(@conn, :error) do %>
-        <div class="notification is-danger">
-          <%= get_flash(@conn, :error) %>
-        </div>
-      <% end %>
+      <div
+        class="notification is-danger"
+        phx-click="lv:clear-flash"
+        phx-value-key="error"
+      >
+        <%= live_flash(@flash, :error) %>
+      </div>
 
       <main role="main">
         <%= @inner_content %>

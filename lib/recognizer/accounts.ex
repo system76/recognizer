@@ -555,12 +555,18 @@ defmodule Recognizer.Accounts do
 
     Redix.noreply_command(:redix, ["SET", "two_factor_settings:#{user.id}", Jason.encode!(attrs)])
 
+    send_new_two_factor_notification(user, new_seed, preference)
+  end
+
+  @doc """
+  Sends a two factor confirmation code for new settings. This is a no-op if the
+  user is trying to setup an app.
+  """
+  def send_new_two_factor_notification(user, seed, preference) do
     if preference != "app" do
-      token = Authentication.generate_token(new_seed)
+      token = Authentication.generate_token(seed)
       Notification.deliver_two_factor_token(user, token, String.to_existing_atom(preference))
     end
-
-    attrs
   end
 
   @doc """

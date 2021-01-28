@@ -1,0 +1,40 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Confirm Phone Number</h2>
+
+  <div class="my-4">
+    <%= if has_phone_number?(@user) do %>
+      <p>
+        Please confirm your phone number to use text or voice two-factor
+        authentication.
+      </p>
+    <% else %>
+      <p>
+        Please add a valid phone number to use text or voice two-factor
+        authentication.
+      </p>
+    <% end %>
+  </div>
+
+  <%= form_for @changeset, "#", [phx_submit: :phone_number], fn f -> %>
+    <div class="field">
+      <%= label f, :phone_number, "Phone Number", class: "label" %>
+
+      <div class="control">
+        <%= email_input f, :phone_number,
+          autocapitalize: "none",
+          autocomplete: "tel",
+          autocorrect: "off",
+          class: input_classes(f, :phone_number),
+          spellcheck: "false",
+          type: "tel"
+        %>
+      </div>
+
+      <%= error_tag f, :phone_number %>
+    </div>
+
+    <div class="buttons is-right mt-6">
+      <%= submit "Confirm", class: "button is-secondary" %>
+    </div>
+  <% end %>
+</div>

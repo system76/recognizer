@@ -1,0 +1,34 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Backup Codes</h2>
+
+  <div class="my-4">
+    <p>
+      Recovery codes are used to access your account if you have lost the
+      access to your phone.
+    </p>
+
+    <p>
+      <strong>
+        Download, print or copy your recovery codes before continuing
+        two-factor authentication setup.
+      </strong>
+    </p>
+  </div>
+
+  <pre><code><%= @settings["recovery_codes"] |> Enum.map(&Map.get(&1, "code")) |> Enum.join("\n") %></code></pre>
+
+  <div class="my-4">
+    <p>
+      <strong>
+        Treat your recovery codes with the same level of attention as you would
+        your password!
+      </strong>
+    </p>
+  </div>
+
+  <div class="buttons is-right mt-5">
+    <div class="control">
+      <%= submit "Next", class: "button is-secondary", phx_click: "backup" %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,50 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Enable Two Factor</h2>
+
+  <div class="my-4">
+    <p>
+      Two-factor authentication adds an additional layer of security to your
+      account by requiring more than just a password to log in. We
+      <strong>strongly</strong> urge you to enable 2FA for the safety of your
+      account.
+    </p>
+  </div>
+
+  <%= form_for @changeset, "#", [phx_submit: :choice], fn f -> %>
+    <%= inputs_for f, :notification_preference, fn n -> %>
+      <div class="label mt-4">
+        Authentication Method Preference
+      </div>
+
+      <div class="field">
+        <div class="control">
+          <%= label class: "label" do %>
+            <%= radio_button n, :two_factor, "app" %>
+            Authenticator App
+          <% end %>
+
+          <%= label class: "label" do %>
+            <%= radio_button n, :two_factor, "text" %>
+            Text Message
+          <% end %>
+
+          <%= label class: "label" do %>
+            <%= radio_button n, :two_factor, "voice" %>
+            Phone Call
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <p class="is-size-7">
+      Message and data rates may apply for text message and phone call
+      methods.
+    </p>
+
+    <div class="buttons is-right mt-5">
+      <div class="control">
+        <%= submit "Update", class: "button is-secondary" %>
+      </div>
+    </div>
+  <% end %>
+</div>

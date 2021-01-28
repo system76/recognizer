@@ -12,7 +12,7 @@ const liveSocket = new LiveSocket('/live', Socket, {
   }
 })
 
-topbar.config({barColors: {0: '#63b1bc'}})
+topbar.config({barColors: {0: '#63b1bc'}, shadowBlur: 0})
 window.addEventListener('phx:page-loading-start', info => topbar.show())
 window.addEventListener('phx:page-loading-stop', info => topbar.hide())
 
