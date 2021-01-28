@@ -15,6 +15,11 @@ config :recognizer, RecognizerWeb.Endpoint,
     accepts: ~w(html json),
     layout: {RecognizerWeb.LayoutView, "error.html"}
   ],
+  http: [
+    protocol_options: [
+      max_header_value_length: 8192
+    ]
+  ],
   pubsub_server: Recognizer.PubSub,
   live_view: [signing_salt: "YzwhzV25"],
   gzip: false
