@@ -1,4 +1,4 @@
-<div class="box">
+<div class="box" x-data="{accountType: '<%= account_type(@changeset) %>'}">
   <h2 class="title is-2 mb-5 has-text-centered-mobile">Create Account</h2>
 
   <%= form_for @changeset, Routes.user_registration_path(@conn, :create), fn f -> %>
@@ -40,18 +40,18 @@
     <div class="field my-5">
       <div class="control">
         <%= label class: "label" do %>
-          <%= radio_button f, :type, :individual %>
+          <%= radio_button f, :type, :individual, "x-model": "accountType" %>
           Personal Account
         <% end %>
 
         <%= label class: "label" do %>
-          <%= radio_button f, :type, :business %>
+          <%= radio_button f, :type, :business, "x-model": "accountType" %>
           Organization Account
         <% end %>
       </div>
     </div>
 
-    <div class="field company_name" style="display:<%= business_type_class(@changeset) %>;">
+    <div class="field" x-show="accountType === 'business'" style="display:<%= business_type_class(@changeset) %>;">
       <%= label f, :email, "Company Name", class: "label" %>
 
       <div class="control">
