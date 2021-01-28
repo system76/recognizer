@@ -21,6 +21,7 @@ defmodule RecognizerWeb do
     quote do
       use Phoenix.Controller, namespace: RecognizerWeb
 
+      import Phoenix.LiveView.Controller
       import Plug.Conn
       import RecognizerWeb.Gettext
 
@@ -53,6 +54,7 @@ defmodule RecognizerWeb do
 
       import Plug.Conn
       import Phoenix.Controller
+      import Phoenix.LiveView.Router
     end
   end
 
@@ -70,6 +72,7 @@ defmodule RecognizerWeb do
 
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
+      import Phoenix.LiveView.Helpers
 
       import RecognizerWeb.ErrorHelpers
       import RecognizerWeb.FormHelpers

@@ -8,6 +8,8 @@ defmodule RecognizerWeb.Endpoint do
     signing_salt: "juvsYHmf"
   ]
 
+  socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
+
   plug RecognizerWeb.HealthcheckPlug
 
   plug Plug.Static,
