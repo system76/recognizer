@@ -16,7 +16,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   def two_factor(conn, _params) do
     user = Authentication.fetch_current_user(conn)
-    {:ok, %{"two_factor_seed" => seed}} = Accounts.get_new_two_factor_settings(user)
+    {:ok, %{two_factor_seed: seed}} = Accounts.get_new_two_factor_settings(user)
 
     render(conn, "confirm_two_factor.html",
       barcode: Authentication.generate_totp_barcode(user, seed),

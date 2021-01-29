@@ -25,7 +25,7 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorController do
 
   def edit(conn, _params) do
     user = conn.assigns.user
-    {:ok, %{"two_factor_seed" => seed}} = Accounts.get_new_two_factor_settings(user)
+    {:ok, %{two_factor_seed: seed}} = Accounts.get_new_two_factor_settings(user)
 
     render(conn, "confirm.html",
       barcode: Authentication.generate_totp_barcode(user, seed),
