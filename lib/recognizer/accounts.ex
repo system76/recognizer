@@ -555,12 +555,32 @@ defmodule Recognizer.Accounts do
 
     Redix.noreply_command(:redix, ["SET", "two_factor_settings:#{user.id}", Jason.encode!(attrs)])
 
+    send_new_two_factor_notification(user, attrs)
+
+    attrs
+  end
+
+  @doc """
+  Sends a new notification message to the user to verify their _new_ two factor
+  settings.
+  """
+  def send_new_two_factor_notification(user) do
+    {:ok, attrs} = get_new_two_factor_settings(user)
+    send_new_two_factor_notification(user, attrs)
+  end
+
+  def send_new_two_factor_notification(user, attrs) do
+    %{
+      notification_preference: %{two_factor: preference},
+      two_factor_seed: seed
+    } = attrs
+
     if preference != "app" do
-      token = Authentication.generate_token(new_seed)
+      token = Authentication.generate_token(seed)
       Notification.deliver_two_factor_token(user, token, String.to_existing_atom(preference))
     end
 
-    attrs
+    :ok
   end
 
   @doc """
@@ -568,8 +588,10 @@ defmodule Recognizer.Accounts do
   are not yet active, but are in the process of being verified.
   """
   def get_new_two_factor_settings(user) do
-    with {:ok, settings} <- Redix.command(:redix, ["GET", "two_factor_settings:#{user.id}"]) do
-      Jason.decode(settings)
+    case Redix.command(:redix, ["GET", "two_factor_settings:#{user.id}"]) do
+      {:ok, nil} -> {:ok, nil}
+      {:ok, settings} -> Jason.decode(settings, keys: :atoms!)
+      res -> res
     end
   end
 
@@ -577,7 +599,7 @@ defmodule Recognizer.Accounts do
   Confirms the user's two factor settings and persists them to the database from our cache
   """
   def confirm_and_save_two_factor_settings(code, user) do
-    with {:ok, %{"two_factor_seed" => seed} = attrs} <- get_new_two_factor_settings(user),
+    with {:ok, %{two_factor_seed: seed} = attrs} <- get_new_two_factor_settings(user),
          true <- Authentication.valid_token?(code, seed) do
       user
       |> Repo.preload([:notification_preference, :recovery_codes])
