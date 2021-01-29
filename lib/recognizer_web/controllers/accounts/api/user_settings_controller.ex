@@ -4,25 +4,6 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
   alias Recognizer.Accounts
   alias RecognizerWeb.{Authentication, ErrorView}
 
-  def confirm_two_factor(conn, params) do
-    two_factor_code = get_in(params, ["user", "two_factor_code"])
-    user = Authentication.fetch_current_user(conn)
-
-    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, user) do
-      {:ok, updated_user} ->
-        render(conn, "show.json", user: updated_user)
-
-      _ ->
-        conn
-        |> put_status(400)
-        |> put_view(ErrorView)
-        |> render("error.json",
-          field: :two_factor_code,
-          reason: "Failed to confirm settings."
-        )
-    end
-  end
-
   def update(conn, %{"action" => "update", "user" => user_params}) do
     user = Authentication.fetch_current_user(conn)
 
@@ -53,24 +34,6 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
         |> put_view(ErrorView)
         |> render("error.json", changeset: changeset)
     end
-  end
-
-  def update(conn, %{"action" => "update_two_factor", "user" => %{"two_factor_enabled" => false}}) do
-    user = Authentication.fetch_current_user(conn)
-
-    with {:ok, updated_user} <- Accounts.update_user_two_factor(user, %{"two_factor_enabled" => false}) do
-      render(conn, "show.json", user: updated_user)
-    end
-  end
-
-  def update(conn, %{"action" => "update_two_factor", "user" => user_params}) do
-    user = Authentication.fetch_current_user(conn)
-    preference = get_in(user_params, ["notification_preference", "two_factor"])
-    settings = Accounts.generate_and_cache_new_two_factor_settings(user, preference)
-
-    conn
-    |> put_status(202)
-    |> render("confirm_two_factor.json", settings: settings, user: user)
   end
 
   def show(conn, _params) do

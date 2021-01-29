@@ -4,29 +4,6 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
   alias Recognizer.Accounts.Role
   alias RecognizerWeb.Authentication
 
-  def render(
-        "confirm_two_factor.json",
-        %{settings: %{notification_preference: %{two_factor: "app"}} = settings, user: user}
-      ) do
-    %{
-      two_factor: %{
-        barcode: Authentication.generate_totp_barcode(user, settings),
-        method: "app",
-        recovery_codes: recovery_codes(settings),
-        totp_app_url: Authentication.get_totp_app_url(user, settings)
-      }
-    }
-  end
-
-  def render("confirm_two_factor.json", %{settings: %{notification_preference: %{two_factor: method}} = settings}) do
-    %{
-      two_factor: %{
-        method: method,
-        recovery_codes: recovery_codes(settings)
-      }
-    }
-  end
-
   def render("show.json", %{user: user}) do
     %{
       user: %{
@@ -56,6 +33,4 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
       token: access_token
     })
   end
-
-  defp recovery_codes(%{recovery_codes: recovery_codes}), do: Enum.map(recovery_codes, &Map.get(&1, :code))
 end

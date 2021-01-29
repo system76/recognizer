@@ -44,7 +44,10 @@ defmodule RecognizerWeb.Router do
 
     get "/settings", UserSettingsController, :show
     put "/settings", UserSettingsController, :update
-    post "/confirm_two_factor", UserSettingsController, :confirm_two_factor
+
+    get "/settings/two-factor", UserSettingsTwoFactorController, :show
+    put "/settings/two-factor", UserSettingsTwoFactorController, :update
+    post "/settings/two-factor/send", UserSettingsTwoFactorController, :send
   end
 
   scope "/", RecognizerWeb.OauthProvider, as: :oauth do
