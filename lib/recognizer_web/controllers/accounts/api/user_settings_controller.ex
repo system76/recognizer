@@ -13,6 +13,7 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
 
       {:error, changeset} ->
         conn
+        |> put_status(:bad_request)
         |> put_view(ErrorView)
         |> render("error.json", changeset: changeset)
     end
@@ -31,6 +32,7 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsController do
 
       {:error, changeset} ->
         conn
+        |> put_status(:bad_request)
         |> put_view(ErrorView)
         |> render("error.json", changeset: changeset)
     end
