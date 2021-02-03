@@ -1,10 +1,45 @@
 <div class="box">
   <h2 class="title is-2 mb-5 has-text-centered-mobile">Setup Two Factor</h2>
 
-  <div class="my-4">
-    <p>
-      Your organization requires you to have <strong>app based two factor
-      authentication</strong> enabled.
+  <div>
+    <p class="py-4">
+      Your organization requires you to have <strong>application based two
+      factor authentication</strong> enabled.
+    </p>
+
+    <p class="py-4">
+      Two-factor authentication (2FA) is an <strong>extra layer of
+        security</strong> used when logging into websites or apps. With 2FA, you
+      have to log in with your username and password and provide another form
+      of authentication that only you know or have access to.
+    </p>
+
+    <p class="py-4">
+      Use an <strong>application on your phone</strong> to get two-factor
+      authentication codes when prompted. After you enable 2FA, System76
+      generates an authentication code any time someone attempts to sign into
+      your System76 account. The only way someone can sign into your account
+      is if they know both your password and have access to the authentication
+      code on your phone.
+    </p>
+
+    <p class="py-4">
+      We recommend using an application such as <a
+        href="https://authy.com"
+        target="_blank"
+        rel="noopener noreferrer"
+      >Authy</a>, <a
+        href="https://1password.com/"
+        target="_blank"
+        rel="noopener
+      noreferrer"
+      >1Password</a>, or <a
+        href="https://www.lastpass.com/auth"
+        target="_blank"
+        rel="noopener noreferrer"
+      >LastPass Authenticator</a>.
+      These applications support secure backup of your authentication codes in
+      the cloud and can be restored if you lose access to your device.
     </p>
   </div>
 
