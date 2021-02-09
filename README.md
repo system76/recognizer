@@ -4,17 +4,23 @@
 
 # Recognizer
 
-Recognizer is a standalone service designed to provide the functionality of both a centralization authentication service and the user account service.
+Recognizer is a standalone service designed to provide the functionality of both a centralization authentication service
+and the user account service.
 
 ### Rationale
 
-At System76 we have multiple applications that use the same underlying data but through differing authentication flows. In order to decouple our applications from authentication, improve maintainability, and faster feature iteration we have decided to build a standalone service to replace existing auth flows within our platform. In future releases we expect to extend our authentication functionality to include developing an OAuth2.0 provider for System76 accounts.
+At System76 we have multiple applications that use the same underlying data but through differing authentication flows.
+In order to decouple our applications from authentication, improve maintainability, and faster feature iteration we have
+decided to build a standalone service to replace existing auth flows within our platform.
 
-**_While the best attempts are made to ensure the software herein is suitable for use by others, it is being developed for use with existing projects at System76. For this reason, modification to the software may be necessary for use elsewhere._**
+**_While the best attempts are made to ensure the software herein is suitable for use by others, it is being developed
+for use with existing projects at System76. For this reason, modification to the software may be necessary for use
+elsewhere._**
 
-## Tests
+## Running
 
-For convince a `docker-compose.yml` file has been included to manage the MySQL instance during testing. Before we run our test suite, we need to stand up our MySQL instance:
+For convenience a `docker-compose.yml` file has been included to manage the MySQL and Redis instances. Before we run
+our test suite, or start local development, we need to stand up our instances:
 
 ```shell
 $ docker-compose up
@@ -28,16 +34,17 @@ Finished in 0.2 seconds
 28 tests, 0 failures
 ```
 
-## Releases
-
-While the final build artifact is a Docker image we do use `mix release` to build a release binary for use within the final image. The process of creating new releases has been simplified by the included Makefile.
-
-In order to take advantage of our Makefile we need to install Docker, the AWS CLI client, and ensure our AWS credentials are accessible at `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`. Once our build environment has been setup we're ready to build and push new releases with the appropriately named make commands:
+Or run our local development server:
 
 ```shell
-make build # Build a new image
-make push # Push the image to AWS ECR
+$ mix ecto.setup
+$ mix phx.server
 ```
+
+## Releases
+
+This repository includes a continuous integration and deployment. Simply make a PR to the `master` branch, and once it's
+merged, it will be deployed to production.
 
 ## License
 
