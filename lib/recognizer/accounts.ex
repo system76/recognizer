@@ -248,6 +248,8 @@ defmodule Recognizer.Accounts do
     with true <- Enum.any?([:email, :newsletter, :first_name, :last_name], &Ecto.Changeset.get_change(changeset, &1)),
          {:error, reason} <- apply(mailchimp_module(), :update_user, [updated_user]) do
       Logger.error(reason)
+      # Bypass any issues with mailchimp and still allow the database update
+      {:ok, updated_user}
     else
       _ -> {:ok, updated_user}
     end
