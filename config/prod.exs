@@ -9,7 +9,7 @@ config :recognizer, RecognizerWeb.Endpoint,
 
 config :recognizer,
   mailchimp: [
-    base_url: "https://server.api.mailchimp.com"
+    base_url: "https://us10.api.mailchimp.com"
   ]
 
 config :logger,
