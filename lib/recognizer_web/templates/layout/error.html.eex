@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/styles/main.css") %>"/>
 
     <script defer type="text/javascript" src="<%= Routes.static_path(@conn, "/scripts/main.js") %>"></script>
+    <script async defer data-domain="account.system76.com" src="https://plausible.io/js/plausible.js"></script>
+    <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
   </head>
   <body>
     <div class="section">
