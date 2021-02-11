@@ -92,7 +92,7 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
 
   defp split_name(nil), do: ["", ""]
   defp split_name(name) do
-    [first_name, rest] = String.split(info.name, " ", size: 2)
+    [first_name, rest] = String.split(name, " ", size: 2)
     last_name = if rest == [], do: "", else: hd(rest)
     [first_name, last_name]
   end
