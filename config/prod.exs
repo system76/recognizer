@@ -7,6 +7,12 @@ config :recognizer, RecognizerWeb.Endpoint,
   gzip: true,
   server: true
 
+config :recognizer,
+  redirect_url: recognizer_config["REDIRECT_URL"],
+  mailchimp: [
+    base_url: "https://server.api.mailchimp.com"
+  ]
+
 config :logger,
   backends: [LoggerJSON],
   level: :info
