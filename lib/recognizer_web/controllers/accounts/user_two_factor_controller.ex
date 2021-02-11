@@ -6,6 +6,8 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   alias Recognizer.Notifications.Account
   alias RecognizerWeb.Authentication
 
+  plug :verify_user_id
+
   def new(conn, _params) do
     current_user_id = get_session(conn, :two_factor_user_id)
     current_user = Accounts.get_user!(current_user_id)
@@ -59,5 +61,13 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     end
 
     conn
+  end
+
+  defp verify_user_id(conn, _params) do
+    if get_session(conn, :two_factor_user_id) == nil do
+      RecognizerWeb.FallbackController.call(conn, {:error, :unauthenticated})
+    else
+      conn
+    end
   end
 end
