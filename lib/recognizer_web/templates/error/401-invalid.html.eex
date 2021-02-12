@@ -2,6 +2,6 @@
   <h2 class="title is-2 mb-5 has-text-centered-mobile">Login Expired</h2>
 
   <p>
-    Your current login has expired. Please <a href="javascript:history.back()">go back</a> and log in again.
+    Your current login has expired. Please go back and log in again.
   </p>
 </div>
