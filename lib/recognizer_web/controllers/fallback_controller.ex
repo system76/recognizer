@@ -5,8 +5,6 @@ defmodule RecognizerWeb.FallbackController do
 
   @behaviour Guardian.Plug.ErrorHandler
 
-  plug :fetch_session
-
   @impl Guardian.Plug.ErrorHandler
   def auth_error(conn, {:already_authenticated, _reason}, _) do
     conn
