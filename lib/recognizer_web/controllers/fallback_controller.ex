@@ -19,15 +19,19 @@ defmodule RecognizerWeb.FallbackController do
 
   @impl Guardian.Plug.ErrorHandler
   def auth_error(conn, {:invalid_token, _reason}, _) do
-    conn
-    |> Recognizer.Guardian.Plug.sign_out()
-    |> fetch_session()
-    |> clear_session()
-    |> respond(:unauthorized, "401-invalid")
+    if not json?(conn) do
+      conn
+      |> Recognizer.Guardian.Plug.sign_out()
+      |> fetch_session()
+      |> clear_session()
+      |> call({:error, :unauthenticated})
+    else
+      respond(conn, :unauthorized, "401")
+    end
   end
 
   @impl Guardian.Plug.ErrorHandler
-  def auth_error(conn, {type, reason}, _) do
+  def auth_error(conn, {_type, _reason}, _) do
     respond(conn, :unauthorized, "401")
   end
 
