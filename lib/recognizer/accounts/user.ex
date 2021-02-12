@@ -95,7 +95,7 @@ defmodule Recognizer.Accounts.User do
     user
     |> cast(attrs, [:first_name, :last_name, :email])
     |> validate_required([:first_name, :last_name])
-    |> put_change(:hashed_password, "")
+    |> put_change(:hashed_password, nil)
     |> validate_email()
     |> put_assoc(:roles, Role.default_role_changeset())
     |> generate_username()
