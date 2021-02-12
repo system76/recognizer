@@ -298,6 +298,7 @@ defmodule Recognizer.Accounts do
 
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, changeset)
+    |> Ecto.Multi.delete_all(:oauth, user_and_oauth_access_query(user))
     |> Ecto.Multi.delete_all(:tokens, user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
@@ -458,6 +459,7 @@ defmodule Recognizer.Accounts do
   def reset_user_password(user, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
+    |> Ecto.Multi.delete_all(:oauth, user_and_oauth_access_query(user))
     |> Ecto.Multi.delete_all(:tokens, user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
@@ -478,6 +480,11 @@ defmodule Recognizer.Accounts do
 
     from t in "users_tokens",
       where: t.sub == ^sub and t.typ == ^typ
+  end
+
+  defp user_and_oauth_access_query(user) do
+    from at in Recognizer.OauthProvider.AccessToken,
+      where: at.resource_owner_id == ^user.id
   end
 
   def change_user_two_factor(user, attrs \\ %{}) do
