@@ -60,10 +60,10 @@ defmodule Recognizer.Accounts do
 
     with %OAuth{user: user} <- Repo.one(query),
          %User{two_factor_enabled: false} <- user do
-      {:ok, user}
+      {:ok, %{user | third_party_login: true}}
     else
       %User{two_factor_enabled: true} = user ->
-        {:two_factor, user}
+        {:two_factor, %{user | third_party_login: true}}
 
       _ ->
         nil
@@ -140,10 +140,11 @@ defmodule Recognizer.Accounts do
       from u in User,
         join: n in assoc(u, :notification_preference),
         left_join: o in assoc(u, :organization),
+        left_join: uo in assoc(u, :oauths),
         where: u.id == ^id,
-        preload: [notification_preference: n, roles: [], organization: o]
+        preload: [oauths: uo, notification_preference: n, roles: [], organization: o]
 
-    Repo.one!(query)
+    query |> Repo.one!() |> User.load_virtuals()
   end
 
   ## User registration

@@ -4,21 +4,33 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
   import Mox
   import Recognizer.AccountsFixtures
 
-  setup %{conn: conn} do
-    user = :user |> build() |> add_two_factor(:app) |> insert()
-
-    %{
-      conn: log_in_user(conn, user),
-      user: user
-    }
-  end
-
   describe "GET /api/settings" do
-    test "GET /api/settings", %{conn: conn, user: %{id: user_id}} do
+    test "two factor is reflected", %{conn: conn} do
+      %{id: user_id} = user = :user |> build() |> add_two_factor(:app) |> insert()
+      conn = conn |> log_in_user(user) |> get("/api/settings")
+
+      assert %{
+               "user" => %{
+                 "id" => ^user_id,
+                 "two_factor_enabled" => true
+               }
+             } = json_response(conn, 200)
+    end
+
+    test "shows third_party_login as true when logged in through oauth", context do
+      %{conn: conn, user: %{id: user_id}} = register_and_log_in_oauth_user(context)
       conn = get(conn, "/api/settings")
-      assert %{"user" => %{"id" => ^user_id, "two_factor_enabled" => true}} = json_response(conn, 200)
+
+      assert %{
+               "user" => %{
+                 "id" => ^user_id,
+                 "third_party_login" => true
+               }
+             } = json_response(conn, 200)
     end
   end
+
+  setup :register_and_log_in_user
 
   describe "PUT /api/settings" do
     setup :verify_on_exit!
