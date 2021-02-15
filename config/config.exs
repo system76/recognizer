@@ -26,7 +26,7 @@ config :recognizer, RecognizerWeb.Endpoint,
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id, :trace_id, :span_id]
+  metadata: [:request_id, :user_id, :trace_id, :span_id]
 
 config :grpc, start_server: true
 
