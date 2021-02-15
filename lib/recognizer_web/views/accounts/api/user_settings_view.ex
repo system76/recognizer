@@ -2,22 +2,22 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
   use RecognizerWeb, :view
 
   alias Recognizer.Accounts.Role
-  alias RecognizerWeb.Authentication
 
   def render("show.json", %{user: user}) do
     %{
       user: %{
         id: user.id,
+        company_name: user.company_name,
+        email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
-        email: user.email,
-        phone_number: user.phone_number,
-        type: user.type,
-        company_name: user.company_name,
         newsletter: user.newsletter,
+        notification_preferences: render("notification_preferences.json", user),
+        phone_number: user.phone_number,
         staff: Role.admin?(user),
         two_factor_enabled: user.two_factor_enabled,
-        notification_preferences: render("notification_preferences.json", user)
+        type: user.type,
+        third_party_login: user.third_party_login
       }
     }
   end

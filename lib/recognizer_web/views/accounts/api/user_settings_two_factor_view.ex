@@ -1,7 +1,6 @@
 defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorView do
   use RecognizerWeb, :view
 
-  alias Recognizer.Accounts.Role
   alias RecognizerWeb.Authentication
 
   def render("show.json", %{user: user} = params) do

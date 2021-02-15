@@ -8,7 +8,7 @@ defmodule Recognizer.Accounts.User do
 
   import Ecto.Changeset
 
-  alias Recognizer.Accounts.{NotificationPreference, RecoveryCode, Role, Organization}
+  alias Recognizer.Accounts.{NotificationPreference, OAuth, Organization, RecoveryCode, Role}
   alias Recognizer.Repo
   alias __MODULE__
 
@@ -35,11 +35,14 @@ defmodule Recognizer.Accounts.User do
     field :two_factor_seed, :string
     field :two_factor_code, :string, virtual: true, redact: true
 
+    field :third_party_login, :boolean, default: false, virtual: true
+
     has_one :notification_preference, NotificationPreference, on_replace: :update
 
     belongs_to :organization, Organization
 
     has_many :roles, Role
+    has_many :oauths, OAuth
     has_many :recovery_codes, RecoveryCode, on_replace: :delete
 
     timestamps()
@@ -89,6 +92,10 @@ defmodule Recognizer.Accounts.User do
     |> validate_company_name()
     |> generate_username()
     |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
+  end
+
+  def load_virtuals(%User{} = user) do
+    %{user | third_party_login: Enum.any?(user.oauths)}
   end
 
   def oauth_registration_changeset(user, attrs) do

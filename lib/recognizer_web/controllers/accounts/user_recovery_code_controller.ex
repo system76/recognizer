@@ -3,7 +3,6 @@ defmodule RecognizerWeb.Accounts.UserRecoveryCodeController do
   use RecognizerWeb, :controller
 
   alias Recognizer.Accounts
-  alias Recognizer.Notifications.Account
   alias RecognizerWeb.Authentication
 
   def new(conn, _params) do

@@ -54,6 +54,13 @@ defmodule RecognizerWeb.ConnCase do
     %{conn: log_in_user(conn, user), user: user}
   end
 
+  def register_and_log_in_oauth_user(%{conn: conn}) do
+    user = Recognizer.AccountsFixtures.insert(:user)
+    oauth = Recognizer.AccountsFixtures.insert(:oauth, user: user)
+    user = Recognizer.Accounts.get_user!(user.id)
+    %{conn: log_in_user(conn, user), user: user, oauth: oauth}
+  end
+
   @doc """
   Logs the given `user` into the `conn`.
 
