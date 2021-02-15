@@ -62,7 +62,7 @@ config :recognizer, ExOauth2Provider,
   default_scopes: ~w(profile:read),
   optional_scopes: ~w(profile:read profile:write),
   authorization_code_expires_in: 600,
-  access_token_expires_in: 7200,
+  access_token_expires_in: nil,
   use_refresh_token: true,
   revoke_refresh_token_on_use: true,
   force_ssl_in_redirect_uri: false
