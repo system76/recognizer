@@ -10,11 +10,11 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
       conn = conn |> log_in_user(user) |> get("/api/settings")
 
       assert %{
-        "user" => %{
-          "id" => ^user_id,
-          "two_factor_enabled" => true
-        }
-      } = json_response(conn, 200)
+               "user" => %{
+                 "id" => ^user_id,
+                 "two_factor_enabled" => true
+               }
+             } = json_response(conn, 200)
     end
 
     test "shows third_party_login as true when logged in through oauth", context do
@@ -22,15 +22,16 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
       conn = get(conn, "/api/settings")
 
       assert %{
-        "user" => %{
-          "id" => ^user_id,
-          "third_party_login" => true
-        }
-      } = json_response(conn, 200)
+               "user" => %{
+                 "id" => ^user_id,
+                 "third_party_login" => true
+               }
+             } = json_response(conn, 200)
     end
   end
 
   setup :register_and_log_in_user
+
   describe "PUT /api/settings" do
     setup :verify_on_exit!
 

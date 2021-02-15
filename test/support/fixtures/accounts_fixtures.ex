@@ -27,7 +27,8 @@ defmodule Recognizer.AccountsFixtures do
     %Accounts.OAuth{
       service: "github",
       service_guid: sequence(:service_guid, &"oauth-guid-#{&1}")
-    } |> merge_attributes(attrs)
+    }
+    |> merge_attributes(attrs)
   end
 
   def user_factory(attrs) do
