@@ -105,11 +105,14 @@ defmodule Recognizer.Accounts do
         where: u.email == ^email,
         preload: [notification_preference: n, roles: [], organization: o]
 
-    with %User{} = user <- Repo.one(query),
+    with %User{hashed_password: hash} = user when hash != "" <- Repo.one(query),
          true <- User.valid_password?(user, password),
          %User{two_factor_enabled: false} <- user do
       {:ok, user}
     else
+      %User{hashed_password: ""} = user ->
+        {:oauth, user}
+
       %User{two_factor_enabled: true} = user ->
         {:two_factor, user}
 
