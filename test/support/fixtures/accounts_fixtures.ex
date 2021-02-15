@@ -36,8 +36,8 @@ defmodule Recognizer.AccountsFixtures do
     password_changed_at = Map.get(attrs, :password_changed_at, NaiveDateTime.utc_now())
 
     hashed_password =
-      if password == "" do
-        ""
+      if is_nil(password) do
+        nil
       else
         Argon2.hash_pwd_salt(password)
       end
