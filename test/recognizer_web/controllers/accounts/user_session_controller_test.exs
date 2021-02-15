@@ -59,7 +59,7 @@ defmodule RecognizerWeb.Accounts.UserSessionControllerTest do
     end
 
     test "emits message when logging into an account with no password", %{conn: conn} do
-      user = insert(:user, password: "")
+      user = insert(:user, password: nil)
 
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
