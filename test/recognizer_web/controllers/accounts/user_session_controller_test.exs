@@ -58,6 +58,19 @@ defmodule RecognizerWeb.Accounts.UserSessionControllerTest do
       assert redirected_to(conn) == Routes.user_two_factor_path(conn, :new)
     end
 
+    test "emits message when logging into an account with no password", %{conn: conn} do
+      user = insert(:user, password: "")
+
+      conn =
+        post(conn, Routes.user_session_path(conn, :create), %{
+          "user" => %{"email" => user.email, "password" => ""}
+        })
+
+      response = html_response(conn, 200)
+      assert response =~ "Log In</h2>"
+      assert response =~ "It looks like this account was setup with third-party login"
+    end
+
     test "emits error message with invalid credentials", %{conn: conn, user: user} do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
