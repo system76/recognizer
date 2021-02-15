@@ -26,7 +26,6 @@ defmodule Recognizer.Guardian do
   end
 
   def encode_and_sign_access_token(access_token) do
-    expires_in = Keyword.get(access_token, :expires_in)
     user = Keyword.get(access_token, :resource_owner)
 
     scopes =
@@ -34,17 +33,10 @@ defmodule Recognizer.Guardian do
       |> Keyword.get(:scopes, [])
       |> String.split(" ")
 
-    {:ok, token, _claims} =
-      encode_and_sign(user, %{scopes: scopes},
-        token_type: "access",
-        ttl: ttl(expires_in)
-      )
+    {:ok, token, _claims} = encode_and_sign(user, %{scopes: scopes}, token_type: "access")
 
     token
   end
-
-  defp ttl(nil), do: nil
-  defp ttl(seconds), do: {seconds, :seconds}
 
   def after_encode_and_sign(resource, claims, token, _options) do
     with {:ok, _} <- Guardian.DB.after_encode_and_sign(resource, claims["typ"], claims, token) do
