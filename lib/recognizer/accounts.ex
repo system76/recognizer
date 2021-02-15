@@ -96,21 +96,22 @@ defmodule Recognizer.Accounts do
       nil
 
   """
-  def get_user_by_email_and_password(email, password)
-      when is_binary(email) and is_binary(password) do
+  def get_user_by_email_and_password(email, password) when is_binary(email) and is_binary(password) do
     query =
       from u in User,
         join: n in assoc(u, :notification_preference),
         left_join: o in assoc(u, :organization),
+        left_join: uo in assoc(u, :oauths),
         where: u.email == ^email,
-        preload: [notification_preference: n, roles: [], organization: o]
+        preload: [oauths: uo, notification_preference: n, roles: [], organization: o]
 
-    with %User{hashed_password: hash} = user when not is_nil(hash) <- Repo.one(query),
+    with %User{} = user <- Repo.one(query),
+         %User{third_party_login: false} <- User.load_virtuals(user),
          true <- User.valid_password?(user, password),
          %User{two_factor_enabled: false} <- user do
       {:ok, user}
     else
-      %User{hashed_password: nil} = user ->
+      %User{third_party_login: true} = user ->
         {:oauth, user}
 
       %User{two_factor_enabled: true} = user ->
