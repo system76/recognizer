@@ -9,7 +9,7 @@ defmodule Recognizer.Accounts.OAuth do
   alias __MODULE__, as: OAuth
 
   schema "user_oauths" do
-    field :service, :string
+    field :service, Recognizer.OAuthService
     field :service_guid, :string
 
     belongs_to :user, User
@@ -19,7 +19,7 @@ defmodule Recognizer.Accounts.OAuth do
     oauth
     |> cast(attrs, [:service, :service_guid, :user_id])
     |> validate_required([:service, :service_guid])
-    |> validate_inclusion(:service, ["github", "google"])
+    |> EctoEnum.validate_enum(:service)
     |> assoc_constraint(:user)
   end
 end

@@ -3,7 +3,7 @@ defmodule Recognizer.Repo.Migrations.AddUserOauths do
 
   def change do
     create table(:user_oauths) do
-      add :service, :string
+      add :service, :"enum('facebook','github','google')"
       add :service_guid, :string
 
       add :user_id, references(:users, type: "int(11) unsigned", on_delete: :nothing)
