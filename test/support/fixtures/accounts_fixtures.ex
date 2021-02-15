@@ -23,6 +23,13 @@ defmodule Recognizer.AccountsFixtures do
     }
   end
 
+  def oauth_factory(attrs) do
+    %Accounts.OAuth{
+      service: "github",
+      service_guid: sequence(:service_guid, &"oauth-guid-#{&1}")
+    } |> merge_attributes(attrs)
+  end
+
   def user_factory(attrs) do
     password = Map.get(attrs, :password, build(:password))
     password_changed_at = Map.get(attrs, :password_changed_at, NaiveDateTime.utc_now())
