@@ -5,12 +5,7 @@ defmodule Recognizer.Notifications.Account do
   notification microservice to deliver.
   """
 
-  use Spandex.Decorators
-
   alias Bottle.Account.V1, as: Account
-
-  # credo:disable-for-next-line
-  @enabled Application.get_env(:ex_aws, :enabled)
 
   @doc """
   Deliver user creation welcome message.
@@ -72,48 +67,52 @@ defmodule Recognizer.Notifications.Account do
     apply(type, :new, [Keyword.merge([user: user], args)])
   end
 
-  defp encode_message(resource, atom) do
-    message_in_a_bottle =
-      Bottle.Core.V1.Bottle.new(
-        request_id: Bottle.RequestId.write(:http),
-        resource: {atom, resource},
-        source: "recognizer",
-        timestamp: DateTime.to_unix(DateTime.utc_now())
-      )
+  if Application.compile_env(:ex_aws, :enabled) do
+    use Spandex.Decorators
 
-    message_in_a_bottle
-    |> Bottle.Core.V1.Bottle.encode()
-    |> URI.encode()
-  end
+    @decorate span(service: :bullhorn, type: :function)
+    defp send_message(resource, atom) do
+      encoded_message = encode_message(resource, atom)
 
-  defp message_queue_url(%message_type{}) do
-    :recognizer
-    |> Application.get_env(:message_queues)
-    |> Keyword.get(message_type)
-  end
+      resource
+      |> message_queue_url()
+      |> send_message_to_queue(encoded_message)
 
-  @decorate span(service: :bullhorn, type: :function)
-  defp send_message(resource, atom) when @enabled do
-    encoded_message = encode_message(resource, atom)
+      {:ok, resource}
+    end
 
-    resource
-    |> message_queue_url()
-    |> send_message_to_queue(encoded_message)
+    defp send_message_to_queue(queues, message) when is_list(queues) do
+      Enum.each(queues, &send_message_to_queue(&1, message))
+    end
 
-    {:ok, resource}
-  end
+    defp send_message_to_queue(queue, message) do
+      queue
+      |> ExAws.SQS.send_message(message)
+      |> ExAws.request()
+    end
 
-  defp send_message(resource, _atom) do
-    {:ok, resource}
-  end
+    defp message_queue_url(%message_type{}) do
+      :recognizer
+      |> Application.get_env(:message_queues)
+      |> Keyword.get(message_type)
+    end
 
-  defp send_message_to_queue(queues, message) when is_list(queues) do
-    Enum.each(queues, &send_message_to_queue(&1, message))
-  end
+    defp encode_message(resource, atom) do
+      message_in_a_bottle =
+        Bottle.Core.V1.Bottle.new(
+          request_id: Bottle.RequestId.write(:http),
+          resource: {atom, resource},
+          source: "recognizer",
+          timestamp: DateTime.to_unix(DateTime.utc_now())
+        )
 
-  defp send_message_to_queue(queue, message) do
-    queue
-    |> ExAws.SQS.send_message(message)
-    |> ExAws.request()
+      message_in_a_bottle
+      |> Bottle.Core.V1.Bottle.encode()
+      |> URI.encode()
+    end
+  else
+    defp send_message(resource, _atom) do
+      {:ok, resource}
+    end
   end
 end

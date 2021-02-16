@@ -60,6 +60,9 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: mix deps.get
 
+      - name: Compilation
+        run: mix compile --force --warnings-as-errors
+
       - name: Test
         run: mix test
         env:
