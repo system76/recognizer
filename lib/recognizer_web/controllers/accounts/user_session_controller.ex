@@ -21,7 +21,7 @@ defmodule RecognizerWeb.Accounts.UserSessionController do
         |> put_session(:two_factor_sent, false)
         |> redirect(to: Routes.user_two_factor_path(conn, :new))
 
-      {:oauth, user} ->
+      {:oauth, _user} ->
         conn
         |> put_flash(:error, "It looks like this account was setup with third-party login")
         |> render("new.html")
