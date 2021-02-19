@@ -17,7 +17,8 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsView do
         staff: Role.admin?(user),
         two_factor_enabled: user.two_factor_enabled,
         type: user.type,
-        third_party_login: user.third_party_login
+        third_party_login: user.third_party_login,
+        stripe_id: user.stripe_id
       }
     }
   end

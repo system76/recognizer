@@ -37,6 +37,8 @@ defmodule Recognizer.Accounts.User do
 
     field :third_party_login, :boolean, default: false, virtual: true
 
+    field :stripe_id, :string
+
     has_one :notification_preference, NotificationPreference, on_replace: :update
 
     belongs_to :organization, Organization
