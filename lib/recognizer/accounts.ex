@@ -162,9 +162,9 @@ defmodule Recognizer.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def register_user(attrs) do
+  def register_user(attrs, opts \\ []) do
     %User{}
-    |> User.registration_changeset(attrs)
+    |> User.registration_changeset(attrs, opts)
     |> insert_user_and_notification_preferences()
     |> maybe_notify_new_user()
   end
