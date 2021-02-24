@@ -35,6 +35,13 @@ defmodule RecognizerWeb.FallbackController do
     respond(conn, :unauthorized, "401")
   end
 
+  def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
+    conn
+    |> put_status(:bad_request)
+    |> put_view(ErrorView)
+    |> render("error.json", changeset: changeset)
+  end
+
   @impl true
   def call(conn, {:error, :unauthenticated}) do
     conn

@@ -5,30 +5,20 @@ defmodule RecognizerWeb.Accounts.Api.UserRegistrationController do
   alias Recognizer.{Accounts, Guardian}
   alias RecognizerWeb.ErrorView
 
-  plug :staff_only
-
   def create(conn, %{"user" => user_params}) do
-    case Accounts.register_user(user_params, skip_password: true) do
-      {:ok, user} ->
-        render(conn, "show.json", user: user)
-
-      {:error, changeset} ->
-        conn
-        |> put_status(:bad_request)
-        |> put_view(ErrorView)
-        |> render("error.json", changeset: changeset)
+    with true <- staff_request?(conn),
+         {:ok, user} <- Accounts.register_user(user_params, skip_password: true) do
+      render(conn, "show.json", user: user)
     end
   end
 
-  def staff_only(conn, _opts) do
+  def staff_request(conn) do
     user = Guardian.current_resource(conn)
 
     if Role.admin?(user) do
-      conn
+      true
     else
-      conn
-      |> send_resp(401, "")
-      |> halt()
+      {:invalid_token, "insufficient permissions"}
     end
   end
 end
