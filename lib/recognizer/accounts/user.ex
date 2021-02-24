@@ -121,7 +121,7 @@ defmodule Recognizer.Accounts.User do
   end
 
   defp validate_password(changeset, opts) do
-    skip_password? = Keyword.get(opts, :skip_password, true)
+    skip_password? = Keyword.get(opts, :skip_password, false)
 
     if skip_password? do
       put_change(changeset, :password, nil)
