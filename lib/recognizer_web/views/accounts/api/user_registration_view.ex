@@ -1,6 +1,8 @@
 defmodule RecognizerWeb.Accounts.Api.UserRegistrationView do
   use RecognizerWeb, :view
 
+  alias Recognizer.Accounts.Role
+
   def render("show.json", %{user: user}) do
     %{
       user: %{
