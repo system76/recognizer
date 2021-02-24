@@ -2,7 +2,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
   use RecognizerWeb.ConnCase
 
   import Mox
-  import Recognizer.AccountsFixtures
+  import Recognizer.AccountFactory
 
   alias Recognizer.Accounts
 

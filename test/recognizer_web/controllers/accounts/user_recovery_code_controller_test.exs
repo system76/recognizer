@@ -1,7 +1,7 @@
 defmodule RecognizerWeb.Accounts.UserRecoveryCodeControllerTest do
   use RecognizerWeb.ConnCase
 
-  import Recognizer.AccountsFixtures
+  import Recognizer.AccountFactory
 
   setup %{conn: conn} do
     user = :user |> build() |> add_two_factor() |> insert()

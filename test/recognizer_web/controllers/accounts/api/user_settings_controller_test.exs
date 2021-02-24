@@ -2,7 +2,7 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
   use RecognizerWeb.ConnCase
 
   import Mox
-  import Recognizer.AccountsFixtures
+  import Recognizer.AccountFactory
 
   describe "GET /api/settings" do
     test "two factor is reflected", %{conn: conn} do

@@ -1,7 +1,7 @@
 defmodule RecognizerWeb.Api.UserSettingsTwoFactorControllerTest do
   use RecognizerWeb.ConnCase
 
-  import Recognizer.AccountsFixtures
+  import Recognizer.AccountFactory
 
   setup %{conn: conn} do
     user = :user |> insert()

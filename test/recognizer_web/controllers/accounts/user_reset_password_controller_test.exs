@@ -1,7 +1,7 @@
 defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
   use RecognizerWeb.ConnCase
 
-  import Recognizer.AccountsFixtures
+  import Recognizer.AccountFactory
 
   alias Recognizer.Accounts
 
