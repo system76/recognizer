@@ -1,7 +1,7 @@
 defmodule RecognizerWeb.FallbackController do
   use RecognizerWeb, :controller
 
-  alias RecognizerWeb.Authentication
+  alias RecognizerWeb.{Authentication, ErrorView}
 
   @behaviour Guardian.Plug.ErrorHandler
 
