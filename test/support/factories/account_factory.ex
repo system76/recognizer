@@ -1,4 +1,4 @@
-defmodule Recognizer.AccountsFixtures do
+defmodule Recognizer.AccountFactory do
   @moduledoc """
   This module defines test helpers for creating entities via the
   `Recognizer.Accounts` context.
@@ -29,6 +29,10 @@ defmodule Recognizer.AccountsFixtures do
       service_guid: sequence(:service_guid, &"oauth-guid-#{&1}")
     }
     |> merge_attributes(attrs)
+  end
+
+  def role_factory(attrs) do
+    struct(Accounts.Role, attrs)
   end
 
   def user_factory(attrs) do

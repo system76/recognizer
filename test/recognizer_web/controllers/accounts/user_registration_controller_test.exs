@@ -1,7 +1,7 @@
 defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
   use RecognizerWeb.ConnCase
 
-  import Recognizer.AccountsFixtures
+  import Recognizer.AccountFactory
 
   describe "GET /users/register" do
     test "renders registration page", %{conn: conn} do

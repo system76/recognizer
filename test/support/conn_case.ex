@@ -49,14 +49,20 @@ defmodule RecognizerWeb.ConnCase do
   It stores an updated connection and a registered user in the
   test context.
   """
+  def register_and_log_in_admin(%{conn: conn}) do
+    user = Recognizer.AccountFactory.insert(:user)
+    Recognizer.AccountFactory.insert(:role, user_id: user.id, role_id: 2)
+    %{conn: log_in_user(conn, user), user: user}
+  end
+
   def register_and_log_in_user(%{conn: conn}) do
-    user = Recognizer.AccountsFixtures.insert(:user)
+    user = Recognizer.AccountFactory.insert(:user)
     %{conn: log_in_user(conn, user), user: user}
   end
 
   def register_and_log_in_oauth_user(%{conn: conn}) do
-    user = Recognizer.AccountsFixtures.insert(:user)
-    oauth = Recognizer.AccountsFixtures.insert(:oauth, user: user)
+    user = Recognizer.AccountFactory.insert(:user)
+    oauth = Recognizer.AccountFactory.insert(:oauth, user: user)
     user = Recognizer.Accounts.get_user!(user.id)
     %{conn: log_in_user(conn, user), user: user, oauth: oauth}
   end

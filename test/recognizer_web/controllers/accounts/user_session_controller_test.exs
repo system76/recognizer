@@ -1,7 +1,7 @@
 defmodule RecognizerWeb.Accounts.UserSessionControllerTest do
   use RecognizerWeb.ConnCase
 
-  import Recognizer.AccountsFixtures
+  import Recognizer.AccountFactory
 
   setup do
     two_factor_user = :user |> build() |> add_two_factor() |> insert()

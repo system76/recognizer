@@ -1,7 +1,7 @@
 defmodule RecognizerWeb.Accounts.Prompt.TwoFactorControllerTest do
   use RecognizerWeb.ConnCase
 
-  import Recognizer.AccountsFixtures
+  import Recognizer.AccountFactory
 
   setup %{conn: conn} do
     user =

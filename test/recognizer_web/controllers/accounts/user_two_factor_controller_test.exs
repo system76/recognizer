@@ -1,7 +1,7 @@
 defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
   use RecognizerWeb.ConnCase
 
-  import Recognizer.AccountsFixtures
+  import Recognizer.AccountFactory
 
   alias RecognizerWeb.Authentication
 

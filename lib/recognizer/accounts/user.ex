@@ -121,17 +121,23 @@ defmodule Recognizer.Accounts.User do
   end
 
   defp validate_password(changeset, opts) do
-    changeset
-    |> validate_required([:password])
-    |> validate_length(:password, min: 8, max: 80)
-    |> validate_format(:password, ~r/[0-9]/, message: "must contain a number")
-    |> validate_format(:password, ~r/[A-Z]/, message: "must contain an UPPERCASE letter")
-    |> validate_format(:password, ~r/[a-z]/, message: "must contain a lowercase letter")
-    |> validate_format(:password, ~r/[ \!\$\*\+\[\{\]\}\\\|\.\/\?,!@#%^&-=,.<>'";:]/,
-      message: "must contain a symbol or space"
-    )
-    |> validate_new_password(opts)
-    |> maybe_hash_password(opts)
+    skip_password? = Keyword.get(opts, :skip_password, false)
+
+    if skip_password? do
+      put_change(changeset, :password, nil)
+    else
+      changeset
+      |> validate_required([:password])
+      |> validate_length(:password, min: 8, max: 80)
+      |> validate_format(:password, ~r/[0-9]/, message: "must contain a number")
+      |> validate_format(:password, ~r/[A-Z]/, message: "must contain an UPPERCASE letter")
+      |> validate_format(:password, ~r/[a-z]/, message: "must contain a lowercase letter")
+      |> validate_format(:password, ~r/[ \!\$\*\+\[\{\]\}\\\|\.\/\?,!@#%^&-=,.<>'";:]/,
+        message: "must contain a symbol or space"
+      )
+      |> validate_new_password(opts)
+      |> maybe_hash_password(opts)
+    end
   end
 
   defp validate_company_name(changeset) do

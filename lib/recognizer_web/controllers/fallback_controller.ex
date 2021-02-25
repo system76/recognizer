@@ -1,7 +1,7 @@
 defmodule RecognizerWeb.FallbackController do
   use RecognizerWeb, :controller
 
-  alias RecognizerWeb.Authentication
+  alias RecognizerWeb.{Authentication, ErrorView}
 
   @behaviour Guardian.Plug.ErrorHandler
 
@@ -33,6 +33,13 @@ defmodule RecognizerWeb.FallbackController do
   @impl Guardian.Plug.ErrorHandler
   def auth_error(conn, {_type, _reason}, _) do
     respond(conn, :unauthorized, "401")
+  end
+
+  def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
+    conn
+    |> put_status(:bad_request)
+    |> put_view(ErrorView)
+    |> render("error.json", changeset: changeset)
   end
 
   @impl true

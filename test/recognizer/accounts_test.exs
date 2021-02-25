@@ -2,7 +2,7 @@ defmodule Recognizer.AccountsTest do
   use Recognizer.DataCase
 
   import Mox
-  import Recognizer.AccountsFixtures
+  import Recognizer.AccountFactory
 
   alias Recognizer.Accounts
   alias Recognizer.Accounts.User
