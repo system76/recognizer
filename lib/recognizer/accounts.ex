@@ -244,12 +244,14 @@ defmodule Recognizer.Accounts do
   def update_user(user, attrs) do
     changeset = User.changeset(user, attrs)
 
-    changeset
-    |> Repo.update()
-    |> maybe_update_mailchimp_subscription(changeset)
+    with {:ok, updated_user} <- Repo.update(changeset),
+         {:ok, _updated_user} <- maybe_update_mailchimp_subscription(updated_user, changeset) do
+      Notification.deliver_user_updated_message(updated_user)
+      {:ok, updated_user}
+    end
   end
 
-  defp maybe_update_mailchimp_subscription({:ok, updated_user}, changeset) do
+  defp maybe_update_mailchimp_subscription(updated_user, changeset) do
     with true <- Enum.any?([:email, :newsletter, :first_name, :last_name], &Ecto.Changeset.get_change(changeset, &1)),
          {:error, reason} <- apply(mailchimp_module(), :update_user, [updated_user]) do
       Logger.error(reason)
@@ -258,10 +260,6 @@ defmodule Recognizer.Accounts do
     else
       _ -> {:ok, updated_user}
     end
-  end
-
-  defp maybe_update_mailchimp_subscription(err, _changeset) do
-    err
   end
 
   defp mailchimp_module do

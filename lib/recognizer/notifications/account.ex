@@ -18,6 +18,26 @@ defmodule Recognizer.Notifications.Account do
   end
 
   @doc """
+  Deliver user updated message.
+  """
+  def deliver_user_updated_message(user) do
+    user
+    |> Recognizer.Bottle.convert_user()
+    |> create_message(Account.UserUpdated)
+    |> send_message(:user_updated)
+  end
+
+  @doc """
+  Deliver user deleted message.
+  """
+  def deliver_user_deleted_message(user) do
+    user
+    |> Recognizer.Bottle.convert_user()
+    |> create_message(Account.UserDeleted)
+    |> send_message(:user_deleted)
+  end
+
+  @doc """
   Deliver user password changed notification.
   """
   def deliver_user_password_changed_notification(user) do
