@@ -80,7 +80,7 @@ defmodule Recognizer.Notifications.Account do
       recovery_code: recovery_code_used,
       codes_remaining: length(codes_remaining)
     )
-    |> send_message(:recovery_code_used)
+    |> send_message(:two_factor_recovery_code_used)
   end
 
   defp create_message(user, type, args \\ []) do
