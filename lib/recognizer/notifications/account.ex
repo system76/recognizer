@@ -14,7 +14,7 @@ defmodule Recognizer.Notifications.Account do
     user
     |> Recognizer.Bottle.convert_user()
     |> create_message(Account.UserCreated)
-    |> send_message(:user_created)
+    |> send_message()
   end
 
   @doc """
@@ -24,7 +24,7 @@ defmodule Recognizer.Notifications.Account do
     user
     |> Recognizer.Bottle.convert_user()
     |> create_message(Account.UserUpdated)
-    |> send_message(:user_updated)
+    |> send_message()
   end
 
   @doc """
@@ -34,7 +34,7 @@ defmodule Recognizer.Notifications.Account do
     user
     |> Recognizer.Bottle.convert_user()
     |> create_message(Account.UserDeleted)
-    |> send_message(:user_deleted)
+    |> send_message()
   end
 
   @doc """
@@ -44,7 +44,7 @@ defmodule Recognizer.Notifications.Account do
     user
     |> Recognizer.Bottle.convert_user()
     |> create_message(Account.PasswordChanged)
-    |> send_message(:password_changed)
+    |> send_message()
   end
 
   @doc """
@@ -54,7 +54,7 @@ defmodule Recognizer.Notifications.Account do
     user
     |> Recognizer.Bottle.convert_user()
     |> create_message(Account.PasswordReset, reset_url: url)
-    |> send_message(:password_reset)
+    |> send_message()
   end
 
   @doc """
@@ -64,7 +64,7 @@ defmodule Recognizer.Notifications.Account do
     user
     |> Recognizer.Bottle.convert_user()
     |> create_message(Account.TwoFactorRequested, token: token, method: two_factor_method(method))
-    |> send_message(:two_factor_requested)
+    |> send_message()
   end
 
   def two_factor_method(:text), do: :TWO_FACTOR_METHOD_SMS
@@ -80,7 +80,7 @@ defmodule Recognizer.Notifications.Account do
       recovery_code: recovery_code_used,
       codes_remaining: length(codes_remaining)
     )
-    |> send_message(:two_factor_recovery_code_used)
+    |> send_message()
   end
 
   defp create_message(user, type, args \\ []) do
@@ -91,44 +91,10 @@ defmodule Recognizer.Notifications.Account do
     use Spandex.Decorators
 
     @decorate span(service: :bullhorn, type: :function)
-    defp send_message(resource, atom) do
-      encoded_message = encode_message(resource, atom)
-
-      resource
-      |> message_queue_url()
-      |> send_message_to_queue(encoded_message)
+    defp send_message(resource) do
+      Bottle.publish(resource, source: "recognizer", request_id: Bottle.RequestId.write(:http))
 
       {:ok, resource}
-    end
-
-    defp send_message_to_queue(queues, message) when is_list(queues) do
-      Enum.each(queues, &send_message_to_queue(&1, message))
-    end
-
-    defp send_message_to_queue(queue, message) do
-      queue
-      |> ExAws.SQS.send_message(message)
-      |> ExAws.request()
-    end
-
-    defp message_queue_url(%message_type{}) do
-      :recognizer
-      |> Application.get_env(:message_queues)
-      |> Keyword.get(message_type)
-    end
-
-    defp encode_message(resource, atom) do
-      message_in_a_bottle =
-        Bottle.Core.V1.Bottle.new(
-          request_id: Bottle.RequestId.write(:http),
-          resource: {atom, resource},
-          source: "recognizer",
-          timestamp: DateTime.to_unix(DateTime.utc_now())
-        )
-
-      message_in_a_bottle
-      |> Bottle.Core.V1.Bottle.encode()
-      |> URI.encode()
     end
   else
     defp send_message(resource, _atom) do
