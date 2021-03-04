@@ -97,7 +97,7 @@ defmodule Recognizer.Notifications.Account do
       {:ok, resource}
     end
   else
-    defp send_message(resource, _atom) do
+    defp send_message(resource) do
       {:ok, resource}
     end
   end
