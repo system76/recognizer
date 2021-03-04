@@ -111,7 +111,8 @@ config :amqp,
     rabbitmq_conn: [
       username: "",
       password: "",
-      host: ""
+      host: "",
+      port: 5672
     ]
   ],
   channels: [

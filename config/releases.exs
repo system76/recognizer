@@ -32,7 +32,9 @@ config :amqp,
     rabbitmq_conn: [
       username: recognizer_config["RABBITMQ_USERNAME"],
       password: recognizer_config["RABBITMQ_PASSWORD"],
-      host: recognizer_config["RABBITMQ_HOST"]
+      host: recognizer_config["RABBITMQ_HOST"],
+      port: recognizer_config["RABBITMQ_PORT"],
+      ssl_options: [verify: :verify_none]
     ]
   ],
   channels: [
