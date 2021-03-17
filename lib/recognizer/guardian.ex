@@ -26,7 +26,15 @@ defmodule Recognizer.Guardian do
   end
 
   def encode_and_sign_access_token(access_token) do
-    user = Keyword.get(access_token, :resource_owner)
+    # Unfortunately for us `ExOauth2Provider` does a `preload(access_token, :resource_owner)` to load the 
+    # owner but this circumvents all the preloading we typically need for a user. Until we're able to patch upstream
+    # the easiest workaround for us is to take the `id` and look the user up via our code which does the
+    # appropriate loading.
+    user =
+      access_token
+      |> Keyword.get(:resource_owner)
+      |> Map.get(:id)
+      |> Accounts.get_user!()
 
     roles = if Accounts.Role.admin?(user), do: ["staff"], else: []
 
