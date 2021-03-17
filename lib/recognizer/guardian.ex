@@ -28,12 +28,14 @@ defmodule Recognizer.Guardian do
   def encode_and_sign_access_token(access_token) do
     user = Keyword.get(access_token, :resource_owner)
 
+    roles = if Accounts.Role.admin?(user), do: ["staff"], else: []
+
     scopes =
       access_token
       |> Keyword.get(:scopes, [])
       |> String.split(" ")
 
-    {:ok, token, _claims} = encode_and_sign(user, %{scopes: scopes}, token_type: "access")
+    {:ok, token, _claims} = encode_and_sign(user, %{roles: roles, scopes: scopes}, token_type: "access")
 
     token
   end
