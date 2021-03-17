@@ -52,7 +52,9 @@ defmodule Recognizer.AccountsTest do
 
     test "returns the user with the given id" do
       %{id: id} = user = insert(:user)
-      assert %User{id: ^id} = Accounts.get_user!(user.id)
+      insert(:role, user_id: id, role_id: 2)
+
+      assert %User{id: ^id, roles: [%{role_id: 2}]} = Accounts.get_user!(user.id)
     end
   end
 
