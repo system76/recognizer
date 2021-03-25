@@ -22,7 +22,7 @@ defmodule Recognizer.Mailchimp do
       |> Jason.encode!()
 
     case HTTPoison.put!(complete_url, body, %{"Content-type" => "application/json"}, hackney: hackney) do
-      %{status: 200} -> {:ok, user}
+      %{status_code: 200} -> {:ok, user}
       %{body: %{"status" => "unsubscribed"}} -> {:ok, user}
       %{body: %{"detail" => reason}} -> {:error, reason}
       err -> {:error, inspect(err)}

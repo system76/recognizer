@@ -24,31 +24,22 @@ config :recognizer, Recognizer.Repo,
   pool_size: recognizer_config["DB_POOL"]
 
 config :recognizer,
-  message_queues: [
-    {Bottle.Account.V1.UserCreated,
-     [
-       recognizer_config["NOTIFICATION_SERVICE_SQS_URL"],
-       recognizer_config["PAYMENT_SERVICE_SQS_URL"],
-       recognizer_config["HELP_DESK_SERVICE_SQS_URL"]
-     ]},
-    {Bottle.Account.V1.UserUpdated,
-     [
-       recognizer_config["NOTIFICATION_SERVICE_SQS_URL"],
-       recognizer_config["PAYMENT_SERVICE_SQS_URL"],
-       recognizer_config["HELP_DESK_SERVICE_SQS_URL"]
-     ]},
-    {Bottle.Account.V1.TwoFactorRequested, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
-    {Bottle.Account.V1.PasswordChanged, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
-    {Bottle.Account.V1.PasswordReset, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]},
-    {Bottle.Account.V1.TwoFactorRecoveryCodeUsed, recognizer_config["NOTIFICATION_SERVICE_SQS_URL"]}
-  ],
   two_factor_issuer: recognizer_config["TWO_FACTOR_ISSUER"],
   redis_host: recognizer_config["REDIS_HOST"]
 
-config :ex_aws,
-  access_key_id: recognizer_config["AWS_ACCESS_KEY_ID"],
-  secret_access_key: recognizer_config["AWS_SECRET_ACCESS_KEY"],
-  region: recognizer_config["AWS_REGION"]
+config :amqp,
+  connections: [
+    rabbitmq_conn: [
+      username: recognizer_config["RABBITMQ_USERNAME"],
+      password: recognizer_config["RABBITMQ_PASSWORD"],
+      host: recognizer_config["RABBITMQ_HOST"],
+      port: recognizer_config["RABBITMQ_PORT"],
+      ssl_options: [verify: :verify_none]
+    ]
+  ],
+  channels: [
+    events: [connection: :rabbitmq_conn]
+  ]
 
 config :appsignal, :config,
   push_api_key: recognizer_config["APPSIGNAL_KEY"],
