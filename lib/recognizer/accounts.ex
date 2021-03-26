@@ -163,6 +163,8 @@ defmodule Recognizer.Accounts do
 
   """
   def register_user(attrs, opts \\ []) do
+    if attrs["newsletter"] === "true", do: Recognizer.Hal.update_newsletter(attrs)
+
     %User{}
     |> User.registration_changeset(attrs, opts)
     |> insert_user_and_notification_preferences()
@@ -242,30 +244,13 @@ defmodule Recognizer.Accounts do
 
   """
   def update_user(user, attrs) do
+    Recognizer.Hal.update_newsletter(attrs)
     changeset = User.changeset(user, attrs)
 
-    with {:ok, updated_user} <- Repo.update(changeset),
-         {:ok, _updated_user} <- maybe_update_mailchimp_subscription(updated_user, changeset) do
+    with {:ok, updated_user} <- Repo.update(changeset) do
       Notification.deliver_user_updated_message(updated_user)
       {:ok, updated_user}
     end
-  end
-
-  defp maybe_update_mailchimp_subscription(updated_user, changeset) do
-    with true <- Enum.any?([:email, :newsletter, :first_name, :last_name], &Ecto.Changeset.get_change(changeset, &1)),
-         {:error, reason} <- apply(mailchimp_module(), :update_user, [updated_user]) do
-      Logger.error(reason)
-      # Bypass any issues with mailchimp and still allow the database update
-      {:ok, updated_user}
-    else
-      _ -> {:ok, updated_user}
-    end
-  end
-
-  defp mailchimp_module do
-    :recognizer
-    |> Application.get_env(:mailchimp)
-    |> Keyword.get(:module, Recognizer.Mailchimp)
   end
 
   @doc """

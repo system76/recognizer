@@ -34,6 +34,11 @@ config :recognizer, RecognizerWeb.Endpoint,
     ]
   ]
 
+config :recognizer,
+  hal: [
+    url: "https://api-v2.genesis76.com"
+  ]
+
 config :logger, :console, format: "[$level] $message\n"
 
 config :phoenix, :stacktrace_depth, 20

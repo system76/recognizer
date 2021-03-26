@@ -8,8 +8,8 @@ config :recognizer, RecognizerWeb.Endpoint,
   server: true
 
 config :recognizer,
-  mailchimp: [
-    base_url: "https://us10.api.mailchimp.com"
+  hal: [
+    url: "https://api-v2.system76.com"
   ]
 
 config :logger,

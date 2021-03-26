@@ -5,7 +5,7 @@ config :recognizer,
   two_factor_issuer: "System76",
   redirect_url: false,
   redis_host: "localhost",
-  mailchimp: []
+  hal: []
 
 config :recognizer, RecognizerWeb.Endpoint,
   url: [host: "localhost"],

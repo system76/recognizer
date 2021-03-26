@@ -176,10 +176,6 @@ defmodule Recognizer.AccountsTest do
     end
 
     test "updates the email", %{user: user} do
-      expect(Recognizer.MockMailchimp, :update_user, fn user ->
-        {:ok, user}
-      end)
-
       email = build(:email)
       assert {:ok, _user} = Accounts.update_user(user, %{email: email})
       changed_user = Repo.get!(User, user.id)
