@@ -19,3 +19,8 @@ config :recognizer, RecognizerWeb.Endpoint,
   server: false
 
 config :logger, level: :warn
+
+config :recognizer,
+  hal: [
+    url: "https://api-v2.genesis76.com"
+  ]

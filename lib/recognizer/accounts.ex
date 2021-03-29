@@ -163,7 +163,9 @@ defmodule Recognizer.Accounts do
 
   """
   def register_user(attrs, opts \\ []) do
-    if attrs["newsletter"] === "true", do: Recognizer.Hal.update_newsletter(attrs)
+    if Map.has_key?(attrs, "newsletter") do
+      if attrs["newsletter"] === "true", do: Recognizer.Hal.update_newsletter(attrs)
+    end
 
     %User{}
     |> User.registration_changeset(attrs, opts)
@@ -244,7 +246,7 @@ defmodule Recognizer.Accounts do
 
   """
   def update_user(user, attrs) do
-    Recognizer.Hal.update_newsletter(attrs)
+    if Map.has_key?(attrs, "newsletter"), do: Recognizer.Hal.update_newsletter(attrs)
     changeset = User.changeset(user, attrs)
 
     with {:ok, updated_user} <- Repo.update(changeset) do
