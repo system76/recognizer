@@ -163,7 +163,7 @@ defmodule Recognizer.Accounts do
 
   """
   def register_user(attrs, opts \\ []) do
-    if Map.get(attrs, "newsletter" == "true"), do: Recognizer.Hal.update_newsletter(attrs)
+    if Map.get(attrs, "newsletter") == "true", do: Recognizer.Hal.update_newsletter(attrs)
 
     %User{}
     |> User.registration_changeset(attrs, opts)
