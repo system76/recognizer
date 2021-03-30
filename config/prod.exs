@@ -7,11 +7,6 @@ config :recognizer, RecognizerWeb.Endpoint,
   gzip: true,
   server: true
 
-config :recognizer,
-  hal: [
-    url: "https://api-v2.system76.com"
-  ]
-
 config :logger,
   backends: [LoggerJSON],
   level: :info

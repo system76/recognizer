@@ -1,5 +1,8 @@
 import Config
 
+config :recognizer,
+  hal_url: "https://api-v2.genesis76.com"
+
 config :recognizer, Recognizer.Repo,
   username: "root",
   password: "recognizer",
@@ -32,11 +35,6 @@ config :recognizer, RecognizerWeb.Endpoint,
       ~r"lib/recognizer_web/(live|views)/.*(ex)$",
       ~r"lib/recognizer_web/templates/.*(eex)$"
     ]
-  ]
-
-config :recognizer,
-  hal: [
-    url: "https://api-v2.genesis76.com"
   ]
 
 config :logger, :console, format: "[$level] $message\n"
