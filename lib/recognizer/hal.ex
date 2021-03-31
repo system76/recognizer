@@ -12,19 +12,26 @@ defmodule Recognizer.Hal do
         Map.put(acc, item["id"], String.to_existing_atom(user["newsletter"]))
       end)
 
-    body =
-      %{
-        "email_address" => user["email"],
-        "status" => mailchimp_status(user["newsletter"]),
-        "interests" => groups,
-        "merge_fields" => %{
-          "FNAME" => user["first_name"],
-          "LNAME" => user["last_name"]
-        }
-      }
-      |> Jason.encode!()
+    req = "/accounts/newsletter?email_address=#{user["email"]}" |> build_url() |> HTTPoison.get!()
+    status = Jason.decode!(req.body)["status"]
 
-    "/accounts/newsletter" |> build_url() |> HTTPoison.post!(body, %{"Content-type" => "application/json"})
+    # only update if not already pending, or subscribed
+    # note: this means you cannot unsubscribe from recognizer settings
+    unless Enum.member?(["pending", "subscribed"], status) do
+      body =
+        %{
+          "email_address" => user["email"],
+          "status" => "pending",
+          "interests" => groups,
+          "merge_fields" => %{
+            "FNAME" => user["first_name"],
+            "LNAME" => user["last_name"]
+          }
+        }
+        |> Jason.encode!()
+
+      "/accounts/newsletter" |> build_url() |> HTTPoison.post!(body, %{"Content-type" => "application/json"})
+    end
   end
 
   defp build_url(path) do
