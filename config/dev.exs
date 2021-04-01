@@ -1,5 +1,8 @@
 import Config
 
+config :recognizer,
+  hal_url: "https://api-v2.genesis76.com"
+
 config :recognizer, Recognizer.Repo,
   username: "root",
   password: "recognizer",

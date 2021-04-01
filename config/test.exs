@@ -2,9 +2,7 @@ import Config
 
 config :recognizer,
   redis_host: System.get_env("REDIS_HOST", "localhost"),
-  mailchimp: [
-    module: Recognizer.MockMailchimp
-  ]
+  hal_url: "https://api-v2.genesis76.com"
 
 config :argon2_elixir,
   t_cost: 1,

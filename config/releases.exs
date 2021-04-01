@@ -7,10 +7,7 @@ recognizer_config =
 
 config :recognizer,
   redirect_url: recognizer_config["REDIRECT_URL"],
-  mailchimp: [
-    api_key: recognizer_config["MAILCHIMP_API_KEY"],
-    newsletter_id: recognizer_config["MAILCHIMP_NEWSLETTER_ID"]
-  ]
+  hal_url: recognizer_config["HAL_URL"]
 
 config :recognizer, RecognizerWeb.Endpoint,
   url: [host: System.get_env("DOMAIN")],

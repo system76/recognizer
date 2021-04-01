@@ -62,10 +62,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
     setup :verify_on_exit!
 
     test "updates the user email", %{conn: conn, user: user} do
-      expect(Recognizer.MockMailchimp, :update_user, fn user ->
-        {:ok, user}
-      end)
-
       conn =
         put(conn, Routes.user_settings_path(conn, :update), %{
           "action" => "update",
