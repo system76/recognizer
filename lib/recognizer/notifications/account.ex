@@ -6,13 +6,14 @@ defmodule Recognizer.Notifications.Account do
   """
 
   alias Bottle.Account.V1, as: Account
+  alias Recognizer.Caster
 
   @doc """
   Deliver user creation welcome message.
   """
   def deliver_user_created_message(user) do
     user
-    |> Recognizer.Bottle.convert_user()
+    |> Caster.cast()
     |> create_message(Account.UserCreated)
     |> send_message()
   end
@@ -22,7 +23,7 @@ defmodule Recognizer.Notifications.Account do
   """
   def deliver_user_updated_message(user) do
     user
-    |> Recognizer.Bottle.convert_user()
+    |> Caster.cast()
     |> create_message(Account.UserUpdated)
     |> send_message()
   end
@@ -32,7 +33,7 @@ defmodule Recognizer.Notifications.Account do
   """
   def deliver_user_deleted_message(user) do
     user
-    |> Recognizer.Bottle.convert_user()
+    |> Caster.cast()
     |> create_message(Account.UserDeleted)
     |> send_message()
   end
@@ -42,7 +43,7 @@ defmodule Recognizer.Notifications.Account do
   """
   def deliver_user_password_changed_notification(user) do
     user
-    |> Recognizer.Bottle.convert_user()
+    |> Caster.cast()
     |> create_message(Account.PasswordChanged)
     |> send_message()
   end
@@ -52,7 +53,7 @@ defmodule Recognizer.Notifications.Account do
   """
   def deliver_reset_password_instructions(user, url) do
     user
-    |> Recognizer.Bottle.convert_user()
+    |> Caster.cast()
     |> create_message(Account.PasswordReset, reset_url: url)
     |> send_message()
   end
@@ -62,7 +63,7 @@ defmodule Recognizer.Notifications.Account do
   """
   def deliver_two_factor_token(user, token, method) do
     user
-    |> Recognizer.Bottle.convert_user()
+    |> Caster.cast()
     |> create_message(Account.TwoFactorRequested, token: token, method: two_factor_method(method))
     |> send_message()
   end
@@ -75,7 +76,7 @@ defmodule Recognizer.Notifications.Account do
   """
   def deliver_user_recovery_code_used_notification(user, recovery_code_used, codes_remaining) do
     user
-    |> Recognizer.Bottle.convert_user()
+    |> Caster.cast()
     |> create_message(Account.TwoFactorRecoveryCodeUsed,
       recovery_code: recovery_code_used,
       codes_remaining: length(codes_remaining)
