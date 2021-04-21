@@ -46,7 +46,7 @@ defmodule Recognizer.AccountFactory do
         Argon2.hash_pwd_salt(password)
       end
 
-    %Accounts.User{
+    user = %Accounts.User{
       first_name: sequence(:first_name, &"first-name-#{&1}"),
       last_name: sequence(:last_name, &"last-name-#{&1}"),
       email: build(:email),
@@ -59,6 +59,8 @@ defmodule Recognizer.AccountFactory do
       notification_preference: build(:notification_preference),
       password_changed_at: password_changed_at
     }
+
+    Map.merge(user, attrs)
   end
 
   def add_two_factor(user, type \\ :text) do
