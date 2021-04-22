@@ -117,15 +117,7 @@ defmodule Recognizer.Accounts.User do
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
     |> unsafe_validate_unique(:email, Repo)
-    |> maybe_downcase_email()
-  end
-
-  defp maybe_downcase_email(changeset) do
-    if email = get_change(changeset, :email) do
-      put_change(changeset, :email, String.downcase(email))
-    else
-      changeset
-    end
+    |> update_change(:email, &String.downcase/1)
   end
 
   defp validate_password(changeset, opts) do
