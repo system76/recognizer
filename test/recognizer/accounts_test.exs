@@ -94,10 +94,14 @@ defmodule Recognizer.AccountsTest do
     end
 
     test "registers users with a hashed password" do
-      {:ok, user} = Accounts.register_user(params_for(:user))
+      {:ok, user} =
+        :user
+        |> params_for(%{email: "TEST@Example.com"})
+        |> Accounts.register_user()
 
       assert is_binary(user.hashed_password)
       assert is_nil(user.password)
+      assert "test@example.com" == user.email
     end
 
     test "adds login role" do
@@ -176,11 +180,10 @@ defmodule Recognizer.AccountsTest do
     end
 
     test "updates the email", %{user: user} do
-      email = build(:email)
-      assert {:ok, _user} = Accounts.update_user(user, %{email: email})
+      assert {:ok, _user} = Accounts.update_user(user, %{email: "TEST@Example.com"})
       changed_user = Repo.get!(User, user.id)
       assert changed_user.email != user.email
-      assert changed_user.email == email
+      assert "test@example.com" == changed_user.email
     end
 
     test "clears company name for individual accounts", %{user: user} do
