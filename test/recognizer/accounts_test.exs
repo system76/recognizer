@@ -94,7 +94,7 @@ defmodule Recognizer.AccountsTest do
     end
 
     test "registers users with a hashed password" do
-      {:ok, user} = 
+      {:ok, user} =
         :user
         |> params_for(%{email: "TEST@Example.com"})
         |> Accounts.register_user()
