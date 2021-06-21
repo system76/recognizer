@@ -59,7 +59,7 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
 
       _ ->
         Logger.error("Unable to create new oauth account", changeset: changeset)
-        "An error occured. Please contact support."
+        "An error occurred. Please contact support."
     end
   end
 
