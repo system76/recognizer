@@ -2,6 +2,8 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
   @moduledoc false
   use RecognizerWeb, :controller
 
+  require Logger
+
   alias Recognizer.{Accounts, Repo}
   alias RecognizerWeb.Authentication
 
@@ -27,12 +29,9 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
         |> put_session(:two_factor_sent, false)
         |> redirect(to: Routes.user_two_factor_path(conn, :new))
 
-      {:error, %Ecto.Changeset{}} ->
+      {:error, %Ecto.Changeset{} = changeset} ->
         conn
-        |> put_flash(
-          :error,
-          "An error occurred. This may indicate you have previously created an account using the email and password combination."
-        )
+        |> put_flash(:error, friendly_error_message(changeset))
         |> redirect(to: Routes.user_session_path(conn, :new))
     end
   end
@@ -46,6 +45,22 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
     conn
     |> put_flash(:error, "We were unable to authenticate you with #{provider}.")
     |> redirect(to: Routes.user_session_path(conn, :new))
+  end
+
+  defp friendly_error_message(changeset) do
+    errors =
+      changeset.errors
+      |> Enum.map(fn {field, {_text, opts}} -> {field, Keyword.get(opts, :validation)} end)
+      |> Enum.into(%{})
+
+    case errors do
+      %{email: :unsafe_unique} ->
+        "An error occurred. This may indicate you have previously created an account using the email and password combination."
+
+      _ ->
+        Logger.error("Unable to create new oauth account", changeset: changeset)
+        "An error occured. Please contact support."
+    end
   end
 
   defp get_or_create_user_from_auth(auth) do
