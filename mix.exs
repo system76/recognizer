@@ -33,7 +33,6 @@ defmodule Recognizer.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:appsignal_phoenix, "~> 2.0.4"},
       {:argon2_elixir, "~> 2.0"},
       {:bottle, github: "system76/bottle", ref: "b3b78b6"},
       {:cors_plug, "~> 2.0"},
