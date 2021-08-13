@@ -38,10 +38,6 @@ config :amqp,
     events: [connection: :rabbitmq_conn]
   ]
 
-config :appsignal, :config,
-  push_api_key: recognizer_config["APPSIGNAL_KEY"],
-  env: recognizer_config["ENVIRONMENT"]
-
 config :recognizer, ExOauth2Provider,
   force_ssl_in_redirect_uri: Map.get(recognizer_config, "FORCE_SSL_OAUTH_APPLICATIONS", true)
 
