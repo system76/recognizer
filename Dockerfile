@@ -10,7 +10,7 @@ RUN set -xe; \
         make \
         musl-dev \
         nodejs \
-        nodejs-npm \
+        npm \
         python3 \
         tzdata;
 

@@ -35,16 +35,6 @@ config :logger_json, :backend,
 
 config :phoenix, :json_library, Jason
 
-config :appsignal, :config,
-  name: "Recognizer",
-  active: false,
-  ignore_errors: [
-    "Ecto.NoResultsError",
-    "Phoenix.MissingParamError",
-    "Phoenix.Router.NoRouteError",
-    "Policy.Error"
-  ]
-
 config :recognizer, :message_queues, []
 
 config :ex_aws,
@@ -104,18 +94,5 @@ config :spandex_ecto, SpandexEcto.EctoLogger,
 
 config :spandex_phoenix, tracer: Recognizer.Tracer
 config :spandex, :decorators, tracer: Recognizer.Tracer
-
-config :amqp,
-  connections: [
-    rabbitmq_conn: [
-      username: "",
-      password: "",
-      host: "",
-      port: 5672
-    ]
-  ],
-  channels: [
-    events: [connection: :rabbitmq_conn]
-  ]
 
 import_config "#{Mix.env()}.exs"

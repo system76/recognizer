@@ -15,6 +15,4 @@ config :recognizer, Recognizer.Repo, log: false
 
 config :phoenix, :logger, false
 
-config :appsignal, :config, active: true
-
 config :ex_aws, enabled: true
