@@ -6,7 +6,7 @@
     System76 account?
   </p>
 
-  <% if @scopes do %>
+  <%= if @scopes do %>
     <p>
       This will allow <strong><%= @client.name %> to do:
     </p>
