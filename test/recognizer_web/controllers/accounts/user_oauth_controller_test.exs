@@ -3,7 +3,6 @@ defmodule RecognizerWeb.Accounts.UserOauthControllerTest do
 
   import Recognizer.AccountFactory
 
-  alias Recognizer.Accounts
   alias RecognizerWeb.Accounts.UserOAuthController
 
   defp ueberauth_fixture(%{service: service, service_guid: guid}, attrs \\ %{}) do
