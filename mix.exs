@@ -20,7 +20,7 @@ defmodule Recognizer.MixProject do
   def application do
     [
       mod: {Recognizer.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:lager, :logger, :runtime_tools]
     ]
   end
 
