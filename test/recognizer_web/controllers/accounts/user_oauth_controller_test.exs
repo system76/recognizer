@@ -87,7 +87,7 @@ defmodule RecognizerWeb.Accounts.UserOauthControllerTest do
         |> assign(:ueberauth_auth, auth)
         |> UserOAuthController.callback(%{})
 
-      assert get_flash(conn, :error) == "An error occured. Please contact support."
+      assert get_flash(conn, :error) == "An error occurred. Please contact support."
     end
   end
 end
