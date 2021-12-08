@@ -5,9 +5,9 @@ defmodule Recognizer.MixProject do
     [
       app: :recognizer,
       version: "0.1.0",
-      elixir: "~> 1.9",
+      elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -20,7 +20,7 @@ defmodule Recognizer.MixProject do
   def application do
     [
       mod: {Recognizer.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :os_mon]
     ]
   end
 
@@ -56,6 +56,7 @@ defmodule Recognizer.MixProject do
       {:phoenix_html, "~> 3.1"},
       {:phoenix_live_reload, "~> 1.3", only: :dev},
       {:phoenix, "~> 1.6.2"},
+      {:phoenix_live_dashboard, "~> 0.5"},
       {:plug_cowboy, "~> 2.5"},
       {:pot, "~> 1.0"},
       {:spandex, "~> 3.1.0"},
