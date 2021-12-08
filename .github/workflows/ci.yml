@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: elixir:1.11-alpine
+      image: elixir:1.12-alpine
 
     services:
       redis: redis:alpine
@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: elixir:1.10-alpine
+      image: elixir:1.12-alpine
 
     steps:
       - name: Checkout
@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: elixir:1.11-alpine
+      image: elixir:1.12-alpine
 
     steps:
       - name: Checkout
