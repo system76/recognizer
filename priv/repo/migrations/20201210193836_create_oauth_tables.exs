@@ -10,7 +10,7 @@ defmodule Recognizer.Repo.Migrations.CreateOauthTables do
       add :scopes, :string, null: false, default: ""
       add :privileged, :boolean, null: false, default: false
 
-      add :owner_id, references(:users, type: "int(11) unsigned", on_delete: :nothing)
+      add :owner_id, references(:users, type: :"int(11) unsigned", on_delete: :nothing)
 
       timestamps()
     end
@@ -22,7 +22,7 @@ defmodule Recognizer.Repo.Migrations.CreateOauthTables do
       add :redirect_uri, :string, null: false
       add :scopes, :string
 
-      add :resource_owner_id, references(:users, type: "int(11) unsigned", on_delete: :nothing)
+      add :resource_owner_id, references(:users, type: :"int(11) unsigned", on_delete: :nothing)
       add :application_id, references(:oauth_applications, on_delete: :nothing)
 
       add :expires_in, :integer, null: false
@@ -38,7 +38,7 @@ defmodule Recognizer.Repo.Migrations.CreateOauthTables do
       add :scopes, :string
       add :previous_refresh_token, :string, null: false, default: ""
 
-      add :resource_owner_id, references(:users, type: "int(11) unsigned", on_delete: :nothing)
+      add :resource_owner_id, references(:users, type: :"int(11) unsigned", on_delete: :nothing)
       add :application_id, references(:oauth_applications, on_delete: :nothing)
 
       add :expires_in, :integer

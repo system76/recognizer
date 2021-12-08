@@ -35,7 +35,7 @@ defmodule Recognizer.Repo.Migrations.CreateUsersAuthTables do
 
   def change do
     create table(:users, primary_key: false) do
-      add :id, :"int(11) unsigned not null auto_increment", primary_key: true
+      add :id, :"int(11) unsigned auto_increment", null: false, primary_key: true
       add :first_name, :string, null: false
       add :last_name, :string, null: false
       add :username, :string, null: false
@@ -48,7 +48,7 @@ defmodule Recognizer.Repo.Migrations.CreateUsersAuthTables do
     create unique_index(:users, [:email])
 
     create table(:users_tokens) do
-      add :user_id, references(:users, type: "int(11) unsigned", on_delete: :delete_all),
+      add :user_id, references(:users, type: :"int(11) unsigned", on_delete: :delete_all),
         null: false
 
       add :token, :binary, null: false, size: 32
