@@ -37,10 +37,6 @@ config :phoenix, :json_library, Jason
 
 config :recognizer, :message_queues, []
 
-config :ex_aws,
-  enabled: false,
-  json_codec: Jason
-
 config :recognizer, ExOauth2Provider,
   repo: Recognizer.Repo,
   resource_owner: Recognizer.Accounts.User,

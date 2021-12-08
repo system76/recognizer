@@ -14,5 +14,3 @@ config :logger,
 config :recognizer, Recognizer.Repo, log: false
 
 config :phoenix, :logger, false
-
-config :ex_aws, enabled: true
