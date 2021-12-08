@@ -7,9 +7,13 @@ defmodule Recognizer.Accounts do
 
   import Ecto.Query, warn: false
 
-  alias Recognizer.Accounts.{User, OAuth, RecoveryCode}
+  alias Ecto.Multi
+  alias Recognizer.Accounts.OAuth
+  alias Recognizer.Accounts.RecoveryCode
+  alias Recognizer.Accounts.User
+  alias Recognizer.Guardian
   alias Recognizer.Notifications.Account, as: Notification
-  alias Recognizer.{Guardian, Repo}
+  alias Recognizer.Repo
   alias RecognizerWeb.Authentication
 
   ## Database getters
@@ -284,10 +288,10 @@ defmodule Recognizer.Accounts do
       |> User.password_changeset(attrs)
       |> User.validate_current_password(password)
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:oauth, user_and_oauth_access_query(user))
-    |> Ecto.Multi.delete_all(:tokens, user_and_contexts_query(user, :all))
+    Multi.new()
+    |> Multi.update(:user, changeset)
+    |> Multi.delete_all(:oauth, user_and_oauth_access_query(user))
+    |> Multi.delete_all(:tokens, user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} ->
@@ -445,10 +449,10 @@ defmodule Recognizer.Accounts do
 
   """
   def reset_user_password(user, attrs) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
-    |> Ecto.Multi.delete_all(:oauth, user_and_oauth_access_query(user))
-    |> Ecto.Multi.delete_all(:tokens, user_and_contexts_query(user, :all))
+    Multi.new()
+    |> Multi.update(:user, User.password_changeset(user, attrs))
+    |> Multi.delete_all(:oauth, user_and_oauth_access_query(user))
+    |> Multi.delete_all(:tokens, user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
@@ -503,8 +507,8 @@ defmodule Recognizer.Accounts do
   def update_user_two_factor(user, attrs) do
     user_changeset = change_user_two_factor(user, attrs)
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, user_changeset)
+    Multi.new()
+    |> Multi.update(:user, user_changeset)
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} ->

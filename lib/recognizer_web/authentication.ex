@@ -7,8 +7,9 @@ defmodule RecognizerWeb.Authentication do
   import Phoenix.Controller
 
   alias Guardian.DB, as: GuardianDB
-  alias RecognizerWeb.Router.Helpers, as: Routes
   alias Recognizer.Guardian
+  alias Recognizer.Guardian.Plug, as: GuardianPlug
+  alias RecognizerWeb.Router.Helpers, as: Routes
 
   @doc """
   Logs the user in.
@@ -30,7 +31,7 @@ defmodule RecognizerWeb.Authentication do
 
         conn
         |> clear_session()
-        |> Guardian.Plug.sign_in(user, params)
+        |> GuardianPlug.sign_in(user, params)
         |> redirect(redirect_opts)
     end
   end
@@ -51,7 +52,7 @@ defmodule RecognizerWeb.Authentication do
     redirect_opts = logout_redirect(conn)
 
     conn
-    |> Guardian.Plug.sign_out()
+    |> GuardianPlug.sign_out()
     |> clear_session()
     |> redirect(redirect_opts)
   end
@@ -70,7 +71,7 @@ defmodule RecognizerWeb.Authentication do
   and remember me token.
   """
   def fetch_current_user(conn) do
-    Guardian.Plug.current_resource(conn)
+    GuardianPlug.current_resource(conn)
   end
 
   @doc """

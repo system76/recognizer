@@ -23,6 +23,8 @@ config :recognizer, RecognizerWeb.Endpoint,
   live_view: [signing_salt: "YzwhzV25"],
   gzip: false
 
+config :recognizer, Recognizer.Notifications.Account, bullhorn_enabled: false
+
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id, :user_id, :trace_id, :span_id]

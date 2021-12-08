@@ -84,11 +84,11 @@ defmodule Recognizer.Notifications.Account do
     |> send_message()
   end
 
-  defp create_message(user, type, args \\ []) do
-    apply(type, :new, [Keyword.merge([user: user], args)])
+  defp create_message(user, notification_module, args \\ []) do
+    notification_module.new(Keyword.merge([user: user], args))
   end
 
-  if Application.compile_env(:ex_aws, :enabled) do
+  if Application.compile_env(:recognizer, [__MODULE__, :bullhorn_enabled]) do
     use Spandex.Decorators
 
     @decorate span(service: :bullhorn, type: :function)

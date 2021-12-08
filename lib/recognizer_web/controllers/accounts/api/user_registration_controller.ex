@@ -1,8 +1,8 @@
 defmodule RecognizerWeb.Accounts.Api.UserRegistrationController do
   use RecognizerWeb, :controller
 
-  alias Recognizer.Accounts.Role
   alias Recognizer.Accounts
+  alias Recognizer.Accounts.Role
   alias RecognizerWeb.FallbackController
 
   def create(conn, %{"user" => user_params}) do

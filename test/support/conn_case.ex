@@ -17,6 +17,8 @@ defmodule RecognizerWeb.ConnCase do
 
   use ExUnit.CaseTemplate
 
+  alias Recognizer.AccountFactory
+
   using do
     quote do
       # Import conveniences for testing with connections
@@ -50,19 +52,19 @@ defmodule RecognizerWeb.ConnCase do
   test context.
   """
   def register_and_log_in_admin(%{conn: conn}) do
-    user = Recognizer.AccountFactory.insert(:user)
-    Recognizer.AccountFactory.insert(:role, user_id: user.id, role_id: 2)
+    user = AccountFactory.insert(:user)
+    AccountFactory.insert(:role, user_id: user.id, role_id: 2)
     %{conn: log_in_user(conn, user), user: user}
   end
 
   def register_and_log_in_user(%{conn: conn}) do
-    user = Recognizer.AccountFactory.insert(:user)
+    user = AccountFactory.insert(:user)
     %{conn: log_in_user(conn, user), user: user}
   end
 
   def register_and_log_in_oauth_user(%{conn: conn}) do
-    user = Recognizer.AccountFactory.insert(:user)
-    oauth = Recognizer.AccountFactory.insert(:oauth, user: user)
+    user = AccountFactory.insert(:user)
+    oauth = AccountFactory.insert(:oauth, user: user)
     user = Recognizer.Accounts.get_user!(user.id)
     %{conn: log_in_user(conn, user), user: user, oauth: oauth}
   end
