@@ -25,6 +25,7 @@ defmodule Recognizer.AccountFactory do
 
   def oauth_factory(attrs) do
     %Accounts.OAuth{
+      user: build(:user),
       service: "github",
       service_guid: sequence(:service_guid, &"oauth-guid-#{&1}")
     }
