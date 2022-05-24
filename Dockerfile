@@ -1,4 +1,4 @@
-FROM elixir:1.11-alpine as build
+FROM elixir:1.12-alpine as build
 
 # Install deps
 RUN set -xe; \

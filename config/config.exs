@@ -8,7 +8,6 @@ config :recognizer,
 
 config :recognizer, RecognizerWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "vbOPS+hzz+UAQRtWxIdqiKrcOuWpbLTfocvgvRVDR9P4JRfxtmWZa45H25iKKYoI",
   render_errors: [
     view: RecognizerWeb.ErrorView,
     accepts: ~w(html json),
@@ -23,6 +22,8 @@ config :recognizer, RecognizerWeb.Endpoint,
   live_view: [signing_salt: "YzwhzV25"],
   gzip: false
 
+config :recognizer, Recognizer.Notifications.Account, bullhorn_enabled: false
+
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id, :user_id, :trace_id, :span_id]
@@ -36,10 +37,6 @@ config :logger_json, :backend,
 config :phoenix, :json_library, Jason
 
 config :recognizer, :message_queues, []
-
-config :ex_aws,
-  enabled: false,
-  json_codec: Jason
 
 config :recognizer, ExOauth2Provider,
   repo: Recognizer.Repo,

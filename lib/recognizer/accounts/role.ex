@@ -28,7 +28,7 @@ defmodule Recognizer.Accounts.Role do
     |> validate_required([:user_id, :role_id])
   end
 
-  def default_role_changeset() do
+  def default_role_changeset do
     [
       %{role_id: @login_role_id}
     ]

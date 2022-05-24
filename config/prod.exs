@@ -13,6 +13,6 @@ config :logger,
 
 config :recognizer, Recognizer.Repo, log: false
 
-config :phoenix, :logger, false
+config :recognizer, Recognizer.Notifications.Account, bullhorn_enabled: true
 
-config :ex_aws, enabled: true
+config :phoenix, :logger, false

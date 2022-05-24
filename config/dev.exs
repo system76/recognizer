@@ -12,7 +12,10 @@ config :recognizer, Recognizer.Repo,
   pool_size: 10
 
 config :recognizer, RecognizerWeb.Endpoint,
-  http: [port: 4000],
+  # Binding to loopback ipv4 address prevents access from other machines.
+  # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
+  http: [ip: {127, 0, 0, 1}, port: 4000],
+  secret_key_base: "vbOPS+hzz+UAQRtWxIdqiKrcOuWpbLTfocvgvRVDR9P4JRfxtmWZa45H25iKKYoI",
   debug_errors: true,
   code_reloader: true,
   check_origin: false,

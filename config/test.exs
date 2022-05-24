@@ -16,7 +16,11 @@ config :recognizer, Recognizer.Repo,
   pool: Ecto.Adapters.SQL.Sandbox
 
 config :recognizer, RecognizerWeb.Endpoint,
-  http: [port: 4002],
+  http: [ip: {127, 0, 0, 1}, port: 4002],
+  secret_key_base: "vbOPS+hzz+UAQRtWxIdqiKrcOuWpbLTfocvgvRVDR9P4JRfxtmWZa45H25iKKYoI",
   server: false
 
 config :logger, level: :warn
+
+# Initialize plugs at runtime for faster test compilation
+config :phoenix, :plug_init_mode, :runtime
