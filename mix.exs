@@ -5,9 +5,9 @@ defmodule Recognizer.MixProject do
     [
       app: :recognizer,
       version: "0.1.0",
-      elixir: "~> 1.9",
+      elixir: "~> 1.13",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      compilers: [:phoenix] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -19,8 +19,7 @@ defmodule Recognizer.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {Recognizer.Application, []},
-      extra_applications: [:lager, :logger, :runtime_tools]
+      mod: {Recognizer.Application, []}
     ]
   end
 
@@ -34,7 +33,7 @@ defmodule Recognizer.MixProject do
   defp deps do
     [
       {:argon2_elixir, "~> 2.0"},
-      {:bottle, github: "system76/bottle", ref: "b3b78b6"},
+      {:bottle, github: "system76/bottle", ref: "87eced5"},
       {:cors_plug, "~> 2.0"},
       {:cowboy, "~> 2.8", override: true},
       {:cowlib, "~> 2.9.1", override: true},

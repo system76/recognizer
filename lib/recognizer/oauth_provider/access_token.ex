@@ -8,10 +8,10 @@ defmodule Recognizer.OauthProvider.AccessToken do
   alias Recognizer.{Accounts, OauthProvider}
 
   schema "oauth_access_tokens" do
-    field :token, :string, null: false
+    field :token, :string
     field :refresh_token, :string
     field :scopes, :string
-    field :previous_refresh_token, :string, null: false, default: ""
+    field :previous_refresh_token, :string, default: ""
 
     belongs_to :resource_owner, Accounts.User
     belongs_to :application, OauthProvider.Application

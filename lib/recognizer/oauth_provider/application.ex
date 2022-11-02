@@ -8,11 +8,11 @@ defmodule Recognizer.OauthProvider.Application do
   alias Recognizer.{Accounts, OauthProvider}
 
   schema "oauth_applications" do
-    field :name, :string, null: false
-    field :uid, :string, null: false
-    field :secret, :string, null: false, default: ""
-    field :redirect_uri, :string, null: false
-    field :scopes, :string, null: false, default: ""
+    field :name, :string
+    field :uid, :string
+    field :secret, :string, default: ""
+    field :redirect_uri, :string
+    field :scopes, :string, default: ""
     field :privileged, :boolean, default: false
 
     belongs_to :owner, Accounts.User
