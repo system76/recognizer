@@ -56,7 +56,7 @@ COPY --from=build-node /usr/local/src/recognizer /usr/local/src/recognizer
 WORKDIR /usr/local/src/recognizer
 
 RUN set -xe; \
-		mix phx.digest; \
+    mix phx.digest; \
     mix release
 
 # -----------------------------------------------
