@@ -552,8 +552,6 @@ defmodule Recognizer.Accounts do
 
     Redix.noreply_command(:redix, ["SET", "two_factor_settings:#{user.id}", Jason.encode!(attrs)])
 
-    send_new_two_factor_notification(user, attrs)
-
     attrs
   end
 
