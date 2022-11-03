@@ -1,4 +1,4 @@
-FROM node:4.18-alpine as build-node
+FROM node:14.18-alpine as build-node
 
 RUN mkdir -p /usr/local/src/recognizer
 
