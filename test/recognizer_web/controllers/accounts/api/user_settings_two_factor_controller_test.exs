@@ -13,7 +13,7 @@ defmodule RecognizerWeb.Api.UserSettingsTwoFactorControllerTest do
   end
 
   describe "two factor not setup" do
-    setup %{conn: conn} do
+    setup do
       Redix.command(:redix, ["FLUSHDB"])
       on_exit(fn -> Redix.command(:redix, ["FLUSHDB"]) end)
     end
