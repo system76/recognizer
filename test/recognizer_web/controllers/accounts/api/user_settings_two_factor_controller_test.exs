@@ -13,6 +13,11 @@ defmodule RecognizerWeb.Api.UserSettingsTwoFactorControllerTest do
   end
 
   describe "two factor not setup" do
+    setup %{conn: conn} do
+      Redix.command(:redix, ["FLUSHDB"])
+      on_exit(fn -> Redix.command(:redix, ["FLUSHDB"]) end)
+    end
+
     test "GET /api/settings/two-factor sends empty view when no 2fa setup", %{conn: conn} do
       conn = get(conn, "/api/settings/two-factor")
       assert %{"two_factor" => nil} = json_response(conn, 200)

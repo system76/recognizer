@@ -14,7 +14,7 @@ defmodule Recognizer.Repo.Migrations.AddUserOauths do
       add :service, :"enum('facebook','github','google')"
       add :service_guid, :string
 
-      add :user_id, references(:users, type: "int(11) unsigned", on_delete: :nothing)
+      add :user_id, references(:users, type: :"int(11) unsigned", on_delete: :nothing)
     end
   end
 end
