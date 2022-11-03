@@ -1,4 +1,14 @@
-FROM elixir:1.13-alpine as build
+FROM node:4.18-alpine as build-node
+
+RUN mkdir -p /usr/local/src/recognizer
+
+COPY . /usr/local/src/recognizer/
+
+RUN cd /usr/local/src/recognizer/assets/; \
+    npm ci; \
+    npm run build;
+
+FROM elixir:1.13-alpine as build-elixir
 
 # Install deps
 RUN set -xe; \
@@ -9,8 +19,6 @@ RUN set -xe; \
         git \
         make \
         musl-dev \
-        nodejs \
-        npm \
         python3 \
         tzdata;
 
@@ -18,11 +26,11 @@ RUN set -xe; \
 RUN mkdir -p /usr/local/src/recognizer
 
 COPY . /usr/local/src/recognizer/
+COPY --from=build-node /usr/local/src/recognizer/_build/prod/rel/${APP_NAME}/assets /recognizer/assets
 
 # ARG is available during the build and not in the final container
 # https://vsupalov.com/docker-arg-vs-env/
 ARG MIX_ENV=prod
-ARG APP_NAME=recognizer
 
 # Use `set -xe;` to enable debugging and exit on error
 # More verbose but that is often beneficial for builds
@@ -32,10 +40,6 @@ RUN set -xe; \
     mix local.rebar --force; \
     mix deps.get; \
     mix deps.compile --all; \
-    cd /usr/local/src/recognizer/assets/; \
-    npm ci; \
-    npm run build; \
-    cd /usr/local/src/recognizer/; \
     mix phx.digest; \
     mix release
 
@@ -60,7 +64,7 @@ RUN set -xe; \
 ARG APP_NAME=recognizer
 
 # Copy the release artifact and set `recognizer` ownership
-COPY --chown=recognizer:recognizer --from=build /usr/local/src/recognizer/_build/prod/rel/${APP_NAME} /recognizer
+COPY --chown=recognizer:recognizer --from=build-elixir /usr/local/src/recognizer/_build/prod/rel/${APP_NAME} /recognizer
 
 # These are fed in from the build script
 ARG VCS_REF
