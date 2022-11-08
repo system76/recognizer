@@ -5,6 +5,8 @@ defmodule RecognizerWeb.Accounts.UserOauthControllerTest do
 
   alias RecognizerWeb.Accounts.UserOAuthController
 
+  @moduletag capture_log: true
+
   defp ueberauth_fixture(%{service: service, service_guid: guid}, attrs \\ %{}) do
     %Ueberauth.Auth{
       provider: service,
