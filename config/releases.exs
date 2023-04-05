@@ -54,3 +54,16 @@ config :ueberauth, Ueberauth.Strategy.Google.OAuth,
 config :recognizer, Recognizer.Tracer,
   disabled?: false,
   env: recognizer_config["ENVIRONMENT"]
+
+config :hammer,
+  backend:
+    {Hammer.Backend.Redis,
+     [
+       expiry_ms: 60_000 * 60 * 2,
+       redix_config: [
+         host: recognizer_config["REDIS_HOST"],
+         port: 6379
+       ],
+       pool_size: 4,
+       pool_max_overflow: 2
+     ]}

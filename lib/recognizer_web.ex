@@ -25,6 +25,7 @@ defmodule RecognizerWeb do
       import RecognizerWeb.Gettext
 
       alias RecognizerWeb.Router.Helpers, as: Routes
+      alias RecognizerWeb.Controllers.Helpers
 
       action_fallback RecognizerWeb.FallbackController
     end

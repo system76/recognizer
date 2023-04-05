@@ -9,6 +9,11 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
     %{user: insert(:user)}
   end
 
+  setup do
+    Redix.command(:redix, ["FLUSHDB"])
+    on_exit(fn -> Redix.command(:redix, ["FLUSHDB"]) end)
+  end
+
   describe "GET /users/reset_password" do
     test "renders the reset password page", %{conn: conn} do
       conn = get(conn, Routes.user_reset_password_path(conn, :new))
@@ -27,6 +32,21 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
 
       assert redirected_to(conn) == Routes.user_session_path(conn, :create)
       assert get_flash(conn, :info) =~ "If your email is in our system"
+    end
+
+    test "rate limit new reset password tokens", %{conn: conn, user: user} do
+      Enum.each(0..20, fn _ ->
+        post(conn, Routes.user_reset_password_path(conn, :create), %{
+          "user" => %{"email" => user.email}
+        })
+      end)
+
+      conn =
+        post(conn, Routes.user_reset_password_path(conn, :create), %{
+          "user" => %{"email" => user.email}
+        })
+
+      assert response(conn, 429)
     end
 
     test "does not send reset password token if email is invalid", %{conn: conn} do

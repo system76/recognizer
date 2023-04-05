@@ -3,6 +3,11 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordController do
 
   alias Recognizer.Accounts
 
+  plug Hammer.Plug, [
+    rate_limit: {"api:reset_password", 60_000, 10},
+    by: {:conn, &Helpers.get_email_from_request/1}
+  ] when action in [:create]
+
   plug :get_user_by_reset_password_token when action in [:edit, :update]
 
   def new(conn, params) do
