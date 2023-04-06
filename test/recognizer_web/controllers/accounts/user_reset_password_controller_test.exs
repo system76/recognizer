@@ -49,6 +49,22 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
       assert response(conn, 429)
     end
 
+    test "rate limit does not affect other emails", %{conn: conn, user: user} do
+      Enum.each(0..20, fn i ->
+        post(conn, Routes.user_reset_password_path(conn, :create), %{
+          "user" => %{"email" => "#{i}#{user.email}"}
+        })
+      end)
+
+      conn =
+        post(conn, Routes.user_reset_password_path(conn, :create), %{
+          "user" => %{"email" => user.email}
+        })
+
+      assert redirected_to(conn) == Routes.user_session_path(conn, :create)
+      assert get_flash(conn, :info) =~ "If your email is in our system"
+    end
+
     test "does not send reset password token if email is invalid", %{conn: conn} do
       conn =
         post(conn, Routes.user_reset_password_path(conn, :create), %{
