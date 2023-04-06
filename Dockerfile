@@ -98,7 +98,8 @@ ENV \
     APP_REVISION="${VERSION}" \
     MIX_APP="recognizer" \
     MIX_ENV="prod" \
-    SHELL="/bin/bash"
+    SHELL="/bin/bash" \
+    LANG=C.UTF-8
 
 # Drop down to our unprivileged `recognizer` user
 USER recognizer
