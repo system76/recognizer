@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: elixir:1.13-alpine
+      image: elixir:1.13.3-slim
 
     services:
       redis: redis:alpine
@@ -36,7 +36,7 @@ jobs:
           persist-credentials: false
 
       - name: Install (os)
-        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev tar zstd
+        run: apt-get update && apt-get install -y build-essential ca-certificates git libmcrypt-dev 
 
       - name: Install (mix)
         run: |
@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: elixir:1.13-alpine
+      image: elixir:1.13.3-slim
 
     steps:
       - name: Checkout
@@ -82,7 +82,7 @@ jobs:
           persist-credentials: false
 
       - name: Install (os)
-        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev
+        run: apt-get update && apt-get install -y build-essential ca-certificates git libmcrypt-dev 
 
       - name: Install (mix)
         run: |
@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: elixir:1.13-alpine
+      image: elixir:1.13.3-slim
 
     steps:
       - name: Checkout
@@ -106,7 +106,7 @@ jobs:
           persist-credentials: false
 
       - name: Install (os)
-        run: apk add --no-cache gcc g++ git imagemagick libmcrypt-dev make musl-dev tar zstd
+        run: apt-get update && apt-get install -y build-essential ca-certificates git libmcrypt-dev 
 
       - name: Install (mix)
         run: |
