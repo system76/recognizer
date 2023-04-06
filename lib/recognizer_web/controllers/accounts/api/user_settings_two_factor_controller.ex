@@ -4,10 +4,12 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
   alias Recognizer.Accounts
   alias RecognizerWeb.{Authentication, ErrorView}
 
-  plug Hammer.Plug, [
-    rate_limit: {"api:two_factor", 60_000, 2},
-    by: :ip
-  ] when action in [:send]
+  plug Hammer.Plug,
+       [
+         rate_limit: {"api:two_factor", 60_000, 2},
+         by: :ip
+       ]
+       when action in [:send]
 
   def show(conn, _params) do
     user = Authentication.fetch_current_user(conn)

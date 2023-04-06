@@ -8,10 +8,12 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
   plug :verify_user_id
 
-  plug Hammer.Plug, [
-    rate_limit: {"api:two_factor", 60_000, 2},
-    by: {:session, :two_factor_user_id}
-  ] when action in [:resend]
+  plug Hammer.Plug,
+       [
+         rate_limit: {"api:two_factor", 60_000, 2},
+         by: {:session, :two_factor_user_id}
+       ]
+       when action in [:resend]
 
   def new(conn, _params) do
     current_user_id = get_session(conn, :two_factor_user_id)
