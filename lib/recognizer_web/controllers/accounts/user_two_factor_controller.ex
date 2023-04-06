@@ -10,7 +10,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"api:two_factor", 60_000, 2},
+         rate_limit: {"user:two_factor", 60_000, 2},
          by: {:session, :two_factor_user_id}
        ]
        when action in [:resend]
