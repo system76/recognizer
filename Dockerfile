@@ -1,7 +1,7 @@
 # -----------------------------------------------
 # 1) Build Elixir
 # -----------------------------------------------
-FROM elixir:1.13-alpine as build-elixir
+FROM elixir:1.13.3-slim as build-elixir
 
 # ARG is available during the build and not in the final container
 # https://vsupalov.com/docker-arg-vs-env/
@@ -10,15 +10,11 @@ ARG MIX_ENV=prod
 
 # Install dependencies
 RUN set -xe; \
-    apk add --update  --no-cache --virtual .build-deps \
+    apt-get update && apt-get install -y \
+        build-essential \
         ca-certificates \
-        g++ \
-        gcc \
         git \
-        make \
-        musl-dev \
-        python3 \
-        tzdata
+        libmcrypt-dev;
 
 # Use the standard /usr/local/src destination
 COPY . /usr/local/src/recognizer/
@@ -62,7 +58,7 @@ RUN set -xe; \
 # -----------------------------------------------
 # 4) Build final release image
 # -----------------------------------------------
-FROM alpine:3.16 as release
+FROM debian:11.6-slim as release
 
 ARG APP_NAME=recognizer
 
@@ -72,20 +68,15 @@ ARG BUILD_DATE
 ARG VERSION
 
 RUN set -xe; \
-    apk add --update  --no-cache --virtual .runtime-deps \
+    apt-get update && apt-get install -y \
         ca-certificates \
-        libmcrypt \
-        libmcrypt-dev \
-        openssl \
-        libstdc++ \
-        ncurses-libs \
-        tzdata;
+        libmcrypt4 \
+        openssl;
 
 # Create a `recognizer` group & user
 # I've been told before it's generally a good practice to reserve ids < 1000 for the system
 RUN set -xe; \
-    addgroup -g 1000 -S recognizer; \
-    adduser -u 1000 -S -h /recognizer -s /bin/sh -G recognizer recognizer
+    adduser --uid 1000 --system --home /recognizer --shell /bin/sh --group recognizer;
 
 # Copy the release artifact and set `recognizer` ownership
 COPY --chown=recognizer:recognizer --from=build-release /usr/local/src/recognizer/_build/prod/rel/${APP_NAME} /recognizer
@@ -107,7 +98,8 @@ ENV \
     APP_REVISION="${VERSION}" \
     MIX_APP="recognizer" \
     MIX_ENV="prod" \
-    SHELL="/bin/bash"
+    SHELL="/bin/bash" \
+    LANG=C.UTF-8
 
 # Drop down to our unprivileged `recognizer` user
 USER recognizer
