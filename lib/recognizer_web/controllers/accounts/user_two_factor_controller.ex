@@ -6,11 +6,13 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   alias Recognizer.Notifications.Account
   alias RecognizerWeb.Authentication
 
+  @one_minute 60_000
+
   plug :verify_user_id
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user:two_factor", 60_000, 2},
+         rate_limit: {"user:two_factor", @one_minute, 2},
          by: {:session, :two_factor_user_id}
        ]
        when action in [:resend]

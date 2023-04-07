@@ -4,9 +4,11 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
   alias Recognizer.Accounts
   alias RecognizerWeb.{Authentication, ErrorView}
 
+  @one_minute 60_000
+
   plug Hammer.Plug,
        [
-         rate_limit: {"api:two_factor", 60_000, 2},
+         rate_limit: {"api:two_factor", @one_minute, 2},
          by: :ip
        ]
        when action in [:send]

@@ -9,11 +9,6 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
     %{user: insert(:user)}
   end
 
-  setup do
-    Redix.command(:redix, ["FLUSHDB"])
-    on_exit(fn -> Redix.command(:redix, ["FLUSHDB"]) end)
-  end
-
   describe "GET /users/reset_password" do
     test "renders the reset password page", %{conn: conn} do
       conn = get(conn, Routes.user_reset_password_path(conn, :new))
