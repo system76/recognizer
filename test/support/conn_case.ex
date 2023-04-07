@@ -41,6 +41,7 @@ defmodule RecognizerWeb.ConnCase do
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 
+  # Clear the redis cache before and after each test.
   setup do
     Redix.command(:redix, ["FLUSHDB"])
     on_exit(fn -> Redix.command(:redix, ["FLUSHDB"]) end)

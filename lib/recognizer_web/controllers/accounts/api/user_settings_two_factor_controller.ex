@@ -8,7 +8,7 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"api:two_factor", @one_minute, 2},
+         rate_limit: {"api:two_factor", @one_minute, 6},
          by: :ip
        ]
        when action in [:send]
