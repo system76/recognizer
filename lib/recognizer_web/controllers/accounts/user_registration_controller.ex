@@ -5,6 +5,15 @@ defmodule RecognizerWeb.Accounts.UserRegistrationController do
   alias Recognizer.Accounts.User
   alias RecognizerWeb.Authentication
 
+  @one_minute 60_000
+
+  plug Hammer.Plug,
+       [
+         rate_limit: {"user:registration", @one_minute, 6},
+         by: :ip
+       ]
+       when action in [:create]
+
   def new(conn, params) do
     user_params = Map.get(params, "user", %{})
     changeset = Accounts.change_user_registration(%User{}, user_params)

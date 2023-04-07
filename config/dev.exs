@@ -42,3 +42,13 @@ config :logger, :console, format: "[$level] $message\n"
 config :phoenix, :stacktrace_depth, 20
 
 config :phoenix, :plug_init_mode, :runtime
+
+config :hammer,
+  backend:
+    {Hammer.Backend.Redis,
+     [
+       expiry_ms: 60_000 * 60 * 2,
+       redix_config: [host: "localhost", port: 6379],
+       pool_size: 4,
+       pool_max_overflow: 2
+     ]}

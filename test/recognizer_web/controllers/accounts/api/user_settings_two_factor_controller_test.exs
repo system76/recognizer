@@ -12,12 +12,15 @@ defmodule RecognizerWeb.Api.UserSettingsTwoFactorControllerTest do
     }
   end
 
-  describe "two factor not setup" do
-    setup do
-      Redix.command(:redix, ["FLUSHDB"])
-      on_exit(fn -> Redix.command(:redix, ["FLUSHDB"]) end)
-    end
+  defp new_user_conn() do
+    conn = Phoenix.ConnTest.build_conn()
+    user = :user |> insert()
 
+    Recognizer.Accounts.generate_and_cache_new_two_factor_settings(user, "text")
+    log_in_user(conn, user)
+  end
+
+  describe "two factor not setup" do
     test "GET /api/settings/two-factor sends empty view when no 2fa setup", %{conn: conn} do
       conn = get(conn, "/api/settings/two-factor")
       assert %{"two_factor" => nil} = json_response(conn, 200)
@@ -40,6 +43,22 @@ defmodule RecognizerWeb.Api.UserSettingsTwoFactorControllerTest do
     end
 
     test "returns success when sending two factor test notification", %{conn: conn} do
+      conn = post(conn, "/api/settings/two-factor/send")
+      assert json_response(conn, 202)
+    end
+
+    test "rate limits two factor notification", %{conn: conn} do
+      Enum.each(0..20, fn _ -> post(conn, "/api/settings/two-factor/send") end)
+
+      conn = post(conn, "/api/settings/two-factor/send")
+      assert response(conn, 429)
+    end
+
+    test "rate limits by user id", %{conn: conn} do
+      Enum.each(0..20, fn _ ->
+        post(new_user_conn(), "/api/settings/two-factor/send")
+      end)
+
       conn = post(conn, "/api/settings/two-factor/send")
       assert json_response(conn, 202)
     end

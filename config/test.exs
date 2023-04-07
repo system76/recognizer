@@ -20,3 +20,13 @@ config :recognizer, RecognizerWeb.Endpoint,
   server: false
 
 config :logger, level: :warn
+
+config :hammer,
+  backend:
+    {Hammer.Backend.Redis,
+     [
+       expiry_ms: 60_000 * 60 * 2,
+       redix_config: [host: System.get_env("REDIS_HOST", "localhost"), port: 6379],
+       pool_size: 4,
+       pool_max_overflow: 2
+     ]}

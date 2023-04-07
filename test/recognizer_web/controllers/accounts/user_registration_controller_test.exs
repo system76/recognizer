@@ -45,5 +45,21 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
       assert response =~ "must have the @ sign and no spaces"
       assert response =~ "must contain a number"
     end
+
+    test "rate limits account creation", %{conn: conn} do
+      Enum.each(0..20, fn _ ->
+        post(conn, Routes.user_registration_path(conn, :create), %{
+          "user" => params_for(:user)
+        })
+      end)
+
+      conn =
+        post(conn, Routes.user_registration_path(conn, :create), %{
+          "user" => params_for(:user)
+        })
+
+      refute Recognizer.Guardian.Plug.current_resource(conn)
+      assert response(conn, 429)
+    end
   end
 end
