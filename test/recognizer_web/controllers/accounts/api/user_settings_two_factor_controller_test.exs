@@ -12,6 +12,14 @@ defmodule RecognizerWeb.Api.UserSettingsTwoFactorControllerTest do
     }
   end
 
+  defp new_user_conn() do
+    conn = Phoenix.ConnTest.build_conn()
+    user = :user |> insert()
+
+    Recognizer.Accounts.generate_and_cache_new_two_factor_settings(user, "text")
+    log_in_user(conn, user)
+  end
+
   describe "two factor not setup" do
     test "GET /api/settings/two-factor sends empty view when no 2fa setup", %{conn: conn} do
       conn = get(conn, "/api/settings/two-factor")
@@ -44,6 +52,15 @@ defmodule RecognizerWeb.Api.UserSettingsTwoFactorControllerTest do
 
       conn = post(conn, "/api/settings/two-factor/send")
       assert response(conn, 429)
+    end
+
+    test "rate limits by user id", %{conn: conn} do
+      Enum.each(0..20, fn _ ->
+        post(new_user_conn(), "/api/settings/two-factor/send")
+      end)
+
+      conn = post(conn, "/api/settings/two-factor/send")
+      assert json_response(conn, 202)
     end
 
     test "confirms the two factor code and updates the user's settings", %{conn: conn, user: user} do
