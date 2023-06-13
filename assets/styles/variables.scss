@@ -52,8 +52,8 @@ $custom-colors: (
 );
 
 // Typography
-$family-sans-serif: "Fira Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-$family-secondary: 'Roboto Slab', serif;
+$family-sans-serif: 'System76 Fira Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$family-secondary: 'System76 Roboto Slab', serif;
 
 // Layout
 $body-background-color: #f5f5f5;
@@ -64,7 +64,7 @@ $body-size: 16px;
 $pre-background: #f5f5f5;
 
 // Forms
-$label-weight: 300;
+$label-weight: 400;
 
 // Boxes
 $box-background-color: $white-bis;
