@@ -102,7 +102,7 @@ a {
   text-transform: uppercase;
   font-family: $family-secondary;
   letter-spacing: 1px;
-  font-weight: 700;
+  font-weight: 400;
   border: 2px solid transparent;
 
   @each $name, $pair in $custom-colors {

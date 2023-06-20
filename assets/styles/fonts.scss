@@ -1,7 +1,9 @@
 @font-face {
   font-family: 'System76 Fira Sans';
   src: url("https://system76.com/fonts/fira/eot/FiraSans-Regular.eot");
-  src: url("https://system76.com/fonts/fira/eot/FiraSans-Regular.eot?#iefix") format("embedded-opentype"), url("https://system76.com/fonts/fira/woff/FiraSans-Regular.woff") format("woff"), url("https://system76.com/fonts/fira/ttf/FiraSans-Regular.ttf") format("truetype");
+  src: url("https://system76.com/fonts/fira/eot/FiraSans-Regular.eot?#iefix") format("embedded-opentype"),
+       url("https://system76.com/fonts/fira/woff/FiraSans-Regular.woff") format("woff"),
+       url("https://system76.com/fonts/fira/ttf/FiraSans-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
 }
@@ -9,7 +11,9 @@
 @font-face {
   font-family: 'System76 Fira Sans';
   src: url("https://system76.com/fonts/fira/eot/FiraSans-Italic.eot");
-  src: url("https://system76.com/fonts/fira/eot/FiraSans-Italic.eot?#iefix") format("embedded-opentype"), url("https://system76.com/fonts/fira/woff/FiraSans-Italic.woff") format("woff"), url("https://system76.com/fonts/fira/ttf/FiraSans-Italic.ttf") format("truetype");
+  src: url("https://system76.com/fonts/fira/eot/FiraSans-Italic.eot?#iefix") format("embedded-opentype"),
+       url("https://system76.com/fonts/fira/woff/FiraSans-Italic.woff") format("woff"),
+       url("https://system76.com/fonts/fira/ttf/FiraSans-Italic.ttf") format("truetype");
   font-weight: 400;
   font-style: italic;
 }
@@ -17,7 +21,9 @@
 @font-face {
   font-family: 'System76 Fira Sans';
   src: url("https://system76.com/fonts/fira/eot/FiraSans-Bold.eot");
-  src: url("https://system76.com/fonts/fira/eot/FiraSans-Bold.eot?#iefix") format("embedded-opentype"), url("https://system76.com/fonts/fira/woff/FiraSans-Bold.woff") format("woff"), url("https://system76.com/fonts/fira/ttf/FiraSans-Bold.ttf") format("truetype");
+  src: url("https://system76.com/fonts/fira/eot/FiraSans-Bold.eot?#iefix") format("embedded-opentype"),
+       url("https://system76.com/fonts/fira/woff/FiraSans-Bold.woff") format("woff"),
+       url("https://system76.com/fonts/fira/ttf/FiraSans-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
 }
@@ -25,7 +31,10 @@
 @font-face {
   font-family: 'System76 Roboto Slab';
   src: url("https://system76.com/fonts/roboto-slab/robotoslab-light-webfont.eot");
-  src: url("https://system76.com/fonts/roboto-slab/robotoslab-light-webfont.eot?#iefix") format("embedded-opentype"), url("https://system76.com/fonts/roboto-slab/robotoslab-light-webfont.woff2") format("woff2"), url("https://system76.com/fonts/roboto-slab/robotoslab-light-webfont.woff") format("woff"), url("https://system76.com/fonts/roboto-slab/robotoslab-light-webfont.ttf") format("truetype");
+  src: url("https://system76.com/fonts/roboto-slab/robotoslab-light-webfont.eot?#iefix") format("embedded-opentype"),
+       url("https://system76.com/fonts/roboto-slab/robotoslab-light-webfont.woff2") format("woff2"),
+       url("https://system76.com/fonts/roboto-slab/robotoslab-light-webfont.woff") format("woff"),
+       url("https://system76.com/fonts/roboto-slab/robotoslab-light-webfont.ttf") format("truetype");
   font-weight: 300;
   font-style: normal;
 }
@@ -33,7 +42,10 @@
 @font-face {
   font-family: 'System76 Roboto Slab';
   src: url("https://system76.com/fonts/roboto-slab/robotoslab-regular-webfont.eot");
-  src: url("https://system76.com/fonts/roboto-slab/robotoslab-regular-webfont.eot?#iefix") format("embedded-opentype"), url("https://system76.com/fonts/roboto-slab/robotoslab-regular-webfont.woff2") format("woff2"), url("https://system76.com/fonts/roboto-slab/robotoslab-regular-webfont.woff") format("woff"), url("https://system76.com/fonts/roboto-slab/robotoslab-regular-webfont.ttf") format("truetype");
+  src: url("https://system76.com/fonts/roboto-slab/robotoslab-regular-webfont.eot?#iefix") format("embedded-opentype"),
+       url("https://system76.com/fonts/roboto-slab/robotoslab-regular-webfont.woff2") format("woff2"),
+       url("https://system76.com/fonts/roboto-slab/robotoslab-regular-webfont.woff") format("woff"),
+       url("https://system76.com/fonts/roboto-slab/robotoslab-regular-webfont.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
 }
@@ -41,7 +53,10 @@
 @font-face {
   font-family: 'System76 Roboto Slab';
   src: url("https://system76.com/fonts/roboto-slab/robotoslab-bold-webfont.eot");
-  src: url("https://system76.com/fonts/roboto-slab/robotoslab-bold-webfont.eot?#iefix") format("embedded-opentype"), url("https://system76.com/fonts/roboto-slab/robotoslab-bold-webfont.woff2") format("woff2"), url("https://system76.com/fonts/roboto-slab/robotoslab-bold-webfont.woff") format("woff"), url("https://system76.com/fonts/roboto-slab/robotoslab-bold-webfont.ttf") format("truetype");
+  src: url("https://system76.com/fonts/roboto-slab/robotoslab-bold-webfont.eot?#iefix") format("embedded-opentype"),
+       url("https://system76.com/fonts/roboto-slab/robotoslab-bold-webfont.woff2") format("woff2"),
+       url("https://system76.com/fonts/roboto-slab/robotoslab-bold-webfont.woff") format("woff"),
+       url("https://system76.com/fonts/roboto-slab/robotoslab-bold-webfont.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
 }
