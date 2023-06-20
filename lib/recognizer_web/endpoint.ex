@@ -4,7 +4,9 @@ defmodule RecognizerWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_recognizer_key",
-    signing_salt: "juvsYHmf"
+    signing_salt: "juvsYHmf",
+    same_site: "Lax",
+    secure: true
   ]
 
   plug RecognizerWeb.HealthcheckPlug
