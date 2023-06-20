@@ -10,9 +10,9 @@ function documentReady (fn) {
   }
 }
 
-function toggleDisplay (selector, value) {
+function toggleDisplay (selector) {
   const input = document.querySelector(selector)
-  input.style.display = (value) ? 'block' : 'none'
+  input.classList.toggle('hidden')
 }
 
 documentReady(function () {
@@ -20,7 +20,7 @@ documentReady(function () {
   .querySelectorAll('input[name="user[type]"]')
   .forEach((field) => {
     field.addEventListener('change', (e) => {
-      toggleDisplay('div.company_name', (e.target.value === 'business'))
+      toggleDisplay('div.company_name')
     })
   })
 })

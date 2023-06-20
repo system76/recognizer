@@ -3,8 +3,8 @@ defmodule RecognizerWeb.Accounts.UserRegistrationView do
 
   def business_type_class(changeset) do
     case Ecto.Changeset.get_field(changeset, :type) do
-      :individual -> "none"
-      :business -> "block"
+      :individual -> "hidden"
+      :business -> ""
     end
   end
 end

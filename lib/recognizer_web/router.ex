@@ -1,12 +1,21 @@
 defmodule RecognizerWeb.Router do
   use RecognizerWeb, :router
 
+  @csp_header %{
+    "content-security-policy" =>
+      "default-src 'self';" <>
+      "script-src 'self' https://plausible.io;" <>
+      "font-src 'self' https://system76.com;" <>
+      "frame-ancestors 'self';" <>
+      "form-action 'self';"
+  }
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
     plug :protect_from_forgery
-    plug :put_secure_browser_headers
+    plug :put_secure_browser_headers, @csp_header
   end
 
   pipeline :api do
