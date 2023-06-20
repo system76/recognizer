@@ -4,10 +4,10 @@ defmodule RecognizerWeb.Router do
   @csp_header %{
     "content-security-policy" =>
       "default-src 'self';" <>
-      "script-src 'self' https://plausible.io;" <>
-      "font-src 'self' https://system76.com;" <>
-      "frame-ancestors 'self';" <>
-      "form-action 'self';"
+        "script-src 'self' https://plausible.io;" <>
+        "font-src 'self' https://system76.com;" <>
+        "frame-ancestors 'self';" <>
+        "form-action 'self';"
   }
 
   pipeline :browser do
