@@ -1,6 +1,10 @@
 defmodule RecognizerWeb.Router do
   use RecognizerWeb, :router
 
+  @hsts_header %{
+    "strict-transport-security" => "max-age=31536000"
+  }
+
   @csp_header %{
     "content-security-policy" =>
       "default-src 'self';" <>
@@ -16,7 +20,7 @@ defmodule RecognizerWeb.Router do
     plug :fetch_session
     plug :fetch_flash
     plug :protect_from_forgery
-    plug :put_secure_browser_headers, @csp_header
+    plug :put_secure_browser_headers, Map.merge(@csp_header, @hsts_header)
   end
 
   pipeline :api do
