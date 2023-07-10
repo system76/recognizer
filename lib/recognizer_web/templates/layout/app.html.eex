@@ -11,13 +11,12 @@
 
     <script defer type="text/javascript" src="<%= Routes.static_path(@conn, "/scripts/main.js") %>"></script>
     <script async defer data-domain="account.system76.com" src="https://plausible.io/js/plausible.exclusions.js" data-exclude="/forgot-password/*"></script>
-    <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
   </head>
   <body>
     <div class="section">
       <div class="container">
         <div class="column is-8-tablet is-offset-2-tablet is-6-desktop is-offset-3-desktop">
-          <header style="margin: 0 auto 2rem; max-width:320px;">
+          <header class="logo">
             <%= render("logo.html") %>
           </header>
 

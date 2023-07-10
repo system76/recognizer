@@ -1,5 +1,6 @@
 @import "variables.scss";
 @import "bulma";
+@import "fonts.scss";
 @import "overrides.scss";
 @import '~font-awesome/css/font-awesome.css';
 
@@ -37,4 +38,13 @@
       }
     }
   }
+}
+
+.logo {
+  margin: 0 auto 2rem;
+  max-width:320px;
+}
+
+.hidden {
+  display: none;
 }

@@ -67,7 +67,7 @@
       </div>
     </div>
 
-    <div class="field company_name" style="display:<%= business_type_class(@changeset) %>;">
+    <div class="field company_name <%= business_type_class(@changeset) %>">
       <%= label f, :email, "Company Name", class: "label" %>
 
       <div class="control">
