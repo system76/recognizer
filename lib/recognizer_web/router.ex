@@ -12,7 +12,7 @@ defmodule RecognizerWeb.Router do
         "connect-src 'self' https://plausible.io;" <>
         "font-src 'self' https://system76.com;" <>
         "frame-ancestors 'self';" <>
-        "form-action 'self';"
+        "form-action 'self' https://account.genesis76.com https://account.system76.com;"
   }
 
   pipeline :browser do
