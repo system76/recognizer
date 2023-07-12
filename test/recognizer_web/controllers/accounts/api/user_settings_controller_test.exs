@@ -40,12 +40,12 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
       assert %{"user" => %{"id" => ^user_id, "first_name" => "Updated"}} = json_response(conn, 200)
     end
 
-    test "don't allow special characters in the first name", %{conn: conn, user: %{id: user_id}} do
+    test "don't allow special characters in the first name", %{conn: conn} do
       conn = put(conn, "/api/settings", %{"action" => "update", "user" => %{"first_name" => "http://example.com"}})
       assert %{"errors" => %{"first_name" => ["must not contain special characters"]}} = json_response(conn, 400)
     end
 
-    test "don't allow special characters in the last name", %{conn: conn, user: %{id: user_id}} do
+    test "don't allow special characters in the last name", %{conn: conn} do
       conn = put(conn, "/api/settings", %{"action" => "update", "user" => %{"last_name" => "http://example.com"}})
       assert %{"errors" => %{"last_name" => ["must not contain special characters"]}} = json_response(conn, 400)
     end
