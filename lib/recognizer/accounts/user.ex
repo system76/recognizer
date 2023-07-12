@@ -59,6 +59,7 @@ defmodule Recognizer.Accounts.User do
     user
     |> cast(attrs, [:first_name, :last_name, :email, :phone_number, :type, :company_name])
     |> validate_required([:first_name, :last_name, :type])
+    |> validate_names()
     |> validate_email()
     |> EctoEnum.validate_enum(:type)
     |> validate_company_name()
@@ -86,6 +87,7 @@ defmodule Recognizer.Accounts.User do
     user
     |> cast(attrs, [:first_name, :last_name, :email, :phone_number, :type, :company_name, :password])
     |> validate_required([:first_name, :last_name, :type])
+    |> validate_names()
     |> validate_email()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
@@ -105,10 +107,19 @@ defmodule Recognizer.Accounts.User do
     |> cast(attrs, [:first_name, :last_name, :email])
     |> validate_required([:first_name, :last_name])
     |> put_change(:hashed_password, nil)
+    |> validate_names()
     |> validate_email()
     |> put_assoc(:roles, Role.default_role_changeset())
     |> generate_username()
     |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
+  end
+
+  defp validate_names(changeset) do
+    changeset
+    |> validate_format(:first_name, ~r/^[\w\s\d\.\,\'\-\_]+$/u, message: "must not contain special characters")
+    |> validate_format(:last_name, ~r/^[\w\s\d\.\,\'\-\_]+$/u, message: "must not contain special characters")
+    |> validate_length(:first_name, max: 80)
+    |> validate_length(:last_name, max: 80)
   end
 
   defp validate_email(changeset) do

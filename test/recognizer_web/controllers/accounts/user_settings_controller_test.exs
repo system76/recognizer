@@ -84,5 +84,29 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       assert response =~ "Change Profile</h2>"
       assert response =~ "must have the @ sign and no spaces"
     end
+
+    test "does not update first name on invalid data", %{conn: conn} do
+      conn =
+        put(conn, Routes.user_settings_path(conn, :update), %{
+          "action" => "update",
+          "user" => %{"first_name" => "https://example.org"}
+        })
+
+      response = html_response(conn, 200)
+      assert response =~ "Change Profile</h2>"
+      assert response =~ "must not contain special characters"
+    end
+
+    test "does not update last name on invalid data", %{conn: conn} do
+      conn =
+        put(conn, Routes.user_settings_path(conn, :update), %{
+          "action" => "update",
+          "user" => %{"last_name" => "https://example.org"}
+        })
+
+      response = html_response(conn, 200)
+      assert response =~ "Change Profile</h2>"
+      assert response =~ "must not contain special characters"
+    end
   end
 end

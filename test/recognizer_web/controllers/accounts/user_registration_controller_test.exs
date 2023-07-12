@@ -37,13 +37,14 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
     test "render errors for invalid data", %{conn: conn} do
       conn =
         post(conn, Routes.user_registration_path(conn, :create), %{
-          "user" => %{"email" => "with spaces", "password" => "too short"}
+          "user" => %{"email" => "with spaces", "password" => "too short", "first_name" => "<>"}
         })
 
       response = html_response(conn, 200)
       assert response =~ "Create Account</h2>"
       assert response =~ "must have the @ sign and no spaces"
       assert response =~ "must contain a number"
+      assert response =~ "must not contain special characters"
     end
 
     test "rate limits account creation", %{conn: conn} do
