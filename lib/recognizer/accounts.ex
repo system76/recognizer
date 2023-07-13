@@ -152,12 +152,6 @@ defmodule Recognizer.Accounts do
     query |> Repo.one!() |> User.load_virtuals()
   end
 
-  def get_user_by_verification_code(code) do
-    VerificationCode
-    |> Repo.get_by(code: code)
-    |> then(&Repo.get(User, &1.user_id))
-  end
-
   ## User registration
 
   @doc """
@@ -172,14 +166,22 @@ defmodule Recognizer.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def register_user(attrs, opts \\ []) do
+  def register_user(attrs, [skip_password: true] = opts) do
     if Map.get(attrs, "newsletter") == "true", do: Recognizer.Hal.update_newsletter(attrs)
 
     %User{}
     |> User.registration_changeset(attrs, opts)
     |> insert_user_and_notification_preferences()
-    |> generate_verification_code()
     |> maybe_notify_new_user()
+  end
+
+  def register_user(attrs, verify_account_url_fun: verify_account_url_fun) do
+    if Map.get(attrs, "newsletter") == "true", do: Recognizer.Hal.update_newsletter(attrs)
+
+    %User{}
+    |> User.registration_changeset(attrs)
+    |> insert_user_and_notification_preferences()
+    |> generate_verification_code(verify_account_url_fun)
   end
 
   @doc """
@@ -624,15 +626,34 @@ defmodule Recognizer.Accounts do
     Repo.preload(user, :notification_preference)
   end
 
-  def generate_verification_code({:ok, user}) do
+  ## Account Verification
+
+  def deliver_account_verification_instructions(%User{} = user, verify_account_url_fun) do
+    code = Repo.get_by(VerificationCode, user_id: user.id)
+
+    Notification.deliver_account_verification_instructions(
+      user,
+      verify_account_url_fun.(code)
+    )
+  end
+
+  def get_user_by_verification_code(code) do
+    VerificationCode
+    |> Repo.get_by(code: code)
+    |> then(&Repo.get(User, &1.user_id))
+  end
+
+  def generate_verification_code({:ok, user}, verify_account_url_fun) do
     %VerificationCode{}
     |> VerificationCode.changeset(%{code: VerificationCode.generate_code(), user_id: user.id})
     |> Repo.insert()
 
+    deliver_account_verification_instructions(user, verify_account_url_fun)
+
     {:ok, user}
   end
 
-  def generate_verification_code(error) do
+  def generate_verification_code(error, _verify_account_url_fun) do
     # TODO refactor pipeline
     error
   end

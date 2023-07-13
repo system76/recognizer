@@ -84,6 +84,16 @@ defmodule Recognizer.Notifications.Account do
     |> send_message()
   end
 
+  @doc """
+  Deliver account verification instructions.
+  """
+  def deliver_account_verification_instructions(user, url) do
+    user
+    |> Caster.cast()
+    |> create_message(Account.Verification, verification_url: url)
+    |> send_message()
+  end
+
   defp create_message(user, type, args \\ []) do
     apply(type, :new, [Keyword.merge([user: user], args)])
   end

@@ -21,7 +21,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationController do
   end
 
   def create(conn, %{"user" => user_params}) do
-    case Accounts.register_user(user_params) do
+    case Accounts.register_user(user_params, verify_account_url_fun: &Routes.verification_code_url(conn, :new, &1)) do
       {:ok, user} ->
         conn
         |> Authentication.conditional_flash(:info, "User created successfully.")
