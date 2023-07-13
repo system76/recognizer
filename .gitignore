@@ -3,6 +3,7 @@
 
 # Ignore any secret local configuration files
 /config/*.secret.exs
+/config/*.local.exs
 
 # If you run "mix test --cover", coverage assets end up here.
 /cover/

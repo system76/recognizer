@@ -103,8 +103,8 @@ defmodule Recognizer.Notifications.Account do
 
     @decorate span(service: :bullhorn, type: :function)
     defp send_message(resource) do
-      Bottle.publish(resource, source: "recognizer", request_id: Bottle.RequestId.write(:http))
-
+      result = Bottle.publish(resource, source: "recognizer", request_id: Bottle.RequestId.write(:http))
+      Logger.error("result #{inspect(result)}")
       {:ok, resource}
     end
   else
