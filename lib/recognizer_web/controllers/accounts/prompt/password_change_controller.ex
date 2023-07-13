@@ -24,17 +24,6 @@ defmodule RecognizerWeb.Accounts.Prompt.PasswordChangeController do
     end
   end
 
-  defp ensure_user(conn, _opts) do
-    user_id = get_session(conn, :prompt_user_id)
-
-    if user_id == nil do
-      RecognizerWeb.FallbackController.call(conn, {:error, :unauthenticated})
-    else
-      user = Accounts.get_user!(user_id)
-      assign(conn, :user, user)
-    end
-  end
-
   defp assign_changesets(conn, _opts) do
     assign(conn, :password_changeset, Accounts.change_user_password(conn.assigns.user))
   end

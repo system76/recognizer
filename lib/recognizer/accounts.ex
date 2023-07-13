@@ -318,6 +318,10 @@ defmodule Recognizer.Accounts do
       {:two_factor, %User{}}
 
   """
+  def user_prompts(%{verified_at: nil} = user) do
+    {:verification_required, user}
+  end
+
   def user_prompts(%{organization_id: nil} = user) do
     {:ok, user}
   end

@@ -97,6 +97,8 @@ defmodule RecognizerWeb.Router do
     put "/prompt/setup-two-factor", TwoFactorController, :create
     get "/prompt/setup-two-factor/confirm", TwoFactorController, :edit
     post "/prompt/setup-two-factor/confirm", TwoFactorController, :update
+
+    get "/prompt/verification", VerificationController, :new
   end
 
   scope "/", RecognizerWeb.Accounts do

@@ -1,0 +1,7 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Account Verification Pending</h2>
+
+  <div class="content">
+    <p>Please click on the link provided in the verification email to activate your account.</p>
+  </div>
+</div>

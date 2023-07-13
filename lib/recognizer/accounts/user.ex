@@ -38,6 +38,7 @@ defmodule Recognizer.Accounts.User do
     field :third_party_login, :boolean, default: false, virtual: true
 
     field :stripe_id, :string
+    field :verified_at, :utc_datetime
 
     has_one :notification_preference, NotificationPreference, on_replace: :update
 

@@ -48,17 +48,6 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorController do
     end
   end
 
-  defp ensure_user(conn, _opts) do
-    user_id = get_session(conn, :prompt_user_id)
-
-    if user_id == nil do
-      RecognizerWeb.FallbackController.call(conn, {:error, :unauthenticated})
-    else
-      user = Accounts.get_user!(user_id)
-      assign(conn, :user, user)
-    end
-  end
-
   defp assign_changesets(conn, _opts) do
     conn
     |> assign(:changeset, Accounts.change_user(conn.assigns.user))
