@@ -5,6 +5,8 @@ defmodule Recognizer.Notifications.Account do
   notification microservice to deliver.
   """
 
+  require Logger
+
   alias Bottle.Account.V1, as: Account
   alias Recognizer.Caster
 
