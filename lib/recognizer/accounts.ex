@@ -629,7 +629,7 @@ defmodule Recognizer.Accounts do
   ## Account Verification
 
   def deliver_account_verification_instructions(%User{} = user, verify_account_url_fun) do
-    code = Repo.get_by(VerificationCode, user_id: user.id)
+    %{code: code} = Repo.get_by(VerificationCode, user_id: user.id)
 
     Notification.deliver_account_verification_instructions(
       user,

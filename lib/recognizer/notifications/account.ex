@@ -5,8 +5,6 @@ defmodule Recognizer.Notifications.Account do
   notification microservice to deliver.
   """
 
-  require Logger
-
   alias Bottle.Account.V1, as: Account
   alias Recognizer.Caster
 
@@ -106,7 +104,6 @@ defmodule Recognizer.Notifications.Account do
     @decorate span(service: :bullhorn, type: :function)
     defp send_message(resource) do
       result = Bottle.publish(resource, source: "recognizer", request_id: Bottle.RequestId.write(:http))
-      Logger.error("result #{inspect(result)}")
       {:ok, resource}
     end
   else
