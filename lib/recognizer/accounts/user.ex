@@ -99,6 +99,15 @@ defmodule Recognizer.Accounts.User do
     |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
   end
 
+  @doc """
+  A user changeset for verification.
+  """
+  def verification_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:verified_at])
+    |> validate_required([:verified_at])
+  end
+
   def load_virtuals(%User{} = user) do
     %{user | third_party_login: Enum.any?(user.oauths)}
   end

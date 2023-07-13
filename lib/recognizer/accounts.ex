@@ -7,9 +7,13 @@ defmodule Recognizer.Accounts do
 
   import Ecto.Query, warn: false
 
-  alias Recognizer.Accounts.{User, OAuth, RecoveryCode}
+  alias Recognizer.Accounts.OAuth
+  alias Recognizer.Accounts.RecoveryCode
+  alias Recognizer.Accounts.User
+  alias Recognizer.Accounts.VerificationCode
   alias Recognizer.Notifications.Account, as: Notification
-  alias Recognizer.{Guardian, Repo}
+  alias Recognizer.Guardian
+  alias Recognizer.Repo
   alias RecognizerWeb.Authentication
 
   ## Database getters
@@ -148,6 +152,12 @@ defmodule Recognizer.Accounts do
     query |> Repo.one!() |> User.load_virtuals()
   end
 
+  def get_user_by_verification_code(code) do
+    VerificationCode
+    |> Repo.get_by(code: code)
+    |> then(&Repo.get(User, &1.user_id))
+  end
+
   ## User registration
 
   @doc """
@@ -168,6 +178,7 @@ defmodule Recognizer.Accounts do
     %User{}
     |> User.registration_changeset(attrs, opts)
     |> insert_user_and_notification_preferences()
+    |> generate_verification_code()
     |> maybe_notify_new_user()
   end
 
@@ -611,5 +622,25 @@ defmodule Recognizer.Accounts do
 
   def load_notification_preferences(user) do
     Repo.preload(user, :notification_preference)
+  end
+
+  def generate_verification_code({:ok, user}) do
+    %VerificationCode{}
+    |> VerificationCode.changeset(%{code: VerificationCode.generate_code(), user_id: user.id})
+    |> Repo.insert()
+
+    {:ok, user}
+  end
+
+  def generate_verification_code(error) do
+    # TODO refactor pipeline
+    error
+  end
+
+  def verify_user(code) do
+    code
+    |> get_user_by_verification_code()
+    |> User.verification_changeset(%{verified_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)})
+    |> Repo.update()
   end
 end

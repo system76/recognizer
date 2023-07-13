@@ -85,6 +85,8 @@ defmodule RecognizerWeb.Router do
 
     get "/recovery-code", UserRecoveryCodeController, :new
     post "/recovery-code", UserRecoveryCodeController, :create
+
+    get "/verify/:code", VerificationCodeController, :new
   end
 
   scope "/", RecognizerWeb.Accounts.Prompt, as: :prompt do
