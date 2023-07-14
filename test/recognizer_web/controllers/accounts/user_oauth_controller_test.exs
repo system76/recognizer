@@ -24,7 +24,7 @@ defmodule RecognizerWeb.Accounts.UserOauthControllerTest do
 
   describe "callback/2" do
     test "logs in a user with third part service", %{conn: conn} do
-      user = insert(:user)
+      user = insert(:user, %{verified_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)})
       auth = :oauth |> insert() |> ueberauth_fixture(%{email: user.email})
 
       conn =

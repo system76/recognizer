@@ -166,15 +166,7 @@ defmodule Recognizer.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def register_user(attrs, [skip_password: true] = opts) do
-    if Map.get(attrs, "newsletter") == "true", do: Recognizer.Hal.update_newsletter(attrs)
-
-    %User{}
-    |> User.registration_changeset(attrs, opts)
-    |> insert_user_and_notification_preferences()
-    |> maybe_notify_new_user()
-  end
-
+  def register_user(attrs, opts \\ [])
   def register_user(attrs, verify_account_url_fun: verify_account_url_fun) do
     if Map.get(attrs, "newsletter") == "true", do: Recognizer.Hal.update_newsletter(attrs)
 
@@ -182,6 +174,15 @@ defmodule Recognizer.Accounts do
     |> User.registration_changeset(attrs)
     |> insert_user_and_notification_preferences()
     |> generate_verification_code(verify_account_url_fun)
+  end
+
+  def register_user(attrs, opts) do
+    if Map.get(attrs, "newsletter") == "true", do: Recognizer.Hal.update_newsletter(attrs)
+
+    %User{}
+    |> User.registration_changeset(attrs, opts)
+    |> insert_user_and_notification_preferences()
+    |> maybe_notify_new_user()
   end
 
   @doc """
