@@ -1,0 +1,7 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Expired Verification Code</h2>
+
+  <div class="content">
+    <p>This verification code has expired.</p>
+  </div>
+</div>

@@ -127,7 +127,7 @@ defmodule Recognizer.Accounts.User do
     |> put_assoc(:roles, Role.default_role_changeset())
     |> generate_username()
     |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
-    |> put_change(:verified_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)) # TODO - test
+    |> put_change(:verified_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
   end
 
   defp validate_names(changeset) do

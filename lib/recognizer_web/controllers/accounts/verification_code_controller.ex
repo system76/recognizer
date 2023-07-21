@@ -11,10 +11,8 @@ defmodule RecognizerWeb.Accounts.VerificationCodeController do
         Notification.deliver_user_created_message(user)
         Authentication.log_in_user(conn, user)
 
-      {:error, error} ->
-        conn
-        |> put_status(400)
-        |> render("error.html", error: error)
+      {:error, _error} ->
+        render(conn, "expired.html")
     end
   end
 end

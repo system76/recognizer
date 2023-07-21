@@ -167,6 +167,7 @@ defmodule Recognizer.Accounts do
 
   """
   def register_user(attrs, opts \\ [])
+
   def register_user(attrs, verify_account_url_fun: verify_account_url_fun) do
     if Map.get(attrs, "newsletter") == "true", do: Recognizer.Hal.update_newsletter(attrs)
 
@@ -639,9 +640,10 @@ defmodule Recognizer.Accounts do
   end
 
   def get_user_by_verification_code(code) do
-    VerificationCode
-    |> Repo.get_by(code: code)
-    |> then(&Repo.get(User, &1.user_id))
+    case Repo.get_by(VerificationCode, code: code) do
+      nil -> {:error, :code_not_found}
+      verification_code -> {:ok, Repo.get(User, verification_code.user_id)}
+    end
   end
 
   def generate_verification_code({:ok, user}, verify_account_url_fun) do
@@ -660,9 +662,14 @@ defmodule Recognizer.Accounts do
   end
 
   def verify_user(code) do
-    code
-    |> get_user_by_verification_code()
-    |> User.verification_changeset(%{verified_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)})
-    |> Repo.update()
+    case get_user_by_verification_code(code) do
+      {:ok, user} ->
+        user
+        |> User.verification_changeset(%{verified_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)})
+        |> Repo.update()
+
+      error ->
+        error
+    end
   end
 end

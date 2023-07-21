@@ -88,4 +88,13 @@ defmodule Recognizer.AccountFactory do
     [_, token, _] = String.split(captured.reset_url, "[TOKEN]")
     token
   end
+
+  def verification_code_factory(attrs) do
+    code = %Accounts.VerificationCode{
+      code: sequence(:verification_code, &"code-#{&1}"),
+      user: build(:user)
+    }
+
+    Map.merge(code, attrs)
+  end
 end
