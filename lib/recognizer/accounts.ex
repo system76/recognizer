@@ -630,15 +630,6 @@ defmodule Recognizer.Accounts do
 
   ## Account Verification
 
-  def deliver_account_verification_instructions(%User{} = user, verify_account_url_fun) do
-    %{code: code} = Repo.get_by(VerificationCode, user_id: user.id)
-
-    Notification.deliver_account_verification_instructions(
-      user,
-      verify_account_url_fun.(code)
-    )
-  end
-
   def get_user_by_verification_code(code) do
     case Repo.get_by(VerificationCode, code: code) do
       nil -> {:error, :code_not_found}
@@ -647,18 +638,28 @@ defmodule Recognizer.Accounts do
   end
 
   def generate_verification_code({:ok, user}, verify_account_url_fun) do
-    %VerificationCode{}
-    |> VerificationCode.changeset(%{code: VerificationCode.generate_code(), user_id: user.id})
-    |> Repo.insert()
+    {:ok, code} =
+      %VerificationCode{}
+      |> VerificationCode.changeset(%{code: VerificationCode.generate_code(), user_id: user.id})
+      |> Repo.insert()
 
-    deliver_account_verification_instructions(user, verify_account_url_fun)
+    Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(code))
 
     {:ok, user}
   end
 
   def generate_verification_code(error, _verify_account_url_fun) do
-    # TODO refactor pipeline
     error
+  end
+
+  def resend_verification_code(user, verify_account_url_fun) do
+    case Repo.get_by(VerificationCode, user_id: user.id) do
+      nil ->
+        generate_verification_code({:ok, user}, verify_account_url_fun)
+
+      {:ok, code} ->
+        Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(code))
+    end
   end
 
   def verify_user(code) do
