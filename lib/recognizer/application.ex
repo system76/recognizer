@@ -23,7 +23,7 @@ defmodule Recognizer.Application do
       RecognizerWeb.Endpoint,
       # Start a worker by calling: Recognizer.Worker.start_link(arg)
       {Redix, name: :redix, host: Application.get_env(:recognizer, :redis_host)},
-      # Start the task for removing expired verification tokens
+      # Start the task for removing expired verification codes
       Recognizer.Accounts.VerificationCodeCleanupTask
     ]
 
