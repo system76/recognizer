@@ -657,7 +657,7 @@ defmodule Recognizer.Accounts do
       nil ->
         generate_verification_code({:ok, user}, verify_account_url_fun)
 
-      {:ok, code} ->
+      code ->
         Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(code))
     end
   end

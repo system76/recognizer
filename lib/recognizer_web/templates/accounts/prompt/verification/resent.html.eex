@@ -1,7 +1,0 @@
-<div class="box">
-  <h2 class="title is-2 mb-5 has-text-centered-mobile">Account Verification Pending</h2>
-
-  <div class="content">
-    <p>Verification code resent</p>
-  </div>
-</div>

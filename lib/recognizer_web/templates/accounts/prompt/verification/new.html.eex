@@ -3,12 +3,16 @@
 
   <div class="content">
     <p>Please click on the link provided in the verification email to activate your account.</p>
-    <%= form_for @conn, Routes.prompt_verification_path(@conn, :resend), fn _f -> %>
-      <div class="buttons is-right mt-5">
-        <div class="control">
-          <%= submit "Resend Verification Code", class: "button is-secondary" %>
+    <%= if @resend? do %>
+    <p>We've sent you another copy of the verification email.</p>
+    <% else %>
+      <%= form_for @conn, Routes.prompt_verification_path(@conn, :resend), fn _f -> %>
+        <div class="buttons is-right mt-5">
+          <div class="control">
+            <%= submit "Resend Verification Code", class: "button is-secondary" %>
+          </div>
         </div>
-      </div>
+      <% end %>
     <% end %>
   </div>
 </div>

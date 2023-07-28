@@ -15,6 +15,10 @@ defmodule RecognizerWeb.Controllers.Helpers do
     Authentication.fetch_current_user(conn).id
   end
 
+  def get_user_id_from_unverified_request(conn) do
+    conn.assigns.user.id
+  end
+
   def ensure_user(conn, _opts) do
     user_id = get_session(conn, :prompt_user_id)
 
