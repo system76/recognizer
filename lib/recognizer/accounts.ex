@@ -638,12 +638,12 @@ defmodule Recognizer.Accounts do
   end
 
   def generate_verification_code({:ok, user}, verify_account_url_fun) do
-    {:ok, code} =
+    {:ok, verification} =
       %VerificationCode{}
       |> VerificationCode.changeset(%{code: VerificationCode.generate_code(), user_id: user.id})
       |> Repo.insert()
 
-    Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(code))
+    Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(verification.code))
 
     {:ok, user}
   end
@@ -657,8 +657,8 @@ defmodule Recognizer.Accounts do
       nil ->
         generate_verification_code({:ok, user}, verify_account_url_fun)
 
-      code ->
-        Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(code))
+      verification ->
+        Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(verification.code))
     end
   end
 
