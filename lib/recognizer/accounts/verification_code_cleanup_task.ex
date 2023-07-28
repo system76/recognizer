@@ -1,4 +1,4 @@
-defmodule Recognizer.VerificationCodeCleanupTask do
+defmodule Recognizer.Accounts.VerificationCodeCleanupTask do
   @moduledoc """
   A scheduled task that cleans up old verification codes.
   """

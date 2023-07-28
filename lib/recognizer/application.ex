@@ -24,7 +24,7 @@ defmodule Recognizer.Application do
       # Start a worker by calling: Recognizer.Worker.start_link(arg)
       {Redix, name: :redix, host: Application.get_env(:recognizer, :redis_host)},
       # Start the task for removing expired verification tokens
-      Recognizer.VerificationCodeCleanupTask
+      Recognizer.Accounts.VerificationCodeCleanupTask
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
