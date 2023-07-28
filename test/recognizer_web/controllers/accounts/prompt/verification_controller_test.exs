@@ -37,4 +37,23 @@ defmodule RecognizerWeb.Accounts.Prompt.VerificationCodeControllerTest do
       assert redirected_to(conn) =~ "/login"
     end
   end
+
+  describe "POST /prompt/verification" do
+    test "resends the verification required page for an unverified user", %{unverified_conn: conn} do
+      conn = post(conn, Routes.prompt_verification_path(conn, :resend))
+      response = html_response(conn, 200)
+      assert response =~ "Account Verification Pending</h2>"
+      assert response =~ "<p>We've sent you another copy of the verification email.</p>"
+    end
+
+    test "redirects verified user", %{verified_conn: conn} do
+      conn = post(conn, Routes.prompt_verification_path(conn, :resend))
+      assert redirected_to(conn) =~ "/settings"
+    end
+
+    test "ignores anonymous user", %{empty_conn: conn} do
+      conn = post(conn, Routes.prompt_verification_path(conn, :resend))
+      assert redirected_to(conn) =~ "/login"
+    end
+  end
 end

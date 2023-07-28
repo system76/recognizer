@@ -637,21 +637,6 @@ defmodule Recognizer.Accounts do
     end
   end
 
-  def generate_verification_code({:ok, user}, verify_account_url_fun) do
-    {:ok, verification} =
-      %VerificationCode{}
-      |> VerificationCode.changeset(%{code: VerificationCode.generate_code(), user_id: user.id})
-      |> Repo.insert()
-
-    Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(verification.code))
-
-    {:ok, user}
-  end
-
-  def generate_verification_code(error, _verify_account_url_fun) do
-    error
-  end
-
   def resend_verification_code(user, verify_account_url_fun) do
     case Repo.get_by(VerificationCode, user_id: user.id) do
       nil ->
@@ -665,12 +650,43 @@ defmodule Recognizer.Accounts do
   def verify_user(code) do
     case get_user_by_verification_code(code) do
       {:ok, user} ->
-        user
-        |> User.verification_changeset(%{verified_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)})
-        |> Repo.update()
+        mark_user_verified(user)
 
       error ->
         error
     end
+  end
+
+  defp mark_user_verified(user) do
+    {:ok, verified_user} =
+      user
+      |> User.verification_changeset(%{verified_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)})
+      |> Repo.update()
+
+    delete_verification_codes_for_user(verified_user)
+    {:ok, verified_user}
+  end
+
+  defp generate_verification_code({:ok, user}, verify_account_url_fun) do
+    {:ok, verification} =
+      %VerificationCode{}
+      |> VerificationCode.changeset(%{code: VerificationCode.generate_code(), user_id: user.id})
+      |> Repo.insert()
+
+    Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(verification.code))
+
+    {:ok, user}
+  end
+
+  defp generate_verification_code(error, _verify_account_url_fun) do
+    error
+  end
+
+  defp delete_verification_codes_for_user(%{id: user_id}) do
+    user_codes =
+      from c in VerificationCode,
+        where: c.user_id == ^user_id
+
+    Repo.delete_all(user_codes)
   end
 end

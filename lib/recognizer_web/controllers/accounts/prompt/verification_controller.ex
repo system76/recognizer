@@ -23,8 +23,12 @@ defmodule RecognizerWeb.Accounts.Prompt.VerificationController do
     Authentication.log_in_user(conn, user)
   end
 
-  def resend(%{assigns: %{user: user}} = conn, _params) do
+  def resend(%{assigns: %{user: %{verified_at: nil} = user}} = conn, _params) do
     Accounts.resend_verification_code(user, &Routes.verification_code_url(conn, :new, &1))
     render(conn, "new.html", resend?: true)
+  end
+
+  def resend(%{assigns: %{user: user}} = conn, _params) do
+    Authentication.log_in_user(conn, user)
   end
 end

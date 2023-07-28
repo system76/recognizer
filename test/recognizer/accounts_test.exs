@@ -387,5 +387,11 @@ defmodule Recognizer.AccountsTest do
     test "fails when the code doesn't exist" do
       assert {:error, :code_not_found} = Accounts.verify_user("pineapple")
     end
+
+    test "deletes verification code after verifying a user" do
+      verification = insert(:verification_code)
+      assert {:ok, %User{}} = Accounts.verify_user(verification.code)
+      assert {:error, _} = Accounts.get_user_by_verification_code(verification.code)
+    end
   end
 end
