@@ -51,11 +51,6 @@ defmodule Recognizer.Accounts.User do
     timestamps()
   end
 
-  @spec changeset(
-          {map, map}
-          | %{:__struct__ => atom | %{:__changeset__ => map, optional(any) => any}, optional(atom) => any},
-          :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
-        ) :: Ecto.Changeset.t()
   @doc """
   A user changeset for changing basic profile fields. This does not change
   the password, or notification settings. If you need to do that, you can use
