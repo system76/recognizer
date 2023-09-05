@@ -9,14 +9,14 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"api:two_factor", @one_minute, 6},
+         rate_limit: {"api:two_factor", @one_minute, 2},
          by: {:conn, &Helpers.get_user_id_from_request/1}
        ]
        when action in [:send]
 
   plug Hammer.Plug,
        [
-         rate_limit: {"api:two_factor_daily", @one_day, 12},
+         rate_limit: {"api:two_factor_daily", @one_day, 6},
          by: {:conn, &Helpers.get_user_id_from_request/1}
        ]
        when action in [:send]
