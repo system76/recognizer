@@ -184,7 +184,7 @@ defmodule Recognizer.Accounts do
     |> User.registration_changeset(attrs, opts)
     |> insert_user_and_notification_preferences()
     |> maybe_notify_new_user()
-    |> verify_user()
+    |> maybe_mark_user_verified()
   end
 
   @doc """
@@ -656,6 +656,14 @@ defmodule Recognizer.Accounts do
       error ->
         error
     end
+  end
+
+  defp maybe_mark_user_verified({:ok, user}) do
+    mark_user_verified(user)
+  end
+
+  defp maybe_mark_user_verified(error) do
+    error
   end
 
   defp mark_user_verified(user) do
