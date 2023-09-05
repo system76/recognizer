@@ -184,6 +184,7 @@ defmodule Recognizer.Accounts do
     |> User.registration_changeset(attrs, opts)
     |> insert_user_and_notification_preferences()
     |> maybe_notify_new_user()
+    |> verify_user()
   end
 
   @doc """
