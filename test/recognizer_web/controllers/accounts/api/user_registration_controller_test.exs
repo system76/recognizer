@@ -22,6 +22,7 @@ defmodule RecognizerWeb.Api.UserRegistrationControllerTest do
 
     test "POST /api/create-account verifies the user", %{conn: conn} do
       email = "test-verification@example.com"
+
       conn =
         post(conn, "/api/create-account", %{
           "user" => %{
