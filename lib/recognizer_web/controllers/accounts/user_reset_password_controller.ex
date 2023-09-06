@@ -4,10 +4,18 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordController do
   alias Recognizer.Accounts
 
   @one_minute 60_000
+  @one_day 86_400_000
 
   plug Hammer.Plug,
        [
          rate_limit: {"user:reset_password", @one_minute, 2},
+         by: {:conn, &Helpers.get_email_from_request/1}
+       ]
+       when action in [:create]
+
+  plug Hammer.Plug,
+       [
+         rate_limit: {"user:reset_password_daily", @one_day, 10},
          by: {:conn, &Helpers.get_email_from_request/1}
        ]
        when action in [:create]
