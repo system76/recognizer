@@ -96,7 +96,7 @@ defmodule Recognizer.Accounts.User do
     |> put_assoc(:roles, Role.default_role_changeset())
     |> validate_company_name()
     |> generate_username()
-    |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
+    |> put_change(:password_changed_at, Repo.now())
   end
 
   @doc """
@@ -121,8 +121,8 @@ defmodule Recognizer.Accounts.User do
     |> validate_email()
     |> put_assoc(:roles, Role.default_role_changeset())
     |> generate_username()
-    |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
-    |> put_change(:verified_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
+    |> put_change(:password_changed_at, Repo.now())
+    |> put_change(:verified_at, Repo.now())
   end
 
   defp validate_names(changeset) do
@@ -239,7 +239,7 @@ defmodule Recognizer.Accounts.User do
     |> cast(attrs, [:password])
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
-    |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
+    |> put_change(:password_changed_at, Repo.now())
   end
 
   @doc """

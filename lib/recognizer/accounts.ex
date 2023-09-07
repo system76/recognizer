@@ -669,7 +669,7 @@ defmodule Recognizer.Accounts do
   defp mark_user_verified(user) do
     {:ok, verified_user} =
       user
-      |> User.verification_changeset(%{verified_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)})
+      |> User.verification_changeset(%{verified_at: Repo.now()})
       |> Repo.update()
 
     delete_verification_codes_for_user(verified_user)
