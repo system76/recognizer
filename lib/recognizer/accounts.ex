@@ -169,22 +169,29 @@ defmodule Recognizer.Accounts do
   def register_user(attrs, opts \\ [])
 
   def register_user(attrs, verify_account_url_fun: verify_account_url_fun) do
-    if Map.get(attrs, "newsletter") == "true", do: Recognizer.Hal.update_newsletter(attrs)
-
     %User{}
     |> User.registration_changeset(attrs)
     |> insert_user_and_notification_preferences()
-    |> generate_verification_code(verify_account_url_fun)
+    |> maybe_generate_verification_code(verify_account_url_fun)
+    |> maybe_send_newsletter(attrs)
   end
 
   def register_user(attrs, opts) do
-    if Map.get(attrs, "newsletter") == "true", do: Recognizer.Hal.update_newsletter(attrs)
-
     %User{}
     |> User.registration_changeset(attrs, opts)
     |> insert_user_and_notification_preferences()
     |> maybe_mark_user_verified()
     |> maybe_notify_new_user()
+    |> maybe_send_newsletter(attrs)
+  end
+
+  defp maybe_send_newsletter({:ok, _user} = response, %{"newsletter" => true} = attrs) do
+    Recognizer.Hal.update_newsletter(attrs)
+    response
+  end
+
+  defp maybe_send_newsletter(response, _attrs) do
+    response
   end
 
   @doc """
@@ -641,7 +648,7 @@ defmodule Recognizer.Accounts do
   def resend_verification_code(user, verify_account_url_fun) do
     case Repo.get_by(VerificationCode, user_id: user.id) do
       nil ->
-        generate_verification_code({:ok, user}, verify_account_url_fun)
+        maybe_generate_verification_code({:ok, user}, verify_account_url_fun)
 
       verification ->
         Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(verification.code))
@@ -676,7 +683,7 @@ defmodule Recognizer.Accounts do
     {:ok, verified_user}
   end
 
-  defp generate_verification_code({:ok, user}, verify_account_url_fun) do
+  defp maybe_generate_verification_code({:ok, user}, verify_account_url_fun) do
     {:ok, verification} =
       %VerificationCode{}
       |> VerificationCode.changeset(%{code: VerificationCode.generate_code(), user_id: user.id})
@@ -687,7 +694,7 @@ defmodule Recognizer.Accounts do
     {:ok, user}
   end
 
-  defp generate_verification_code(error, _verify_account_url_fun) do
+  defp maybe_generate_verification_code(error, _verify_account_url_fun) do
     error
   end
 
