@@ -5,12 +5,20 @@ defmodule RecognizerWeb.Accounts.Prompt.VerificationController do
   alias RecognizerWeb.Authentication
 
   @one_minute 60_000
+  @one_day 86_400_000
 
   plug :ensure_user
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user:verification", @one_minute, 3},
+         rate_limit: {"user:verification", @one_minute, 2},
+         by: {:conn, &get_user_id_from_unverified_request/1}
+       ]
+       when action in [:resend]
+
+  plug Hammer.Plug,
+       [
+         rate_limit: {"user:verification_daily", @one_day, 6},
          by: {:conn, &get_user_id_from_unverified_request/1}
        ]
        when action in [:resend]
