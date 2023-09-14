@@ -185,7 +185,7 @@ defmodule Recognizer.Accounts do
     |> maybe_send_newsletter(attrs)
   end
 
-  defp maybe_send_newsletter({:ok, _user} = response, %{"newsletter" => true} = attrs) do
+  defp maybe_send_newsletter({:ok, _user} = response, %{"newsletter" => "true"} = attrs) do
     Recognizer.Hal.update_newsletter(attrs)
     response
   end
