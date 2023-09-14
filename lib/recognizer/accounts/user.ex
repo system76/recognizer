@@ -122,7 +122,7 @@ defmodule Recognizer.Accounts.User do
     |> put_assoc(:roles, Role.default_role_changeset())
     |> generate_username()
     |> put_change(:password_changed_at, Repo.now())
-    |> put_change(:verified_at, Repo.now())
+    |> put_change(:verified_at, DateTime.from_naive!(Repo.now(), "Etc/UTC"))
   end
 
   defp validate_names(changeset) do
