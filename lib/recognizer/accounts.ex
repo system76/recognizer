@@ -7,9 +7,13 @@ defmodule Recognizer.Accounts do
 
   import Ecto.Query, warn: false
 
-  alias Recognizer.Accounts.{User, OAuth, RecoveryCode}
+  alias Recognizer.Accounts.OAuth
+  alias Recognizer.Accounts.RecoveryCode
+  alias Recognizer.Accounts.User
+  alias Recognizer.Accounts.VerificationCode
   alias Recognizer.Notifications.Account, as: Notification
-  alias Recognizer.{Guardian, Repo}
+  alias Recognizer.Guardian
+  alias Recognizer.Repo
   alias RecognizerWeb.Authentication
 
   ## Database getters
@@ -162,13 +166,32 @@ defmodule Recognizer.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def register_user(attrs, opts \\ []) do
-    if Map.get(attrs, "newsletter") == "true", do: Recognizer.Hal.update_newsletter(attrs)
+  def register_user(attrs, opts \\ [])
 
+  def register_user(attrs, verify_account_url_fun: verify_account_url_fun) do
+    %User{}
+    |> User.registration_changeset(attrs)
+    |> insert_user_and_notification_preferences()
+    |> maybe_generate_verification_code(verify_account_url_fun)
+    |> maybe_send_newsletter(attrs)
+  end
+
+  def register_user(attrs, opts) do
     %User{}
     |> User.registration_changeset(attrs, opts)
     |> insert_user_and_notification_preferences()
+    |> maybe_mark_user_verified()
     |> maybe_notify_new_user()
+    |> maybe_send_newsletter(attrs)
+  end
+
+  defp maybe_send_newsletter({:ok, _user} = response, %{"newsletter" => "true"} = attrs) do
+    Recognizer.Hal.update_newsletter(attrs)
+    response
+  end
+
+  defp maybe_send_newsletter(response, _attrs) do
+    response
   end
 
   @doc """
@@ -318,6 +341,10 @@ defmodule Recognizer.Accounts do
       {:two_factor, %User{}}
 
   """
+  def user_prompts(%{verified_at: nil} = user) do
+    {:verification_required, user}
+  end
+
   def user_prompts(%{organization_id: nil} = user) do
     {:ok, user}
   end
@@ -607,5 +634,75 @@ defmodule Recognizer.Accounts do
 
   def load_notification_preferences(user) do
     Repo.preload(user, :notification_preference)
+  end
+
+  ## Account Verification
+
+  def get_user_by_verification_code(code) do
+    case Repo.get_by(VerificationCode, code: code) do
+      nil -> {:error, :code_not_found}
+      verification_code -> {:ok, Repo.get(User, verification_code.user_id)}
+    end
+  end
+
+  def resend_verification_code(user, verify_account_url_fun) do
+    case Repo.get_by(VerificationCode, user_id: user.id) do
+      nil ->
+        maybe_generate_verification_code({:ok, user}, verify_account_url_fun)
+
+      verification ->
+        Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(verification.code))
+    end
+  end
+
+  def verify_user(code) do
+    case get_user_by_verification_code(code) do
+      {:ok, user} ->
+        mark_user_verified(user)
+
+      error ->
+        error
+    end
+  end
+
+  defp maybe_mark_user_verified({:ok, user}) do
+    mark_user_verified(user)
+  end
+
+  defp maybe_mark_user_verified(error) do
+    error
+  end
+
+  defp mark_user_verified(user) do
+    {:ok, verified_user} =
+      user
+      |> User.verification_changeset(%{verified_at: Repo.now()})
+      |> Repo.update()
+
+    delete_verification_codes_for_user(verified_user)
+    {:ok, verified_user}
+  end
+
+  defp maybe_generate_verification_code({:ok, user}, verify_account_url_fun) do
+    {:ok, verification} =
+      %VerificationCode{}
+      |> VerificationCode.changeset(%{code: VerificationCode.generate_code(), user_id: user.id})
+      |> Repo.insert()
+
+    Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(verification.code))
+
+    {:ok, user}
+  end
+
+  defp maybe_generate_verification_code(error, _verify_account_url_fun) do
+    error
+  end
+
+  defp delete_verification_codes_for_user(%{id: user_id}) do
+    user_codes =
+      from c in VerificationCode,
+        where: c.user_id == ^user_id
+
+    Repo.delete_all(user_codes)
   end
 end

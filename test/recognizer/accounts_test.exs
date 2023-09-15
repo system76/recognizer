@@ -366,4 +366,32 @@ defmodule Recognizer.AccountsTest do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
     end
   end
+
+  describe "get_user_by_verification_code/1" do
+    test "gets a user" do
+      verification = insert(:verification_code)
+      assert {:ok, %User{}} = Accounts.get_user_by_verification_code(verification.code)
+    end
+
+    test "fails when the code doesn't exist" do
+      assert {:error, :code_not_found} = Accounts.get_user_by_verification_code("pineapple")
+    end
+  end
+
+  describe "verify_user/1" do
+    test "verifies a user" do
+      verification = insert(:verification_code)
+      assert {:ok, %User{}} = Accounts.verify_user(verification.code)
+    end
+
+    test "fails when the code doesn't exist" do
+      assert {:error, :code_not_found} = Accounts.verify_user("pineapple")
+    end
+
+    test "deletes verification code after verifying a user" do
+      verification = insert(:verification_code)
+      assert {:ok, %User{}} = Accounts.verify_user(verification.code)
+      assert {:error, _} = Accounts.get_user_by_verification_code(verification.code)
+    end
+  end
 end

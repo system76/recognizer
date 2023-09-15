@@ -15,6 +15,11 @@ defmodule RecognizerWeb.Authentication do
   """
   def log_in_user(conn, user, params \\ %{}) do
     case Recognizer.Accounts.user_prompts(user) do
+      {:verification_required, _user} ->
+        conn
+        |> put_session(:prompt_user_id, user.id)
+        |> redirect(to: Routes.prompt_verification_path(conn, :new))
+
       {:password_change, _user} ->
         conn
         |> put_session(:prompt_user_id, user.id)

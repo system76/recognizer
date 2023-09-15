@@ -39,6 +39,7 @@ defmodule Recognizer.AccountFactory do
   def user_factory(attrs) do
     password = Map.get(attrs, :password, build(:password))
     password_changed_at = Map.get(attrs, :password_changed_at, NaiveDateTime.utc_now())
+    verified_at = Map.get(attrs, :verified_at, NaiveDateTime.utc_now())
 
     hashed_password =
       if is_nil(password) do
@@ -58,7 +59,8 @@ defmodule Recognizer.AccountFactory do
       password: password,
       hashed_password: hashed_password,
       notification_preference: build(:notification_preference),
-      password_changed_at: password_changed_at
+      password_changed_at: password_changed_at,
+      verified_at: verified_at
     }
 
     Map.merge(user, attrs)
@@ -85,5 +87,14 @@ defmodule Recognizer.AccountFactory do
     {:ok, captured} = fun.(&"[TOKEN]#{&1}[TOKEN]")
     [_, token, _] = String.split(captured.reset_url, "[TOKEN]")
     token
+  end
+
+  def verification_code_factory(attrs) do
+    code = %Accounts.VerificationCode{
+      code: sequence(:verification_code, &"code-#{&1}"),
+      user: build(:user)
+    }
+
+    Map.merge(code, attrs)
   end
 end

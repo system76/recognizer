@@ -1,0 +1,18 @@
+<div class="box">
+  <h2 class="title is-2 mb-5 has-text-centered">Verify Your Email</h2>
+
+  <div class="content has-text-centered">
+    <p>Almost there! Check your email and click the link to activate your account.</p>
+    <%= if @resend? do %>
+    <p>We've sent you another copy of the verification email.</p>
+    <% else %>
+      <%= form_for @conn, Routes.prompt_verification_path(@conn, :resend), fn _f -> %>
+        <div class="buttons is-centered mt-5">
+          <div class="control">
+            <%= submit "Resend Verification Email", class: "button is-secondary" %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

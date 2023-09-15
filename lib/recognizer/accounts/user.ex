@@ -38,6 +38,7 @@ defmodule Recognizer.Accounts.User do
     field :third_party_login, :boolean, default: false, virtual: true
 
     field :stripe_id, :string
+    field :verified_at, :utc_datetime
 
     has_one :notification_preference, NotificationPreference, on_replace: :update
 
@@ -95,7 +96,16 @@ defmodule Recognizer.Accounts.User do
     |> put_assoc(:roles, Role.default_role_changeset())
     |> validate_company_name()
     |> generate_username()
-    |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
+    |> put_change(:password_changed_at, Repo.now())
+  end
+
+  @doc """
+  A user changeset for verification.
+  """
+  def verification_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:verified_at])
+    |> validate_required([:verified_at])
   end
 
   def load_virtuals(%User{} = user) do
@@ -111,7 +121,8 @@ defmodule Recognizer.Accounts.User do
     |> validate_email()
     |> put_assoc(:roles, Role.default_role_changeset())
     |> generate_username()
-    |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
+    |> put_change(:password_changed_at, Repo.now())
+    |> put_change(:verified_at, DateTime.from_naive!(Repo.now(), "Etc/UTC"))
   end
 
   defp validate_names(changeset) do
@@ -228,7 +239,7 @@ defmodule Recognizer.Accounts.User do
     |> cast(attrs, [:password])
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password(opts)
-    |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
+    |> put_change(:password_changed_at, Repo.now())
   end
 
   @doc """

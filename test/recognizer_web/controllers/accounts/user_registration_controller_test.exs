@@ -19,19 +19,14 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
 
   describe "POST /users/register" do
     @tag :capture_log
-    test "creates account and logs the user in", %{conn: conn} do
+    test "creates account and prompts for verification", %{conn: conn} do
       conn =
         post(conn, Routes.user_registration_path(conn, :create), %{
           "user" => params_for(:user)
         })
 
-      assert Recognizer.Guardian.Plug.current_resource(conn)
-      assert redirected_to(conn) =~ "/settings"
-
-      # Now do a logged in request and assert on the menu
-      conn
-      |> get("/")
-      |> html_response(200)
+      refute Recognizer.Guardian.Plug.current_resource(conn)
+      assert redirected_to(conn) =~ "/prompt/verification"
     end
 
     test "render errors for invalid data", %{conn: conn} do

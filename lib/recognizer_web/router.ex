@@ -85,6 +85,8 @@ defmodule RecognizerWeb.Router do
 
     get "/recovery-code", UserRecoveryCodeController, :new
     post "/recovery-code", UserRecoveryCodeController, :create
+
+    get "/verify/:code", VerificationCodeController, :new
   end
 
   scope "/", RecognizerWeb.Accounts.Prompt, as: :prompt do
@@ -97,6 +99,9 @@ defmodule RecognizerWeb.Router do
     put "/prompt/setup-two-factor", TwoFactorController, :create
     get "/prompt/setup-two-factor/confirm", TwoFactorController, :edit
     post "/prompt/setup-two-factor/confirm", TwoFactorController, :update
+
+    get "/prompt/verification", VerificationController, :new
+    post "/prompt/verification", VerificationController, :resend
   end
 
   scope "/", RecognizerWeb.Accounts do
