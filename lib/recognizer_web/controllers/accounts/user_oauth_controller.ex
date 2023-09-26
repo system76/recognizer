@@ -97,7 +97,7 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
   # they use `name` which is the full name.
   # We need to make a best guess at dividing it into first and last.
   defp provider_params(%{provider: :github, info: info}) do
-    [first_name | last_name] = split_name(info.name)
+    [first_name, last_name] = split_name(info.name)
 
     %{
       email: info.email,
