@@ -58,7 +58,7 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
         "An error occurred. This may indicate you have previously created an account using the email and password combination."
 
       _ ->
-        Logger.error("Unable to create new oauth account", changeset: changeset)
+        Logger.error("Unable to create new oauth account - #{inspect(changeset)}")
         "An error occurred. Please contact support."
     end
   end
