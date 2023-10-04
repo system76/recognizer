@@ -70,7 +70,7 @@ defmodule Recognizer.AccountsTest do
       {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "not valid"})
 
       assert %{
-               email: ["must have the @ sign and no spaces"],
+               email: ["must have the @ sign, no spaces and a top level domain"],
                password: ["must contain an UPPERCASE letter", "must contain a number"]
              } = errors_on(changeset)
     end

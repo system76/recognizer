@@ -37,7 +37,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
 
       response = html_response(conn, 200)
       assert response =~ "Create Account</h2>"
-      assert response =~ "must have the @ sign and no spaces"
+      assert response =~ "must have the @ sign, no spaces and a top level domain"
       assert response =~ "must contain a number"
       assert response =~ "must not contain special characters"
     end
