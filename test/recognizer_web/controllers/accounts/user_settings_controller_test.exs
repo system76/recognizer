@@ -82,7 +82,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
 
       response = html_response(conn, 200)
       assert response =~ "Change Profile</h2>"
-      assert response =~ "must have the @ sign and no spaces"
+      assert response =~ "must have the @ sign, no spaces and a top level domain"
     end
 
     test "does not update first name on invalid data", %{conn: conn} do
