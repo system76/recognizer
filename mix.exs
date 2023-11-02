@@ -54,6 +54,7 @@ defmodule Recognizer.MixProject do
       {:hammer_plug, "~> 3.0"},
       {:httpoison, "~> 0.13"},
       {:jason, "~> 1.0"},
+      {:joken, "~> 2.6.0"},
       {:logger_json, github: "Nebo15/logger_json", ref: "8e4290a"},
       {:myxql, ">= 0.0.0"},
       {:redix, ">= 0.0.0"},

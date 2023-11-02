@@ -31,13 +31,23 @@ defmodule RecognizerWeb.Authentication do
         |> redirect(to: Routes.prompt_two_factor_path(conn, :new))
 
       {:ok, _user} ->
-        redirect_opts = login_redirect(conn)
+        if get_session(conn, :bc) do
+          log_in_bc_user(conn, user)
+        else
+          redirect_opts = login_redirect(conn)
 
-        conn
-        |> clear_session()
-        |> Guardian.Plug.sign_in(user, params)
-        |> redirect(redirect_opts)
+          conn
+          |> clear_session()
+          |> Guardian.Plug.sign_in(user, params)
+          |> redirect(redirect_opts)
+        end
     end
+  end
+
+  defp log_in_bc_user(conn, user) do
+    conn
+    |> create_bc_jwt(user)
+    |> redirect_bc()
   end
 
   @doc """

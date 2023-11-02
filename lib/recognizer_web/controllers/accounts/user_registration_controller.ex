@@ -14,6 +14,12 @@ defmodule RecognizerWeb.Accounts.UserRegistrationController do
        ]
        when action in [:create]
 
+  def new(conn, %{"bc" => "true"} = params) do
+    conn
+    |> put_session(:bc, true)
+    |> new(Map.drop(params, ["bc"]))
+  end
+
   def new(conn, params) do
     user_params = Map.get(params, "user", %{})
     changeset = Accounts.change_user_registration(%User{}, user_params)
