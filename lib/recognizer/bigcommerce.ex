@@ -6,10 +6,9 @@ defmodule Recognizer.BigCommerce do
   def generate_login_jwt(user) do
     {:ok, token, claims} =
       user
+      |> Recognizer.Repo.preload(:bigcommerce_user)
       |> jwt_claims()
       |> Token.generate_and_sign(jwt_signer())
-
-    IO.inspect(claims)
 
     token
   end
