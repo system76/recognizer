@@ -7,8 +7,9 @@ defmodule RecognizerWeb.Authentication do
   import Phoenix.Controller
 
   alias Guardian.DB, as: GuardianDB
-  alias RecognizerWeb.Router.Helpers, as: Routes
+  alias Recognizer.BigCommerce
   alias Recognizer.Guardian
+  alias RecognizerWeb.Router.Helpers, as: Routes
 
   @doc """
   Logs the user in.
@@ -45,9 +46,9 @@ defmodule RecognizerWeb.Authentication do
   end
 
   defp log_in_bc_user(conn, user) do
-    conn
-    |> create_bc_jwt(user)
-    |> redirect_bc()
+    jwt = BigCommerce.generate_login_jwt(user)
+
+    redirect(conn, external: BigCommerce.login_redirect_uri(jwt))
   end
 
   @doc """

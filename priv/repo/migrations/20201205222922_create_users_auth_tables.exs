@@ -60,5 +60,13 @@ defmodule Recognizer.Repo.Migrations.CreateUsersAuthTables do
 
     create index(:users_tokens, [:user_id])
     create unique_index(:users_tokens, [:context, :token])
+
+    # This table was created by a migration in a different application.
+    create table(:bigcommerce_customer_users, primary_key: false) do
+      add :bc_id, :integer, null: false
+      add :user_id, references(:users, type: :"int(11) unsigned"), null: false, primary_key: true
+
+      timestamps()
+    end
   end
 end
