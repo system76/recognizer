@@ -1,11 +1,10 @@
 defmodule Recognizer.BigCommerce do
   require Logger
 
-  alias Ecto.UUID
   alias Recognizer.BigCommerce.Token
 
   def generate_login_jwt(user) do
-    {:ok, token, claims} =
+    {:ok, token, _claims} =
       user
       |> Recognizer.Repo.preload(:bigcommerce_user)
       |> jwt_claims()
@@ -23,7 +22,7 @@ defmodule Recognizer.BigCommerce do
       "aud" => "BigCommerce",
       "iss" => config(:client_id),
       "jti" => Ecto.UUID.generate(),
-      "operation" => 'customer_login',
+      "operation" => "customer_login",
       "store_hash" => config(:store_hash),
       "customer_id" => user.bigcommerce_user.bc_id
     }
