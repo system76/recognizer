@@ -48,7 +48,9 @@ defmodule RecognizerWeb.Authentication do
   defp log_in_bc_user(conn, user) do
     jwt = BigCommerce.generate_login_jwt(user)
 
-    redirect(conn, external: BigCommerce.login_redirect_uri(jwt))
+    conn
+    |> clear_session()
+    |> redirect(external: BigCommerce.login_redirect_uri(jwt))
   end
 
   @doc """
