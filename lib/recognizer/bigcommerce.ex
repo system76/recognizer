@@ -15,10 +15,6 @@ defmodule Recognizer.BigCommerce do
       {:error, e} ->
         Logger.error("error creating bigcommerce customer: #{inspect(e)}")
         {:error, e}
-
-      e ->
-        Logger.error("error creating bigcommerce customer: #{inspect(e)}")
-        {:error, e}
     end
   end
 

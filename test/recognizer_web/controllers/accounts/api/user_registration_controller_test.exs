@@ -11,7 +11,7 @@ defmodule RecognizerWeb.Api.UserRegistrationControllerTest do
   setup :register_and_log_in_admin
 
   defp ok_bigcommerce_response() do
-    body = Jason.encode!(%{data: %{id: 1001}})
+    body = Jason.encode!(%{data: [%{id: 1001}]})
 
     {:ok, %HTTPoison.Response{body: body, status_code: 200}}
   end
@@ -24,7 +24,7 @@ defmodule RecognizerWeb.Api.UserRegistrationControllerTest do
         "last_name" => "User"
       }
 
-      user_json = Jason.encode!(user)
+      user_json = Jason.encode!([user])
 
       expect(HTTPoisonMock, :post, 1, fn _, ^user_json, _ -> ok_bigcommerce_response() end)
 

@@ -26,12 +26,7 @@ defmodule Recognizer.BigCommerce.Client do
   end
 
   defp user_as_customer_params(%User{email: email, first_name: first_name, last_name: last_name}) do
-    {:ok,
-     %{
-       "email" => email,
-       "first_name" => first_name,
-       "last_name" => last_name
-     }}
+    {:ok, [%{"email" => email, "first_name" => first_name, "last_name" => last_name}]}
   end
 
   defp user_as_customer_params(_user) do
@@ -48,7 +43,7 @@ defmodule Recognizer.BigCommerce.Client do
 
   defp get_id(response) do
     case Jason.decode(response) do
-      {:ok, %{"data" => %{"id" => id}}} -> {:ok, id}
+      {:ok, %{"data" => [%{"id" => id}]}} -> {:ok, id}
       {:error, e} -> {:error, e}
       e -> {:error, e}
     end

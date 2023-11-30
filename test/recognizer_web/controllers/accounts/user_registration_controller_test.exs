@@ -10,7 +10,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
   setup :verify_on_exit!
 
   defp ok_bigcommerce_response() do
-    body = Jason.encode!(%{data: %{id: 1001}})
+    body = Jason.encode!(%{data: [%{id: 1001}]})
 
     {:ok, %HTTPoison.Response{body: body, status_code: 200}}
   end
