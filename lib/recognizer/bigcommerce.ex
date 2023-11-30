@@ -1,7 +1,26 @@
 defmodule Recognizer.BigCommerce do
   require Logger
 
+  alias Recognizer.Accounts.BCCustomerUser, as: Customer
+  alias Recognizer.BigCommerce.Client
   alias Recognizer.BigCommerce.Token
+  alias Recognizer.Repo
+
+  def create_customer(user) do
+    case Client.create_customer(user) do
+      {:ok, bc_id} ->
+        Repo.insert(%Customer{user_id: user.id, bc_id: bc_id})
+        :ok
+
+      {:error, e} ->
+        Logger.error("error creating bigcommerce customer: #{inspect(e)}")
+        {:error, e}
+
+      e ->
+        Logger.error("error creating bigcommerce customer: #{inspect(e)}")
+        {:error, e}
+    end
+  end
 
   def generate_login_jwt(user) do
     {:ok, token, _claims} =
