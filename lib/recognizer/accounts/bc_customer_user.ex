@@ -1,4 +1,6 @@
 defmodule Recognizer.Accounts.BCCustomerUser do
+  @moduledoc false
+
   use Ecto.Schema
 
   alias Recognizer.Accounts.User

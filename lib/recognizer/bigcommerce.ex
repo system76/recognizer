@@ -1,4 +1,8 @@
 defmodule Recognizer.BigCommerce do
+  @moduledoc """
+  BigCommerce context.
+  """
+
   require Logger
 
   alias Recognizer.Accounts.BCCustomerUser, as: Customer
