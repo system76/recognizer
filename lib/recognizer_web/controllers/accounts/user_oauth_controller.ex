@@ -33,6 +33,9 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
         conn
         |> put_flash(:error, friendly_error_message(changeset))
         |> redirect(to: Routes.user_session_path(conn, :new))
+
+      {:error, e} ->
+        {:error, e}
     end
   end
 
@@ -83,8 +86,8 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
            {:ok, _oauth} <- Accounts.create_oauth(user, provider, uid) do
         user
       else
-        {:error, changeset} ->
-          Repo.rollback(changeset)
+        {:error, e} ->
+          Repo.rollback(e)
       end
     end)
   end

@@ -35,7 +35,9 @@ defmodule RecognizerWeb.Accounts.UserRegistrationController do
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
-      {:error, e} -> {:error, e}
+
+      {:error, e} ->
+        {:error, e}
     end
   end
 end
