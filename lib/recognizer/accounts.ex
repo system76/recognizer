@@ -718,9 +718,10 @@ defmodule Recognizer.Accounts do
   end
 
   def maybe_create_big_commerce_customer({:ok, user}) do
-    case BigCommerce.create_customer(user) do
-      :ok -> {:ok, user}
-      e -> e
+    if BigCommerce.enabled?() do
+      BigCommerce.create_customer(user)
+    else
+      {:ok, user}
     end
   end
 

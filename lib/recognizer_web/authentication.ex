@@ -32,7 +32,7 @@ defmodule RecognizerWeb.Authentication do
         |> redirect(to: Routes.prompt_two_factor_path(conn, :new))
 
       {:ok, _user} ->
-        if get_session(conn, :bc) do
+        if BigCommerce.enabled?() && get_session(conn, :bc) do
           log_in_bc_user(conn, user)
         else
           redirect_opts = login_redirect(conn)

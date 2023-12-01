@@ -59,4 +59,5 @@ config :recognizer, Recognizer.BigCommerce,
   access_token: "bc_access_token",
   store_hash: "bc_store_hash",
   login_uri: "http://localhost/",
-  http_client: HTTPoison
+  http_client: HTTPoison,
+  enabled?: true

@@ -6,11 +6,15 @@ defmodule Recognizer.BigCommerce do
   alias Recognizer.BigCommerce.Token
   alias Recognizer.Repo
 
+  def enabled?() do
+    config(:enabled?)
+  end
+
   def create_customer(user) do
     case Client.create_customer(user) do
       {:ok, bc_id} ->
         Repo.insert(%Customer{user_id: user.id, bc_id: bc_id})
-        :ok
+        {:ok, user}
 
       {:error, e} ->
         Logger.error("error creating bigcommerce customer: #{inspect(e)}")

@@ -74,4 +74,5 @@ config :recognizer, Recognizer.BigCommerce,
   access_token: recognizer_config["BIGCOMMERCE_ACCESS_TOKEN"],
   store_hash: recognizer_config["BIGCOMMERCE_STORE_HASH"],
   login_uri: recognizer_config["BIGCOMMERCE_LOGIN_URI"],
-  http_client: HTTPoison
+  http_client: HTTPoison,
+  enabled?: true
