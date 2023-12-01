@@ -5,6 +5,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
   import Recognizer.AccountFactory
 
   alias Recognizer.Accounts.BCCustomerUser
+  alias Recognizer.Accounts.User
   alias Recognizer.Repo
 
   setup :verify_on_exit!
@@ -13,6 +14,12 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
     body = Jason.encode!(%{data: [%{id: 1001}]})
 
     {:ok, %HTTPoison.Response{body: body, status_code: 200}}
+  end
+
+  defp bad_bigcommerce_response() do
+    body = Jason.encode!(%{errors: [%{failure: 1}]})
+
+    {:ok, %HTTPoison.Response{body: body, status_code: 400}}
   end
 
   describe "GET /users/register" do
@@ -55,6 +62,21 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
       assert response =~ "must have the @ sign, no spaces and a top level domain"
       assert response =~ "must contain a number"
       assert response =~ "must not contain special characters"
+    end
+
+    @tag :capture_log
+    test "renders an error page for a bigcommerce failure", %{conn: conn} do
+      expect(HTTPoisonMock, :post, 1, fn _, _, _ -> bad_bigcommerce_response() end)
+
+      conn =
+        post(conn, Routes.user_registration_path(conn, :create), %{
+          "user" => params_for(:user)
+        })
+
+      assert Repo.all(User) == []
+      refute Recognizer.Guardian.Plug.current_resource(conn)
+      response = html_response(conn, 500)
+      assert response =~ "Something has gone horribly wrong"
     end
 
     test "rate limits account creation", %{conn: conn} do

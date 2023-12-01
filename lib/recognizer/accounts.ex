@@ -167,10 +167,16 @@ defmodule Recognizer.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def register_user(attrs, opts \\ [])
+  def register_user(attrs, opts \\ []) do
+    Repo.transaction(fn ->
+      case do_register_user(attrs, opts) do
+        {:ok, user} -> user
+        {:error, e} -> Repo.rollback(e)
+      end
+    end)
+  end
 
-  def register_user(attrs, verify_account_url_fun: verify_account_url_fun) do
-    # todo transaction
+  defp do_register_user(attrs, verify_account_url_fun: verify_account_url_fun) do
     %User{}
     |> User.registration_changeset(attrs)
     |> insert_user_and_notification_preferences()
@@ -179,8 +185,7 @@ defmodule Recognizer.Accounts do
     |> maybe_send_newsletter(attrs)
   end
 
-  def register_user(attrs, opts) do
-    # todo transaction
+  defp do_register_user(attrs, opts) do
     %User{}
     |> User.registration_changeset(attrs, opts)
     |> insert_user_and_notification_preferences()
