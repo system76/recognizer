@@ -9,6 +9,8 @@ defmodule Recognizer.BigCommerce.Client do
 
   alias HTTPoison.Response
 
+  @default_retry_ms 5000
+
   def create_customer(user) do
     with {:ok, customer_params} <- user_as_customer_params(user),
          {:ok, customer_json} <- Jason.encode(customer_params),
@@ -35,9 +37,18 @@ defmodule Recognizer.BigCommerce.Client do
 
   defp post_customer(customer_json) do
     case http_client().post(customers_uri(), customer_json, default_headers()) do
-      {:ok, %Response{body: response, status_code: 200}} -> {:ok, response}
-      {:error, e} -> {:error, e}
-      e -> {:error, e}
+      {:ok, %Response{body: response, status_code: 200}} ->
+        {:ok, response}
+
+      {:ok, %Response{status_code: 429, headers: headers}} ->
+        sleep_for_rate_limit(headers)
+        post_customer(customer_json)
+
+      {:error, e} ->
+        {:error, e}
+
+      e ->
+        {:error, e}
     end
   end
 
@@ -72,5 +83,16 @@ defmodule Recognizer.BigCommerce.Client do
 
   defp config(key) do
     Application.get_env(:recognizer, Recognizer.BigCommerce)[key]
+  end
+
+  defp sleep_for_rate_limit(headers) do
+    retry_ms =
+      case List.keyfind(headers, "x-rate-limit-time-reset-ms", 0) do
+        nil -> @default_retry_ms
+        {_, retry_value} -> String.to_integer(retry_value)
+      end
+
+    Logger.warn("Rate limited, sleeping for ms: #{inspect(retry_ms)}")
+    Process.sleep(retry_ms)
   end
 end
