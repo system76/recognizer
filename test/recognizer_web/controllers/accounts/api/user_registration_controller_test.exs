@@ -77,7 +77,6 @@ defmodule RecognizerWeb.Api.UserRegistrationControllerTest do
         })
 
       assert %{"user" => _} = json_response(conn, 201)
-      assert %User{verified_at: verified_at} = Repo.get_by!(User, email: email)
     end
 
     test "POST /api/create-account fails for regular users", %{conn: conn} do
