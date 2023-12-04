@@ -30,3 +30,12 @@ config :hammer,
        pool_size: 4,
        pool_max_overflow: 2
      ]}
+
+config :recognizer, Recognizer.BigCommerce,
+  client_id: "bc_id",
+  client_secret: "bc_secret",
+  access_token: "bc_access_token",
+  store_hash: "bc_store_hash",
+  login_uri: "http://localhost/",
+  http_client: HTTPoisonMock,
+  enabled?: true

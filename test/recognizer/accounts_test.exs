@@ -5,9 +5,18 @@ defmodule Recognizer.AccountsTest do
   import Recognizer.AccountFactory
 
   alias Recognizer.Accounts
+  alias Recognizer.Accounts.BCCustomerUser
   alias Recognizer.Accounts.User
 
   @new_valid_password "NeWVal1DP!ssW0R$"
+
+  setup :verify_on_exit!
+
+  defp ok_bigcommerce_response() do
+    body = Jason.encode!(%{data: [%{id: 1001}]})
+
+    {:ok, %HTTPoison.Response{body: body, status_code: 200}}
+  end
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do
@@ -94,6 +103,8 @@ defmodule Recognizer.AccountsTest do
     end
 
     test "registers users with a hashed password" do
+      expect(HTTPoisonMock, :post, 1, fn _, _, _ -> ok_bigcommerce_response() end)
+
       {:ok, user} =
         :user
         |> params_for(%{email: "TEST@Example.com"})
@@ -102,9 +113,11 @@ defmodule Recognizer.AccountsTest do
       assert is_binary(user.hashed_password)
       assert is_nil(user.password)
       assert "test@example.com" == user.email
+      assert Repo.get_by(BCCustomerUser, bc_id: 1001)
     end
 
     test "adds login role" do
+      expect(HTTPoisonMock, :post, 1, fn _, _, _ -> ok_bigcommerce_response() end)
       {:ok, user} = Accounts.register_user(params_for(:user))
       assert Enum.any?(user.roles, fn r -> r.role_id == 1 end)
     end

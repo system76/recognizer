@@ -67,3 +67,12 @@ config :hammer,
        pool_size: 4,
        pool_max_overflow: 2
      ]}
+
+config :recognizer, Recognizer.BigCommerce,
+  client_id: recognizer_config["BIGCOMMERCE_CLIENT_ID"],
+  client_secret: recognizer_config["BIGCOMMERCE_CLIENT_SECRET"],
+  access_token: recognizer_config["BIGCOMMERCE_ACCESS_TOKEN"],
+  store_hash: recognizer_config["BIGCOMMERCE_STORE_HASH"],
+  login_uri: recognizer_config["BIGCOMMERCE_LOGIN_URI"],
+  http_client: HTTPoison,
+  enabled?: false

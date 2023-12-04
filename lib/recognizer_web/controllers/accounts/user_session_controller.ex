@@ -4,6 +4,12 @@ defmodule RecognizerWeb.Accounts.UserSessionController do
   alias Recognizer.Accounts
   alias RecognizerWeb.Authentication
 
+  def new(conn, %{"bc" => "true"}) do
+    conn
+    |> put_session(:bc, true)
+    |> render("new.html", error_message: nil)
+  end
+
   def new(conn, _params) do
     render(conn, "new.html", error_message: nil)
   end

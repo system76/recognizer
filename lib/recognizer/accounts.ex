@@ -11,6 +11,7 @@ defmodule Recognizer.Accounts do
   alias Recognizer.Accounts.RecoveryCode
   alias Recognizer.Accounts.User
   alias Recognizer.Accounts.VerificationCode
+  alias Recognizer.BigCommerce
   alias Recognizer.Notifications.Account, as: Notification
   alias Recognizer.Guardian
   alias Recognizer.Repo
@@ -166,20 +167,29 @@ defmodule Recognizer.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def register_user(attrs, opts \\ [])
+  def register_user(attrs, opts \\ []) do
+    Repo.transaction(fn ->
+      case do_register_user(attrs, opts) do
+        {:ok, user} -> user
+        {:error, e} -> Repo.rollback(e)
+      end
+    end)
+  end
 
-  def register_user(attrs, verify_account_url_fun: verify_account_url_fun) do
+  defp do_register_user(attrs, verify_account_url_fun: verify_account_url_fun) do
     %User{}
     |> User.registration_changeset(attrs)
     |> insert_user_and_notification_preferences()
+    |> maybe_create_big_commerce_customer()
     |> maybe_generate_verification_code(verify_account_url_fun)
     |> maybe_send_newsletter(attrs)
   end
 
-  def register_user(attrs, opts) do
+  defp do_register_user(attrs, opts) do
     %User{}
     |> User.registration_changeset(attrs, opts)
     |> insert_user_and_notification_preferences()
+    |> maybe_create_big_commerce_customer()
     |> maybe_mark_user_verified()
     |> maybe_notify_new_user()
     |> maybe_send_newsletter(attrs)
@@ -203,6 +213,7 @@ defmodule Recognizer.Accounts do
     %User{}
     |> User.oauth_registration_changeset(attrs)
     |> insert_user_and_notification_preferences()
+    |> maybe_create_big_commerce_customer()
     |> maybe_notify_new_user()
   end
 
@@ -704,5 +715,17 @@ defmodule Recognizer.Accounts do
         where: c.user_id == ^user_id
 
     Repo.delete_all(user_codes)
+  end
+
+  def maybe_create_big_commerce_customer({:ok, user}) do
+    if BigCommerce.enabled?() do
+      BigCommerce.create_customer(user)
+    else
+      {:ok, user}
+    end
+  end
+
+  def maybe_create_big_commerce_customer(error) do
+    error
   end
 end

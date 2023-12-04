@@ -8,7 +8,12 @@ defmodule Recognizer.Accounts.User do
 
   import Ecto.Changeset
 
-  alias Recognizer.Accounts.{NotificationPreference, OAuth, Organization, RecoveryCode, Role}
+  alias Recognizer.Accounts.BCCustomerUser, as: BcUser
+  alias Recognizer.Accounts.NotificationPreference
+  alias Recognizer.Accounts.OAuth
+  alias Recognizer.Accounts.Organization
+  alias Recognizer.Accounts.RecoveryCode
+  alias Recognizer.Accounts.Role
   alias Recognizer.Repo
   alias __MODULE__
 
@@ -41,6 +46,7 @@ defmodule Recognizer.Accounts.User do
     field :verified_at, :utc_datetime
 
     has_one :notification_preference, NotificationPreference, on_replace: :update
+    has_one :bigcommerce_user, BcUser
 
     belongs_to :organization, Organization
 

@@ -7,8 +7,9 @@ defmodule RecognizerWeb.Authentication do
   import Phoenix.Controller
 
   alias Guardian.DB, as: GuardianDB
-  alias RecognizerWeb.Router.Helpers, as: Routes
+  alias Recognizer.BigCommerce
   alias Recognizer.Guardian
+  alias RecognizerWeb.Router.Helpers, as: Routes
 
   @doc """
   Logs the user in.
@@ -31,13 +32,25 @@ defmodule RecognizerWeb.Authentication do
         |> redirect(to: Routes.prompt_two_factor_path(conn, :new))
 
       {:ok, _user} ->
-        redirect_opts = login_redirect(conn)
+        if BigCommerce.enabled?() && get_session(conn, :bc) do
+          log_in_bc_user(conn, user)
+        else
+          redirect_opts = login_redirect(conn)
 
-        conn
-        |> clear_session()
-        |> Guardian.Plug.sign_in(user, params)
-        |> redirect(redirect_opts)
+          conn
+          |> clear_session()
+          |> Guardian.Plug.sign_in(user, params)
+          |> redirect(redirect_opts)
+        end
     end
+  end
+
+  defp log_in_bc_user(conn, user) do
+    jwt = BigCommerce.generate_login_jwt(user)
+
+    conn
+    |> clear_session()
+    |> redirect(external: BigCommerce.login_redirect_uri(jwt))
   end
 
   @doc """

@@ -1,7 +1,26 @@
 defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
   use RecognizerWeb.ConnCase
 
+  import Mox
   import Recognizer.AccountFactory
+
+  alias Recognizer.Accounts.BCCustomerUser
+  alias Recognizer.Accounts.User
+  alias Recognizer.Repo
+
+  setup :verify_on_exit!
+
+  defp ok_bigcommerce_response() do
+    body = Jason.encode!(%{data: [%{id: 1001}]})
+
+    {:ok, %HTTPoison.Response{body: body, status_code: 200}}
+  end
+
+  defp bad_bigcommerce_response() do
+    body = Jason.encode!(%{errors: [%{failure: 1}]})
+
+    {:ok, %HTTPoison.Response{body: body, status_code: 400}}
+  end
 
   describe "GET /users/register" do
     test "renders registration page", %{conn: conn} do
@@ -20,6 +39,8 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
   describe "POST /users/register" do
     @tag :capture_log
     test "creates account and prompts for verification", %{conn: conn} do
+      expect(HTTPoisonMock, :post, 1, fn _, _, _ -> ok_bigcommerce_response() end)
+
       conn =
         post(conn, Routes.user_registration_path(conn, :create), %{
           "user" => params_for(:user)
@@ -27,6 +48,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
 
       refute Recognizer.Guardian.Plug.current_resource(conn)
       assert redirected_to(conn) =~ "/prompt/verification"
+      assert Repo.get_by(BCCustomerUser, bc_id: 1001)
     end
 
     test "render errors for invalid data", %{conn: conn} do
@@ -42,7 +64,24 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
       assert response =~ "must not contain special characters"
     end
 
+    @tag :capture_log
+    test "renders an error page for a bigcommerce failure", %{conn: conn} do
+      expect(HTTPoisonMock, :post, 1, fn _, _, _ -> bad_bigcommerce_response() end)
+
+      conn =
+        post(conn, Routes.user_registration_path(conn, :create), %{
+          "user" => params_for(:user)
+        })
+
+      assert Repo.all(User) == []
+      refute Recognizer.Guardian.Plug.current_resource(conn)
+      response = html_response(conn, 500)
+      assert response =~ "Something has gone horribly wrong"
+    end
+
     test "rate limits account creation", %{conn: conn} do
+      stub(HTTPoisonMock, :post, fn _, _, _ -> ok_bigcommerce_response() end)
+
       Enum.each(0..20, fn _ ->
         post(conn, Routes.user_registration_path(conn, :create), %{
           "user" => params_for(:user)
