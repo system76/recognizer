@@ -33,7 +33,7 @@ defmodule RecognizerWeb.Authentication do
 
       {:ok, _user} ->
         if BigCommerce.enabled?() && get_session(conn, :bc) do
-          log_in_bc_user(conn, user)
+          log_in_bc_user(conn, user, params)
         else
           redirect_opts = login_redirect(conn)
 
@@ -45,11 +45,13 @@ defmodule RecognizerWeb.Authentication do
     end
   end
 
-  defp log_in_bc_user(conn, user) do
+  defp log_in_bc_user(conn, user, params) do
     jwt = BigCommerce.generate_login_jwt(user)
 
     conn
     |> clear_session()
+    |> Guardian.Plug.sign_in(user, params)
+    |> put_session(:bc, true)
     |> redirect(external: BigCommerce.login_redirect_uri(jwt))
   end
 

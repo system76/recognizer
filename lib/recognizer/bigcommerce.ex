@@ -40,6 +40,10 @@ defmodule Recognizer.BigCommerce do
     config(:login_uri) <> jwt
   end
 
+  def logout_redirect_uri() do
+    config(:logout_uri)
+  end
+
   defp jwt_claims(user) do
     %{
       "aud" => "BigCommerce",
