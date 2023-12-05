@@ -115,7 +115,7 @@ defmodule RecognizerWeb.Authentication do
   def logout_redirect(conn) do
     cond do
       get_session(conn, :bc) ->
-        BigCommerce.logout_redirect_uri()
+        [external: BigCommerce.logout_redirect_uri()]
 
       Map.has_key?(conn.query_params, "redirect_uri") ->
         [external: conn.query_params["redirect_uri"]]
