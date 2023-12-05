@@ -2,7 +2,6 @@ defmodule RecognizerWeb.Accounts.UserSessionController do
   use RecognizerWeb, :controller
 
   alias Recognizer.Accounts
-  alias Recognizer.BigCommerce
   alias RecognizerWeb.Authentication
 
   def new(conn, %{"bc" => "true"}) do
@@ -44,7 +43,6 @@ defmodule RecognizerWeb.Accounts.UserSessionController do
     conn
     |> put_session(:bc, true)
     |> Authentication.log_out_user()
-    |> redirect(external: BigCommerce.logout_redirect_uri())
   end
 
   def delete(conn, _params) do
