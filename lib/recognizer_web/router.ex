@@ -44,7 +44,7 @@ defmodule RecognizerWeb.Router do
   end
 
   scope "/", RecognizerWeb do
-    pipe_through [:bc, :browser]
+    pipe_through [:browser, :bc]
 
     get "/", HomepageController, :index
 
