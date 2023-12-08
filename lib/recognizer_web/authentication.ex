@@ -85,7 +85,7 @@ defmodule RecognizerWeb.Authentication do
   def login_redirect(conn, user) do
     cond do
       get_session(conn, :bc) ->
-        [external: user |> BigCommerce.generate_login_jwt() |> BigCommerce.login_redirect_uri()]
+        [external: BigCommerce.login_redirect_uri(user)]
 
       get_session(conn, :user_return_to) ->
         [to: get_session(conn, :user_return_to)]
