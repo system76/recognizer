@@ -29,8 +29,22 @@ defmodule RecognizerWeb.Router do
     plug Guardian.Plug.EnsureNotAuthenticated
   end
 
+  pipeline :bc do
+    plug :add_bc_to_session
+  end
+
+  defp add_bc_to_session(%{query_params: %{"bc" => "true"}} = conn, _opts) do
+    if Recognizer.BigCommerce.enabled?() do
+      put_session(conn, :bc, true)
+    end
+  end
+
+  defp add_bc_to_session(conn, _opts) do
+    conn
+  end
+
   scope "/", RecognizerWeb do
-    pipe_through :browser
+    pipe_through [:bc, :browser]
 
     get "/", HomepageController, :index
 
@@ -56,7 +70,7 @@ defmodule RecognizerWeb.Router do
   end
 
   scope "/", RecognizerWeb.OauthProvider, as: :oauth do
-    pipe_through [:browser, :auth, :user]
+    pipe_through [:browser, :bc, :auth, :user]
 
     get "/oauth/authorize", AuthorizeController, :new
     get "/oauth/authorize/:code", AuthorizeController, :show
@@ -65,7 +79,7 @@ defmodule RecognizerWeb.Router do
   end
 
   scope "/", RecognizerWeb.Accounts do
-    pipe_through [:browser, :auth, :guest]
+    pipe_through [:browser, :bc, :auth, :guest]
 
     get "/create-account", UserRegistrationController, :new
     post "/create-account", UserRegistrationController, :create
@@ -90,7 +104,7 @@ defmodule RecognizerWeb.Router do
   end
 
   scope "/", RecognizerWeb.Accounts.Prompt, as: :prompt do
-    pipe_through [:browser, :auth, :guest]
+    pipe_through [:browser, :bc, :auth, :guest]
 
     get "/prompt/update-password", PasswordChangeController, :edit
     put "/prompt/update-password", PasswordChangeController, :update
@@ -105,7 +119,7 @@ defmodule RecognizerWeb.Router do
   end
 
   scope "/", RecognizerWeb.Accounts do
-    pipe_through [:browser, :auth, :user]
+    pipe_through [:browser, :bc, :auth, :user]
 
     get "/settings", UserSettingsController, :edit
     put "/settings", UserSettingsController, :update

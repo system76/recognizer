@@ -8,7 +8,7 @@ defmodule RecognizerWeb.FallbackController do
   @impl Guardian.Plug.ErrorHandler
   def auth_error(conn, {:already_authenticated, _reason}, _) do
     conn
-    |> redirect(Authentication.login_redirect(conn))
+    |> redirect(Authentication.login_redirect(conn, Authentication.fetch_current_user(conn)))
     |> halt()
   end
 

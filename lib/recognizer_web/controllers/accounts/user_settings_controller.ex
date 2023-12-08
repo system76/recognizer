@@ -6,12 +6,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   plug :assign_email_and_password_changesets
 
-  def edit(conn, %{"bc" => "true"}) do
-    conn
-    |> put_session(:bc, true)
-    |> edit(%{})
-  end
-
   def edit(conn, _params) do
     cond do
       get_session(conn, :bc) ->
