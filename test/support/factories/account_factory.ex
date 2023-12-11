@@ -66,6 +66,14 @@ defmodule Recognizer.AccountFactory do
     Map.merge(user, attrs)
   end
 
+  def bc_customer_user_factory(attrs) do
+    %Accounts.BCCustomerUser{
+      user: build(:user),
+      bc_id: sequence(:bc_id, & &1)
+    }
+    |> merge_attributes(attrs)
+  end
+
   def add_two_factor(user, type \\ :text) do
     seed = Recognizer.Accounts.generate_new_two_factor_seed()
 
