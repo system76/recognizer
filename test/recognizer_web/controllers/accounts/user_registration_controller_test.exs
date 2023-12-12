@@ -34,6 +34,13 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
       conn = conn |> log_in_user(insert(:user)) |> get(Routes.user_registration_path(conn, :new))
       assert redirected_to(conn) == "/settings"
     end
+
+    test "redirects to bigcommerce if already logged in", %{conn: conn} do
+      %{user: user} = insert(:bc_customer_user)
+      conn = conn |> log_in_user(user) |> get(Routes.user_registration_path(conn, :new, %{"bc" => "true"}))
+
+      assert redirected_to(conn) =~ "http://localhost/login/"
+    end
   end
 
   describe "POST /users/register" do
