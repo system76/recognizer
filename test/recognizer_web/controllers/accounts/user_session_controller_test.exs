@@ -5,14 +5,15 @@ defmodule RecognizerWeb.Accounts.UserSessionControllerTest do
 
   setup do
     two_factor_user = :user |> build() |> add_two_factor() |> insert()
+    %{user: user} = insert(:bc_customer_user)
 
     %{
-      user: insert(:user),
+      user: user,
       two_factor_user: two_factor_user
     }
   end
 
-  describe "GET /users/log_in" do
+  describe "GET /users/login" do
     test "renders log in page", %{conn: conn} do
       conn = get(conn, Routes.user_session_path(conn, :new))
       response = html_response(conn, 200)
@@ -23,9 +24,14 @@ defmodule RecognizerWeb.Accounts.UserSessionControllerTest do
       conn = conn |> log_in_user(user) |> get(Routes.user_session_path(conn, :new))
       assert redirected_to(conn) == "/settings"
     end
+
+    test "redirects to bigcommerce if already logged in", %{conn: conn, user: user} do
+      conn = conn |> log_in_user(user) |> get(Routes.user_session_path(conn, :new, %{"bc" => "true"}))
+      assert redirected_to(conn) =~ "http://localhost/login/"
+    end
   end
 
-  describe "POST /users/log_in" do
+  describe "POST /users/login" do
     test "logs the user in", %{conn: conn, user: user} do
       conn =
         post(conn, Routes.user_session_path(conn, :create), %{
@@ -84,7 +90,7 @@ defmodule RecognizerWeb.Accounts.UserSessionControllerTest do
     end
   end
 
-  describe "DELETE /users/log_out" do
+  describe "DELETE /users/logout" do
     test "logs the user out", %{conn: conn, user: user} do
       conn = conn |> log_in_user(user) |> get(Routes.user_session_path(conn, :delete))
       assert redirected_to(conn) == "/"
@@ -105,6 +111,12 @@ defmodule RecognizerWeb.Accounts.UserSessionControllerTest do
         )
 
       assert redirected_to(conn) == "http://localhost:3000/logged-out"
+    end
+
+    test "redirects to bigcommerce logout", %{conn: conn} do
+      conn = get(conn, Routes.user_session_path(conn, :delete, %{"bc" => "true"}))
+
+      assert redirected_to(conn) == "http://localhost/logout"
     end
   end
 end

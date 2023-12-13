@@ -32,25 +32,13 @@ defmodule RecognizerWeb.Authentication do
         |> redirect(to: Routes.prompt_two_factor_path(conn, :new))
 
       {:ok, _user} ->
-        if BigCommerce.enabled?() && get_session(conn, :bc) do
-          log_in_bc_user(conn, user)
-        else
-          redirect_opts = login_redirect(conn)
+        redirect_opts = login_redirect(conn, user)
 
-          conn
-          |> clear_session()
-          |> Guardian.Plug.sign_in(user, params)
-          |> redirect(redirect_opts)
-        end
+        conn
+        |> clear_session()
+        |> Guardian.Plug.sign_in(user, params)
+        |> redirect(redirect_opts)
     end
-  end
-
-  defp log_in_bc_user(conn, user) do
-    jwt = BigCommerce.generate_login_jwt(user)
-
-    conn
-    |> clear_session()
-    |> redirect(external: BigCommerce.login_redirect_uri(jwt))
   end
 
   @doc """
@@ -94,8 +82,11 @@ defmodule RecognizerWeb.Authentication do
   @doc """
   The URL to redirect the user to after authentication is done.
   """
-  def login_redirect(conn) do
+  def login_redirect(conn, user) do
     cond do
+      get_session(conn, :bc) ->
+        [external: BigCommerce.login_redirect_uri(user)]
+
       get_session(conn, :user_return_to) ->
         [to: get_session(conn, :user_return_to)]
 
@@ -112,6 +103,9 @@ defmodule RecognizerWeb.Authentication do
   """
   def logout_redirect(conn) do
     cond do
+      get_session(conn, :bc) ->
+        [external: BigCommerce.logout_redirect_uri()]
+
       Map.has_key?(conn.query_params, "redirect_uri") ->
         [external: conn.query_params["redirect_uri"]]
 

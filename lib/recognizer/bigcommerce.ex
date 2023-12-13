@@ -26,7 +26,15 @@ defmodule Recognizer.BigCommerce do
     end
   end
 
-  def generate_login_jwt(user) do
+  def login_redirect_uri(user) do
+    config(:login_uri) <> generate_login_jwt(user)
+  end
+
+  def logout_redirect_uri() do
+    config(:logout_uri)
+  end
+
+  defp generate_login_jwt(user) do
     {:ok, token, _claims} =
       user
       |> Recognizer.Repo.preload(:bigcommerce_user)
@@ -34,10 +42,6 @@ defmodule Recognizer.BigCommerce do
       |> Token.generate_and_sign(jwt_signer())
 
     token
-  end
-
-  def login_redirect_uri(jwt) do
-    config(:login_uri) <> jwt
   end
 
   defp jwt_claims(user) do
