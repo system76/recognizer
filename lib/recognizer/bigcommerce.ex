@@ -27,8 +27,8 @@ defmodule Recognizer.BigCommerce do
   end
 
   def update_customer(user) do
-    case Client.update_customer(user) do
-      {:ok, _}->
+    case Client.update_customer(Repo.preload(user, :bigcommerce_user)) do
+      {:ok, _} ->
         {:ok, user}
 
       {:error, e} ->
