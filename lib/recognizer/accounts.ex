@@ -281,8 +281,10 @@ defmodule Recognizer.Accounts do
     if Map.has_key?(attrs, "newsletter"), do: Recognizer.Hal.update_newsletter(attrs)
     changeset = User.changeset(user, attrs)
 
-    with {:ok, updated_user} <- Repo.update(changeset) do
+    with {:ok, updated_user} <- Repo.update(changeset),
+         {:ok, _} <- Recognizer.BigCommerce.update_customer(updated_user) do
       Notification.deliver_user_updated_message(updated_user)
+
       {:ok, updated_user}
     end
   end

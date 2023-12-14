@@ -2,6 +2,7 @@ defmodule RecognizerWeb.Api.UserRegistrationControllerTest do
   use RecognizerWeb.ConnCase
 
   import Mox
+  import Recognizer.BigCommerceTestHelpers
 
   alias Recognizer.Accounts.BCCustomerUser
   alias Recognizer.Accounts.User
@@ -12,24 +13,13 @@ defmodule RecognizerWeb.Api.UserRegistrationControllerTest do
   setup :verify_on_exit!
   setup :register_and_log_in_admin
 
-  defp ok_bigcommerce_response() do
-    body = Jason.encode!(%{data: [%{id: 1001}]})
-
-    {:ok, %HTTPoison.Response{body: body, status_code: 200}}
-  end
-
-  defp limit_bigcommerce_response() do
-    headers = [{"x-rate-limit-time-reset-ms", "1"}]
-
-    {:ok, %HTTPoison.Response{status_code: 429, headers: headers}}
-  end
-
   describe "POST /api/create-account" do
     test "POST /api/create-account is limited to staff only", %{conn: conn} do
       user = %{
         "email" => "test@example.com",
         "first_name" => "Test",
-        "last_name" => "User"
+        "last_name" => "User",
+        "company" => ""
       }
 
       user_json = Jason.encode!([user])

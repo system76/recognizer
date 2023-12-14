@@ -1,7 +1,11 @@
 defmodule RecognizerWeb.Accounts.Prompt.TwoFactorControllerTest do
   use RecognizerWeb.ConnCase
 
+  import Mox
   import Recognizer.AccountFactory
+  import Recognizer.BigCommerceTestHelpers
+
+  setup :verify_on_exit!
 
   setup %{conn: conn} do
     user =
@@ -35,6 +39,8 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorControllerTest do
 
   describe "PUT /prompt/setup-two-factor" do
     test "updates the user notification settings", %{conn: conn} do
+      expect(HTTPoisonMock, :put, 1, fn _, _, _ -> ok_bigcommerce_response() end)
+
       new_conn =
         put(conn, Routes.prompt_two_factor_path(conn, :create), %{
           "user" => %{

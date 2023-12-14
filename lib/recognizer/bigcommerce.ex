@@ -26,6 +26,17 @@ defmodule Recognizer.BigCommerce do
     end
   end
 
+  def update_customer(user) do
+    case Client.update_customer(user) do
+      {:ok, _}->
+        {:ok, user}
+
+      {:error, e} ->
+        Logger.error("error creating bigcommerce customer: #{inspect(e)}")
+        {:error, e}
+    end
+  end
+
   def login_redirect_uri(user) do
     config(:login_uri) <> generate_login_jwt(user)
   end

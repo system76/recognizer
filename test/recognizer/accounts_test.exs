@@ -3,6 +3,7 @@ defmodule Recognizer.AccountsTest do
 
   import Mox
   import Recognizer.AccountFactory
+  import Recognizer.BigCommerceTestHelpers
 
   alias Recognizer.Accounts
   alias Recognizer.Accounts.BCCustomerUser
@@ -11,12 +12,6 @@ defmodule Recognizer.AccountsTest do
   @new_valid_password "NeWVal1DP!ssW0R$"
 
   setup :verify_on_exit!
-
-  defp ok_bigcommerce_response() do
-    body = Jason.encode!(%{data: [%{id: 1001}]})
-
-    {:ok, %HTTPoison.Response{body: body, status_code: 200}}
-  end
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do
@@ -193,6 +188,8 @@ defmodule Recognizer.AccountsTest do
     end
 
     test "updates the email", %{user: user} do
+      expect(HTTPoisonMock, :put, 1, fn _, _, _ -> ok_bigcommerce_response() end)
+
       assert {:ok, _user} = Accounts.update_user(user, %{email: "TEST@Example.com"})
       changed_user = Repo.get!(User, user.id)
       assert changed_user.email != user.email
@@ -200,6 +197,8 @@ defmodule Recognizer.AccountsTest do
     end
 
     test "clears company name for individual accounts", %{user: user} do
+      expect(HTTPoisonMock, :put, 1, fn _, _, _ -> ok_bigcommerce_response() end)
+
       assert {:ok, _user} = Accounts.update_user(user, %{type: :individual, company_name: "test"})
       changed_user = Repo.get!(User, user.id)
       assert changed_user.type == :individual
