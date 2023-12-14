@@ -8,9 +8,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   def edit(conn, _params) do
     cond do
-      get_session(conn, :bc) ->
-        render(conn, "edit.html")
-
       Application.get_env(:recognizer, :redirect_url) ->
         redirect(conn, external: Application.get_env(:recognizer, :redirect_url))
 
@@ -52,7 +49,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     case Accounts.update_user(user, user_params) do
       {:ok, _updated_user} ->
         conn
-        |> put_flash(:info, "Settings has been updated.")
+        |> put_flash(:info, "Your settings have been updated.")
         |> redirect(to: Routes.user_settings_path(conn, :edit))
 
       {:error, changeset} ->
