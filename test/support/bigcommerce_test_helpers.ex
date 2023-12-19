@@ -1,4 +1,6 @@
 defmodule Recognizer.BigCommerceTestHelpers do
+  @moduledoc false
+
   def ok_bigcommerce_response() do
     body = Jason.encode!(%{data: [%{id: 1001}]})
 
