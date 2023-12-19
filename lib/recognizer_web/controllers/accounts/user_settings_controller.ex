@@ -8,9 +8,9 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   def edit(conn, _params) do
     if Application.get_env(:recognizer, :redirect_url) do
-        redirect(conn, external: Application.get_env(:recognizer, :redirect_url))
+      redirect(conn, external: Application.get_env(:recognizer, :redirect_url))
     else
-        render(conn, "edit.html")
+      render(conn, "edit.html")
     end
   end
 
