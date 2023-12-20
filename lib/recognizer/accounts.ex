@@ -195,15 +195,6 @@ defmodule Recognizer.Accounts do
     |> maybe_send_newsletter(attrs)
   end
 
-  defp maybe_send_newsletter({:ok, _user} = response, %{"newsletter" => "true"} = attrs) do
-    Recognizer.Hal.update_newsletter(attrs)
-    response
-  end
-
-  defp maybe_send_newsletter(response, _attrs) do
-    response
-  end
-
   @doc """
   Registers a user from a third party service. This is different from above
   because it does not set a password, therefor only letting the user login with
@@ -227,6 +218,18 @@ defmodule Recognizer.Accounts do
     end
   end
 
+  def maybe_create_big_commerce_customer({:ok, user}) do
+    if BigCommerce.enabled?() do
+      BigCommerce.create_customer(user)
+    else
+      {:ok, user}
+    end
+  end
+
+  def maybe_create_big_commerce_customer(error) do
+    error
+  end
+
   defp maybe_notify_new_user({:ok, user}) do
     {:ok, _} = Notification.deliver_user_created_message(user)
     {:ok, user}
@@ -234,6 +237,15 @@ defmodule Recognizer.Accounts do
 
   defp maybe_notify_new_user(error) do
     error
+  end
+
+  defp maybe_send_newsletter({:ok, _user} = response, %{"newsletter" => "true"} = attrs) do
+    Recognizer.Hal.update_newsletter(attrs)
+    response
+  end
+
+  defp maybe_send_newsletter(response, _attrs) do
+    response
   end
 
   @doc """
@@ -282,10 +294,18 @@ defmodule Recognizer.Accounts do
     changeset = User.changeset(user, attrs)
 
     with {:ok, updated_user} <- Repo.update(changeset),
-         {:ok, _} <- Recognizer.BigCommerce.update_customer(updated_user) do
+         {:ok, _} <- maybe_update_big_commerce_customer(updated_user) do
       Notification.deliver_user_updated_message(updated_user)
 
       {:ok, updated_user}
+    end
+  end
+
+  defp maybe_update_big_commerce_customer(user) do
+    if BigCommerce.enabled?() do
+      Recognizer.BigCommerce.update_customer(user)
+    else
+      {:ok, user}
     end
   end
 
@@ -717,17 +737,5 @@ defmodule Recognizer.Accounts do
         where: c.user_id == ^user_id
 
     Repo.delete_all(user_codes)
-  end
-
-  def maybe_create_big_commerce_customer({:ok, user}) do
-    if BigCommerce.enabled?() do
-      BigCommerce.create_customer(user)
-    else
-      {:ok, user}
-    end
-  end
-
-  def maybe_create_big_commerce_customer(error) do
-    error
   end
 end
