@@ -3,24 +3,13 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
 
   import Mox
   import Recognizer.AccountFactory
+  import Recognizer.BigCommerceTestHelpers
 
   alias Recognizer.Accounts.BCCustomerUser
   alias Recognizer.Accounts.User
   alias Recognizer.Repo
 
   setup :verify_on_exit!
-
-  defp ok_bigcommerce_response() do
-    body = Jason.encode!(%{data: [%{id: 1001}]})
-
-    {:ok, %HTTPoison.Response{body: body, status_code: 200}}
-  end
-
-  defp bad_bigcommerce_response() do
-    body = Jason.encode!(%{errors: [%{failure: 1}]})
-
-    {:ok, %HTTPoison.Response{body: body, status_code: 400}}
-  end
 
   describe "GET /users/register" do
     test "renders registration page", %{conn: conn} do

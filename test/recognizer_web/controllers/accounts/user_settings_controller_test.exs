@@ -3,6 +3,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
 
   import Mox
   import Recognizer.AccountFactory
+  import Recognizer.BigCommerceTestHelpers
 
   alias Recognizer.Accounts
 
@@ -62,6 +63,8 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
     setup :verify_on_exit!
 
     test "updates the user email", %{conn: conn, user: user} do
+      expect(HTTPoisonMock, :put, 1, fn _, _, _ -> ok_bigcommerce_response() end)
+
       conn =
         put(conn, Routes.user_settings_path(conn, :update), %{
           "action" => "update",
@@ -69,7 +72,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         })
 
       assert redirected_to(conn) == Routes.user_settings_path(conn, :edit)
-      assert get_flash(conn, :info) =~ "Settings has been updated"
+      assert get_flash(conn, :info) =~ "Your settings have been updated"
       refute Accounts.get_user_by_email(user.email)
     end
 

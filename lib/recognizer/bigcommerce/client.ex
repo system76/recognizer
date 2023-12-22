@@ -5,6 +5,7 @@ defmodule Recognizer.BigCommerce.Client do
 
   require Logger
 
+  alias Recognizer.Accounts.BCCustomerUser
   alias Recognizer.Accounts.User
 
   alias HTTPoison.Response
@@ -27,12 +28,19 @@ defmodule Recognizer.BigCommerce.Client do
     end
   end
 
-  defp user_as_customer_params(%User{email: email, first_name: first_name, last_name: last_name}) do
-    {:ok, [%{"email" => email, "first_name" => first_name, "last_name" => last_name}]}
-  end
+  def update_customer(user) do
+    with {:ok, customer_params} <- user_as_customer_params(user),
+         {:ok, customer_json} <- Jason.encode(customer_params) do
+      put_customer(customer_json)
+    else
+      {:error, e} ->
+        Logger.error("cannot update customer with error: #{inspect(e)}")
+        {:error, e}
 
-  defp user_as_customer_params(_user) do
-    {:error, :invalid_user}
+      e ->
+        Logger.error("cannot update customer with error: #{inspect(e)}")
+        {:error, e}
+    end
   end
 
   defp post_customer(customer_json) do
@@ -52,12 +60,71 @@ defmodule Recognizer.BigCommerce.Client do
     end
   end
 
+  defp put_customer(customer_json) do
+    case http_client().put(customers_uri(), customer_json, default_headers()) do
+      {:ok, %Response{body: response, status_code: 200}} ->
+        {:ok, response}
+
+      {:ok, %Response{status_code: 429, headers: headers}} ->
+        sleep_for_rate_limit(headers)
+        put_customer(customer_json)
+
+      {:error, e} ->
+        {:error, e}
+
+      e ->
+        {:error, e}
+    end
+  end
+
   defp get_id(response) do
     case Jason.decode(response) do
       {:ok, %{"data" => [%{"id" => id}]}} -> {:ok, id}
       {:error, e} -> {:error, e}
       e -> {:error, e}
     end
+  end
+
+  defp user_as_customer_params(%User{
+         email: email,
+         first_name: first_name,
+         last_name: last_name,
+         company_name: company,
+         phone_number: phone_number,
+         bigcommerce_user: %BCCustomerUser{bc_id: bc_id}
+       }) do
+    {:ok,
+     [
+       %{
+         "id" => bc_id,
+         "email" => email,
+         "first_name" => first_name,
+         "last_name" => last_name,
+         "company" => company,
+         "phone" => phone_number
+       }
+     ]}
+  end
+
+  defp user_as_customer_params(%User{
+         email: email,
+         first_name: first_name,
+         last_name: last_name,
+         company_name: company
+       }) do
+    {:ok,
+     [
+       %{
+         "email" => email,
+         "first_name" => first_name,
+         "last_name" => last_name,
+         "company" => company
+       }
+     ]}
+  end
+
+  defp user_as_customer_params(_user) do
+    {:error, :invalid_user}
   end
 
   defp default_headers() do

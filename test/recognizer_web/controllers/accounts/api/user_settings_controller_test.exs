@@ -3,6 +3,7 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
 
   import Mox
   import Recognizer.AccountFactory
+  import Recognizer.BigCommerceTestHelpers
 
   describe "GET /api/settings" do
     test "two factor is reflected", %{conn: conn} do
@@ -36,6 +37,8 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
     setup :verify_on_exit!
 
     test "PUT /api/settings with `update` action", %{conn: conn, user: %{id: user_id}} do
+      expect(HTTPoisonMock, :put, 1, fn _, _, _ -> ok_bigcommerce_response() end)
+
       conn = put(conn, "/api/settings", %{"action" => "update", "user" => %{"first_name" => "Updated"}})
       assert %{"user" => %{"id" => ^user_id, "first_name" => "Updated"}} = json_response(conn, 200)
     end
