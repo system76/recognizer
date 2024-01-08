@@ -61,4 +61,4 @@ config :recognizer, Recognizer.BigCommerce,
   login_uri: "http://localhost/login/",
   logout_uri: "http://localhost/logout",
   http_client: HTTPoison,
-  enabled?: true
+  enabled?: false
