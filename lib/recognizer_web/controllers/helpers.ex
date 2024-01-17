@@ -8,7 +8,7 @@ defmodule RecognizerWeb.Controllers.Helpers do
   import Plug.Conn, only: [get_session: 2, assign: 3]
 
   def get_email_from_request(conn) do
-    conn.params["user"]["email"]
+    String.downcase(conn.params["user"]["email"] || "")
   end
 
   def get_user_id_from_request(conn) do
