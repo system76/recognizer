@@ -10,7 +10,12 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     if Application.get_env(:recognizer, :redirect_url) && !get_session(conn, :bc) do
       redirect(conn, external: Application.get_env(:recognizer, :redirect_url))
     else
-      render(conn, "edit.html")
+      conn
+      |> put_resp_header(
+        "Content-Security-Policy",
+        "default-src 'self'; frame-ancestors 'self' https://bigcommerce.com;"
+      )
+      |> render("edit.html")
     end
   end
 
