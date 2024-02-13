@@ -7,7 +7,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   plug :assign_email_and_password_changesets
 
   def edit(conn, _params) do
-    if Application.get_env(:recognizer, :redirect_url) do
+    if Application.get_env(:recognizer, :redirect_url) && !get_session(conn, :bc) do
       redirect(conn, external: Application.get_env(:recognizer, :redirect_url))
     else
       render(conn, "edit.html")
