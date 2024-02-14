@@ -11,6 +11,7 @@ defmodule RecognizerWeb.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers, @hsts_header
+    plug :allow_bc_frame
   end
 
   pipeline :api do
@@ -44,6 +45,15 @@ defmodule RecognizerWeb.Router do
   defp add_bc_to_session(conn, _opts) do
     conn
   end
+
+  defp allow_bc_frame(conn, _opts),
+    do:
+      conn
+      |> delete_resp_header("x-frame-options")
+      |> put_resp_header(
+        "Content-Security-Policy",
+        "default-src 'self'; frame-ancestors 'self' https://bigcommerce.com;"
+      )
 
   scope "/", RecognizerWeb do
     pipe_through [:browser, :bc]
