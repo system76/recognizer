@@ -52,7 +52,7 @@ defmodule RecognizerWeb.Router do
       |> delete_resp_header("x-frame-options")
       |> put_resp_header(
         "Content-Security-Policy",
-        "default-src 'self'; frame-ancestors 'self' https://bigcommerce.com;"
+        "default-src 'self'; frame-ancestors 'self' https://system76.mybigcommerce.com;"
       )
 
   scope "/", RecognizerWeb do
