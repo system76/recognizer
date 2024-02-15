@@ -3,6 +3,7 @@
 
   <div class="content has-text-centered">
     <p>Almost there! Check your email and click the link to activate your account.</p>
+    <p><%= @email %></p>
     <%= if @resend? do %>
     <p>We've sent you another copy of the verification email.</p>
     <% else %>
@@ -16,7 +17,7 @@
     <% end %>
   </div>
   <div class="content has-text-centered">
-    <p>Please allow a few minutes for the verification email to arrive. If you do not receive one, please let us know at
+    <p>Please allow a few minutes for a verification email to arrive. If you do not receive one, please let us know at
       <a href="mailto:registration@system76.com?subject=Account Verification">registration@system76.com</a>.
     </p>
   </div>
