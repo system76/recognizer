@@ -17,7 +17,7 @@
     <% end %>
   </div>
   <div class="content has-text-centered">
-    <p>Please allow a few minutes for the verification email to arrive. If you do not receive one, please let us know at
+    <p>Please allow a few minutes for a verification email to arrive. If you do not receive one, please let us know at
       <a href="mailto:registration@system76.com?subject=Account Verification">registration@system76.com</a>.
     </p>
   </div>
