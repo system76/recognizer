@@ -2,7 +2,8 @@ import Config
 
 config :recognizer,
   redis_host: System.get_env("REDIS_HOST", "localhost"),
-  hal_url: "https://api-v2.genesis76.com"
+  hal_url: "https://api-v2.genesis76.com",
+  hal_token: "token"
 
 config :argon2_elixir,
   t_cost: 1,

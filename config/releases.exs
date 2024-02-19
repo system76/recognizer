@@ -7,7 +7,8 @@ recognizer_config =
 
 config :recognizer,
   redirect_url: recognizer_config["REDIRECT_URL"],
-  hal_url: recognizer_config["HAL_URL"]
+  hal_url: recognizer_config["HAL_URL"],
+  hal_token: recognizer_config["HAL_TOKEN"]
 
 config :recognizer, RecognizerWeb.Endpoint,
   url: [host: System.get_env("DOMAIN")],
