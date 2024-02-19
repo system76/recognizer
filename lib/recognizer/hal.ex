@@ -7,7 +7,7 @@ defmodule Recognizer.Hal do
     req =
       "/accounts/newsletter/interests"
       |> build_url()
-      |> HTTPoison.get!(authentication_headers())
+      |> HTTPoison.get!(authorization_headers())
 
     interests = Jason.decode!(req.body)["interests"]
 
@@ -19,7 +19,7 @@ defmodule Recognizer.Hal do
     req =
       "/accounts/newsletter?email_address=#{user["email"]}"
       |> build_url()
-      |> HTTPoison.get!(authentication_headers())
+      |> HTTPoison.get!(authorization_headers())
 
     status = Jason.decode!(req.body)["status"]
 
@@ -40,7 +40,7 @@ defmodule Recognizer.Hal do
 
       "/accounts/newsletter"
       |> build_url()
-      |> HTTPoison.post!(body, [{"content-type", "application/json"}] ++ authentication_headers())
+      |> HTTPoison.post!(body, [{"content-type", "application/json"}] ++ authorization_headers())
     end
   end
 
@@ -49,7 +49,7 @@ defmodule Recognizer.Hal do
     Path.join([base_url, path])
   end
 
-  defp authentication_headers() do
-    [{"authentication", "Recognizer #{Application.get_env(:recognizer, :hal_token)}"}]
+  defp authorization_headers() do
+    [{"authorization", "Recognizer #{Application.get_env(:recognizer, :hal_token)}"}]
   end
 end
