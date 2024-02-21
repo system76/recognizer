@@ -90,6 +90,7 @@ defmodule Recognizer.MixProject do
       "ecto.seed": ["run priv/repo/seeds.exs"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "ecto.seed"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
+      "ecto.legacy_migrate": ["ecto.migrate --migrations-path priv/repo/_legacy_migrations"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
   end
