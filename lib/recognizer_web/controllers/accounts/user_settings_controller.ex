@@ -16,12 +16,22 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   def two_factor(conn, _params) do
     user = Authentication.fetch_current_user(conn)
-    {:ok, %{two_factor_seed: seed}} = Accounts.get_new_two_factor_settings(user)
 
-    render(conn, "confirm_two_factor.html",
-      barcode: Authentication.generate_totp_barcode(user, seed),
-      totp_app_url: Authentication.get_totp_app_url(user, seed)
-    )
+    case Accounts.get_new_two_factor_settings(user) do
+      {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: "app"}}} ->
+        render(conn, "confirm_two_factor.html",
+          barcode: Authentication.generate_totp_barcode(user, seed),
+          totp_app_url: Authentication.get_totp_app_url(user, seed)
+        )
+
+      {:ok, settings} ->
+        :ok = Accounts.send_new_two_factor_notification(user, settings)
+
+        conn
+        |> put_session(:two_factor_user_id, user.id)
+        |> put_session(:two_factor_sent, false)
+        |> redirect(to: Routes.user_two_factor_path(conn, :new))
+    end
   end
 
   def two_factor_confirm(conn, params) do
