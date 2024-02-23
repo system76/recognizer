@@ -17,20 +17,21 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   def two_factor(conn, _params) do
     user = Authentication.fetch_current_user(conn)
 
+    # TODO params instead of cache
     case Accounts.get_new_two_factor_settings(user) do
       {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: "app"}}} ->
+        IO.puts("rendering app 2fa confirmation...")
+
         render(conn, "confirm_two_factor.html",
           barcode: Authentication.generate_totp_barcode(user, seed),
           totp_app_url: Authentication.get_totp_app_url(user, seed)
         )
 
-      {:ok, settings} ->
-        :ok = Accounts.send_new_two_factor_notification(user, settings)
+      {:ok, _} ->
+        IO.puts("sending external 2fa notification...")
 
-        conn
-        |> put_session(:two_factor_user_id, user.id)
-        |> put_session(:two_factor_sent, false)
-        |> redirect(to: Routes.user_two_factor_path(conn, :new))
+        # TODO not this path, a new page..
+        redirect(conn, to: Routes.user_two_factor_path(conn, :new))
     end
   end
 
