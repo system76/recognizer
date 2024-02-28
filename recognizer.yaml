@@ -1,0 +1,48 @@
+##
+# Resources for testing and running locally - intended for use with Podman.
+##
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: recognizer
+  name: recognizer
+spec:
+  containers:
+  - name: redis
+    image: docker.io/library/redis:alpine
+    ports:
+    - containerPort: 6379
+      hostPort: 6379
+    volumeMounts:
+    - mountPath: /data
+      name: redis-pvc
+
+  - name: mysql
+    image: docker.io/library/mysql:5.7.24
+    args:
+    - --character-set-server=utf8
+    - --collation-server=utf8_general_ci
+    env:
+    - name: MYSQL_DATABASE
+      value: "recognizer_test"
+    - name: MYSQL_ROOT_PASSWORD
+      value: "recognizer"
+    ports:
+    - containerPort: 3306
+      hostPort: 3306
+    volumeMounts:
+    - mountPath: /var/lib/mysql
+      name: mysql-pvc
+
+  restartPolicy: Never
+
+  volumes:
+  - name: redis-pvc
+    persistentVolumeClaim:
+      claimName: recognizer-redis
+
+  - name: mysql-pvc
+    persistentVolumeClaim:
+      claimName: recognizer-mysql
