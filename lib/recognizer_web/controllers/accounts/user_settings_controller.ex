@@ -89,7 +89,20 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
     Accounts.generate_and_cache_new_two_factor_settings(user, preference)
 
-    redirect(conn, to: Routes.user_settings_path(conn, :two_factor))
+    redirect(conn, to: Routes.user_settings_path(conn, :review))
+  end
+
+  def review(conn, _params) do
+    user = Authentication.fetch_current_user(conn)
+    {:ok, %{recovery_codes: recovery_codes}} = Accounts.get_new_two_factor_settings(user)
+
+    recovery_block =
+      recovery_codes
+      |> Enum.map(& &1.code)
+      |> Enum.map(& &1 <> "\n")
+
+    conn
+    |> render("recovery_codes.html", recovery_block: recovery_block)
   end
 
   defp assign_email_and_password_changesets(conn, _opts) do
