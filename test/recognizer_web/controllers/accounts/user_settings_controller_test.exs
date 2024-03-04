@@ -112,4 +112,18 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       assert response =~ "must not contain special characters"
     end
   end
+
+  describe "GET /users/settings/two-factor/review (backup codes)" do
+    test "gets review page after 2fa setup", %{conn: conn, user: user} do
+      Recognizer.Accounts.generate_and_cache_new_two_factor_settings(user, "app")
+      conn = get(conn, Routes.user_settings_path(conn, :review))
+      _response = html_response(conn, 200)
+    end
+
+    test "review 2fa without setup is ?", %{conn: conn} do
+      conn = get(conn, Routes.user_settings_path(conn, :review))
+      _response = html_response(conn, 302)
+      assert get_flash(conn, :error) == "Two factor setup not yet initiated"
+    end
+  end
 end

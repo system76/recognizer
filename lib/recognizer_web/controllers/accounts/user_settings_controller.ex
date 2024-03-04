@@ -94,15 +94,22 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   def review(conn, _params) do
     user = Authentication.fetch_current_user(conn)
-    {:ok, %{recovery_codes: recovery_codes}} = Accounts.get_new_two_factor_settings(user)
 
-    recovery_block =
-      recovery_codes
-      |> Enum.map(& &1.code)
-      |> Enum.map(& &1 <> "\n")
+    case Accounts.get_new_two_factor_settings(user) do
+      {:ok, %{recovery_codes: recovery_codes}} ->
+        recovery_block =
+          recovery_codes
+          |> Enum.map(& &1.code)
+          |> Enum.map(&(&1 <> "\n"))
 
-    conn
-    |> render("recovery_codes.html", recovery_block: recovery_block)
+        conn
+        |> render("recovery_codes.html", recovery_block: recovery_block)
+
+      _ ->
+        conn
+        |> put_flash(:error, "Two factor setup not yet initiated")
+        |> redirect(to: Routes.user_settings_path(conn, :edit))
+    end
   end
 
   defp assign_email_and_password_changesets(conn, _opts) do
