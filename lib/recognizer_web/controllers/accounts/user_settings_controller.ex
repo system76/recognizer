@@ -107,7 +107,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
       _ ->
         conn
-        |> put_flash(:error, "Two factor setup not yet initiated")
+        |> put_flash(:error, "Two factor setup expired or not yet initiated")
         |> redirect(to: Routes.user_settings_path(conn, :edit))
     end
   end

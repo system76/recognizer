@@ -373,6 +373,19 @@ defmodule Recognizer.AccountsTest do
     end
   end
 
+  describe "two-factor" do
+    setup do
+      %{user: insert(:user)}
+    end
+
+    test "settings cache lifecycle", %{user: user} do
+      Accounts.generate_and_cache_new_two_factor_settings(user, "app")
+      assert {:ok, %{}} = Accounts.get_new_two_factor_settings(user)
+      Accounts.clear_two_factor_settings(user)
+      assert {:ok, nil} = Accounts.get_new_two_factor_settings(user)
+    end
+  end
+
   describe "inspect/2" do
     test "does not include password" do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""

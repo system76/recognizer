@@ -120,7 +120,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       _response = html_response(conn, 200)
     end
 
-    test "review 2fa without setup is ?", %{conn: conn} do
+    test "review 2fa without cached codes is redirected with flash error", %{conn: conn} do
       conn = get(conn, Routes.user_settings_path(conn, :review))
       _response = html_response(conn, 302)
       assert get_flash(conn, :error) == "Two factor setup not yet initiated"
