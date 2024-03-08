@@ -64,5 +64,4 @@ config :recognizer, Recognizer.BigCommerce,
   http_client: HTTPoison,
   enabled?: false
 
-config :recognizer, Recognizer.Accounts,
-  cache_expiry: 60 * 60 * 24 * 7
+config :recognizer, Recognizer.Accounts, cache_expiry: 60 * 60 * 24 * 7

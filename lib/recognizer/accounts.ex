@@ -610,13 +610,14 @@ defmodule Recognizer.Accounts do
       two_factor_enabled: true
     }
 
-    :ok = Redix.noreply_command(:redix, [
-      "SET",
-      "two_factor_settings:#{user.id}",
-      Jason.encode!(attrs),
-      "EX",
-      config(:cache_expiry)
-    ])
+    :ok =
+      Redix.noreply_command(:redix, [
+        "SET",
+        "two_factor_settings:#{user.id}",
+        Jason.encode!(attrs),
+        "EX",
+        config(:cache_expiry)
+      ])
 
     attrs
   end
@@ -671,8 +672,10 @@ defmodule Recognizer.Accounts do
     end
   end
 
-  def clear_two_factor_settings(user), do:
-    {:ok, _} = Redix.command(:redix, ["DEL", "two_factor_settings:#{user.id}"])
+  @doc """
+  Deletes cached settings.
+  """
+  def clear_two_factor_settings(user), do: {:ok, _} = Redix.command(:redix, ["DEL", "two_factor_settings:#{user.id}"])
 
   def load_notification_preferences(user) do
     Repo.preload(user, :notification_preference)
@@ -748,7 +751,5 @@ defmodule Recognizer.Accounts do
     Repo.delete_all(user_codes)
   end
 
-  defp config(key), do:
-    Application.get_env(:recognizer, __MODULE__)[key]
-
+  defp config(key), do: Application.get_env(:recognizer, __MODULE__)[key]
 end
