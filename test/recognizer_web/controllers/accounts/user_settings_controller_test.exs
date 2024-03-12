@@ -6,6 +6,10 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
   import Recognizer.BigCommerceTestHelpers
 
   alias Recognizer.Accounts
+  alias Recognizer.Accounts.User
+  alias Recognizer.Repo
+  alias RecognizerWeb.Authentication
+
 
   setup :register_and_log_in_user
 
@@ -113,9 +117,11 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
     end
   end
 
+
+
   describe "GET /users/settings/two-factor/review (backup codes)" do
     test "gets review page after 2fa setup", %{conn: conn, user: user} do
-      Recognizer.Accounts.generate_and_cache_new_two_factor_settings(user, "app")
+      Accounts.generate_and_cache_new_two_factor_settings(user, "app")
       conn = get(conn, Routes.user_settings_path(conn, :review))
       _response = html_response(conn, 200)
     end
@@ -123,7 +129,47 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
     test "review 2fa without cached codes is redirected with flash error", %{conn: conn} do
       conn = get(conn, Routes.user_settings_path(conn, :review))
       _response = html_response(conn, 302)
-      assert get_flash(conn, :error) == "Two factor setup not yet initiated"
+      assert get_flash(conn, :error) == "Two factor setup expired or not yet initiated"
     end
   end
+
+  describe "GET /users/settings/two-factor (confirmation)" do
+    test "/two-factor page is rendered with settings", %{conn: conn, user: user} do
+      Accounts.generate_and_cache_new_two_factor_settings(user, "app")
+      conn = get(conn, Routes.user_settings_path(conn, :two_factor))
+      assert html_response(conn, 200) =~ "Configure App"
+    end
+
+    test "/two-factor/confirm saves and clears", %{conn: conn, user: user} do
+      settings = Accounts.generate_and_cache_new_two_factor_settings(user, "app")
+
+      token = Authentication.generate_token(settings)
+      params = %{"two_factor_code" => token}
+
+      conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
+
+      assert redirected_to(conn) =~ "/settings"
+      assert get_flash(conn, :info) =~ "Two factor code verified"
+
+      %{recovery_codes: recovery_codes} =
+        User
+        |> Repo.get(user.id)
+        |> Repo.preload(:recovery_codes)
+
+      refute Enum.empty?(recovery_codes)
+
+      assert {:ok, nil} = Accounts.get_new_two_factor_settings(user)
+    end
+
+    test "/two-factor/confirm redirects without cached settings", %{conn: conn, user: user} do
+      settings = Accounts.generate_and_cache_new_two_factor_settings(user, "app")
+      token = Authentication.generate_token(settings)
+      Accounts.clear_two_factor_settings(user)
+      params = %{"two_factor_code" => token}
+      conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
+      assert redirected_to(conn) =~ "/two-factor"
+      assert get_flash(conn, :error) =~ "Two factor code is invalid"
+    end
+  end
+
 end

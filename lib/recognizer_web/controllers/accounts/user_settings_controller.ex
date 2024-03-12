@@ -30,14 +30,16 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
     case Accounts.confirm_and_save_two_factor_settings(two_factor_code, user) do
       {:ok, _updated_user} ->
+        Accounts.clear_two_factor_settings(user)
+
         conn
-        |> put_flash(:info, "Two factor code verified.")
+        |> put_flash(:info, "Two factor code verified")
         |> redirect(to: Routes.user_settings_path(conn, :edit))
 
       _ ->
         conn
-        |> put_flash(:error, "Two factor code is invalid.")
-        |> redirect(to: Routes.user_settings_path(conn, :confirm_two_factor))
+        |> put_flash(:error, "Two factor code is invalid")
+        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
     end
   end
 
