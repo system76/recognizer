@@ -102,7 +102,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
         recovery_block =
           recovery_codes
           |> Enum.map(& &1.code)
-          |> Enum.map(&(&1 <> "\n"))
+          |> Enum.join("\n")
 
         conn
         |> render("recovery_codes.html", recovery_block: recovery_block)
