@@ -10,7 +10,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
   alias Recognizer.Repo
   alias RecognizerWeb.Authentication
 
-
   setup :register_and_log_in_user
 
   describe "GET /users/settings" do
@@ -117,8 +116,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
     end
   end
 
-
-
   describe "GET /users/settings/two-factor/review (backup codes)" do
     test "gets review page after 2fa setup", %{conn: conn, user: user} do
       Accounts.generate_and_cache_new_two_factor_settings(user, "app")
@@ -171,5 +168,4 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       assert get_flash(conn, :error) =~ "Two factor code is invalid"
     end
   end
-
 end

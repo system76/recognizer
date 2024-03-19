@@ -1,4 +1,5 @@
 import '../../deps/phoenix_html/priv/static/phoenix_html.js'
+import './util.js'
 
 import '../styles/main.scss'
 
@@ -21,6 +22,15 @@ documentReady(function () {
   .forEach((field) => {
     field.addEventListener('change', (e) => {
       toggleDisplay('div.company_name')
+    })
+  })
+
+  document
+  .querySelectorAll('#copy-text')
+  .forEach((field) => {
+    field.addEventListener('click', (event) => {
+      const text = event.target.dataset.recoveryBlock
+      copyClipboard(text)
     })
   })
 })
