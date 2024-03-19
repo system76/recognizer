@@ -117,15 +117,6 @@
       <%= error_tag f, :phone_number %>
     </div>
 
-    <div class="field mt-5">
-      <div class="control">
-        <%= label class: "label" do %>
-          <%= checkbox f, :newsletter %>
-          Subscribe to our newsletter
-        <% end %>
-      </div>
-    </div>
-
     <div class="buttons is-right mt-5">
       <div class="control">
         <%= submit "Change Profile", class: "button is-secondary" %>
