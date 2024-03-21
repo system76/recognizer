@@ -9,7 +9,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user:registration", @one_minute, 6},
+         rate_limit: {"user:registration", @one_minute, 2},
          by: :ip
        ]
        when action in [:create]
