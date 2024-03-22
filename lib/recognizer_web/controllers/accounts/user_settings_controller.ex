@@ -13,28 +13,30 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       render(conn, "edit.html")
     end
   end
-
-  def two_factor(conn, _params) do
+  @doc """
+  Generate codes for a new two factor setup
+  """
+  def two_factor_init(conn, _params) do
     user = Authentication.fetch_current_user(conn)
+    {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}} = settings} = Accounts.get_new_two_factor_settings(user)
 
-    # TODO params instead of cache
-    case Accounts.get_new_two_factor_settings(user) do
-      {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: "app"}}} ->
-        IO.puts("rendering app 2fa confirmation...")
-
-        render(conn, "confirm_two_factor.html",
-          barcode: Authentication.generate_totp_barcode(user, seed),
-          totp_app_url: Authentication.get_totp_app_url(user, seed)
-        )
-
-      {:ok, _} ->
-        IO.puts("sending external 2fa notification...")
-
-        # TODO not this path, a new page..
-        redirect(conn, to: Routes.user_two_factor_path(conn, :new))
+    if method == "text" || method == "voice" do
+      # TODO error without user phone
+      # TODO rate limit, retry button
+      :ok = Accounts.send_new_two_factor_notification(user, settings)
+      render(conn, "confirm_two_factor_external.html")
+    else
+      render(conn, "confirm_two_factor.html",
+        barcode: Authentication.generate_totp_barcode(user, seed),
+        totp_app_url: Authentication.get_totp_app_url(user, seed)
+      )
     end
+
   end
 
+  @doc """
+  Confirming and saving a new two factor setup with user-provided code
+  """
   def two_factor_confirm(conn, params) do
     two_factor_code = Map.get(params, "two_factor_code", "")
     user = Authentication.fetch_current_user(conn)
@@ -96,6 +98,9 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
+  @doc """
+  Form submission to begin two factor setup
+  """
   def update(conn, %{"action" => "update_two_factor", "user" => user_params}) do
     user = Authentication.fetch_current_user(conn)
     preference = get_in(user_params, ["notification_preference", "two_factor"])

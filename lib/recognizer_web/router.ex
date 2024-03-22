@@ -125,7 +125,7 @@ defmodule RecognizerWeb.Router do
 
     get "/settings", UserSettingsController, :edit
     put "/settings", UserSettingsController, :update
-    get "/settings/two-factor", UserSettingsController, :two_factor
+    get "/settings/two-factor", UserSettingsController, :two_factor_init
     post "/settings/two-factor", UserSettingsController, :two_factor_confirm
     get "/settings/two-factor/review", UserSettingsController, :review
   end
