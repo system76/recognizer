@@ -4,7 +4,16 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   alias Recognizer.Accounts
   alias RecognizerWeb.Authentication
 
+  @one_minute 60_000
+
   plug :assign_email_and_password_changesets
+
+  plug Hammer.Plug,
+       [
+         rate_limit: {"user_settings:two_factor", @one_minute, 2},
+         by: {:conn, &get_user_id_from_request/1}
+       ]
+       when action in [:two_factor_init]
 
   def edit(conn, _params) do
     if Application.get_env(:recognizer, :redirect_url) && !get_session(conn, :bc) do
@@ -13,6 +22,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       render(conn, "edit.html")
     end
   end
+
   @doc """
   Generate codes for a new two factor setup
   """
@@ -22,7 +32,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
     if method == "text" || method == "voice" do
       # TODO error without user phone
-      # TODO rate limit, retry button
+      # TODO better rate limit error
       :ok = Accounts.send_new_two_factor_notification(user, settings)
       render(conn, "confirm_two_factor_external.html")
     else
