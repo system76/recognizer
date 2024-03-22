@@ -11,7 +11,8 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   plug Hammer.Plug,
        [
          rate_limit: {"user_settings:two_factor", @one_minute, 2},
-         by: {:conn, &get_user_id_from_request/1}
+         by: {:conn, &get_user_id_from_request/1},
+         on_deny: &__MODULE__.two_factor_rate_limited/2
        ]
        when action in [:two_factor_init]
 
@@ -28,11 +29,12 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   """
   def two_factor_init(conn, _params) do
     user = Authentication.fetch_current_user(conn)
-    {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}} = settings} = Accounts.get_new_two_factor_settings(user)
+
+    {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}} = settings} =
+      Accounts.get_new_two_factor_settings(user)
 
     if method == "text" || method == "voice" do
       # TODO error without user phone
-      # TODO better rate limit error
       :ok = Accounts.send_new_two_factor_notification(user, settings)
       render(conn, "confirm_two_factor_external.html")
     else
@@ -41,7 +43,16 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
         totp_app_url: Authentication.get_totp_app_url(user, seed)
       )
     end
+  end
 
+  @doc """
+  Graceful error for 2fa retry rate limits
+  """
+  def two_factor_rate_limited(conn, _params) do
+    conn
+    |> put_flash(:error, "Too many requests, please wait and try again")
+    |> render( "confirm_two_factor_external.html")
+    |> halt()
   end
 
   @doc """
