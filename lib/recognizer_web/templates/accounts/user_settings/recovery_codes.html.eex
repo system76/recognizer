@@ -20,7 +20,7 @@
 
     <div class="buttons is-right mt-5">
         <div class="control">
-            <%= link "Copy and Continue", to: Routes.user_settings_path(@conn, :two_factor), class: "button is-secondary", id: "copy-text", data: [recovery_block: @recovery_block] %>
+            <%= link "Copy and Continue", to: Routes.user_settings_path(@conn, :two_factor_init), class: "button is-secondary", id: "copy-text", data: [recovery_block: @recovery_block] %>
         </div>
     </div>
 
