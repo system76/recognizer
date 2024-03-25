@@ -1,11 +1,6 @@
 <div class="box">
     <h2 class="title is-2 mb-5 has-text-centered-mobile">Confirm Two Factor Authentication</h2>
 
-    <div class="content">
-        <p>If you did not receive a verification code, or it has expired, you can retry:</p>
-        <%= link "Send again", to: Routes.user_settings_path(@conn, :two_factor_init), class: "button is-secondary"%>
-    </div>
-
     <div class="content mt-5">
         <p>Enter the provided 6-digit code:</p>
     </div>
@@ -23,5 +18,13 @@
         <%= submit "Verify Code", class: "button is-secondary" %>
         <a href="/settings" class="button">Cancel</a>
     </div>
+
+    <div class="content">
+        <p>If you did not receive a verification code, or it has expired:</p>
+        <div class="buttons is-right">
+            <%= link "Send another", to: Routes.user_settings_path(@conn, :two_factor_init), class: "button is-warning is-right"%>
+        </div>
+    </div>
+
     <% end %>
 </div>
