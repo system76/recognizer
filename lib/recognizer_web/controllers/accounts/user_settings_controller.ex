@@ -35,7 +35,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       Accounts.get_new_two_factor_settings(user)
 
     if method == "text" || method == "voice" do
-      # TODO error without user phone (redirect here with flash error, or stop at settings update)
       :ok = Accounts.send_new_two_factor_notification(user, settings)
       render(conn, "confirm_two_factor_external.html")
     else
@@ -93,6 +92,9 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
+  @doc """
+  Form submission for settings applied
+  """
   def update(conn, %{"action" => "update", "user" => user_params}) do
     user = Authentication.fetch_current_user(conn)
 
@@ -125,6 +127,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
+  # disable 2fa
   def update(conn, %{"action" => "update_two_factor", "user" => %{"two_factor_enabled" => "0"}}) do
     user = Authentication.fetch_current_user(conn)
 
@@ -135,18 +138,27 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
-  @doc """
-  Form submission to begin two factor setup
-  """
-  def update(conn, %{"action" => "update_two_factor", "user" => user_params}) do
-    user = Authentication.fetch_current_user(conn)
-    preference = get_in(user_params, ["notification_preference", "two_factor"])
+  # enable 2fa
+  def update(conn, %{
+        "action" => "update_two_factor",
+        "user" => %{"notification_preference" => %{"two_factor" => preference}}
+      }) do
+    %{phone_number: phone_number} = user = Authentication.fetch_current_user(conn)
 
-    Accounts.generate_and_cache_new_two_factor_settings(user, preference)
-
-    redirect(conn, to: Routes.user_settings_path(conn, :review))
+    # phone number required for text/voice
+    if (preference == "text" || preference == "voice") && phone_number == nil do
+      conn
+      |> put_flash(:error, "Phone number required for text and voice two-factor methods")
+      |> redirect(to: Routes.user_settings_path(conn, :edit))
+    else
+      Accounts.generate_and_cache_new_two_factor_settings(user, preference)
+      redirect(conn, to: Routes.user_settings_path(conn, :review))
+    end
   end
 
+  @doc """
+  Review recovery codes for copying.
+  """
   def review(conn, _params) do
     user = Authentication.fetch_current_user(conn)
 

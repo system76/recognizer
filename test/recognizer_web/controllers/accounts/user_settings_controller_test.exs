@@ -114,10 +114,35 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       assert response =~ "Change Profile</h2>"
       assert response =~ "must not contain special characters"
     end
-  end
 
-  # todo test "requires account phone number for text"
-  # TODO another for app bypass
+    test "update two-factor redirects for text method without phone number", %{conn: conn, user: user} do
+      stub(HTTPoisonMock, :put, fn _, _, _ -> ok_bigcommerce_response() end)
+      Accounts.update_user(user, %{phone_number: nil})
+
+      conn =
+        put(conn, Routes.user_settings_path(conn, :update), %{
+          "action" => "update_two_factor",
+          "user" => %{"notification_preference" => %{"two_factor" => "text"}}
+        })
+
+      assert redirected_to(conn) =~ "/settings"
+      assert get_flash(conn, :error) =~ "Phone number required"
+    end
+
+    test "update two-factor allows app setup without a phone number", %{conn: conn, user: user} do
+      stub(HTTPoisonMock, :put, fn _, _, _ -> ok_bigcommerce_response() end)
+      Accounts.update_user(user, %{phone_number: nil})
+
+      conn =
+        put(conn, Routes.user_settings_path(conn, :edit), %{
+          "action" => "update_two_factor",
+          "user" => %{"notification_preference" => %{"two_factor" => "app"}}
+        })
+
+      assert redirected_to(conn) =~ "/settings/two-factor/review"
+      refute get_flash(conn, :error)
+    end
+  end
 
   describe "GET /users/settings/two-factor/review (backup codes)" do
     test "gets review page after 2fa setup", %{conn: conn, user: user} do
