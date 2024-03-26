@@ -14,7 +14,7 @@
 </div>
 
 <div class="box">
-  <h2 class="title is-2 mb-5 has-text-centered-mobile">Change Profile</h2>
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Update Profile</h2>
 
   <%= form_for @changeset, Routes.user_settings_path(@conn, :update), fn f -> %>
     <%= hidden_input f, :action, name: "action", value: "update" %>
@@ -128,17 +128,27 @@
 
     <div class="buttons is-right mt-5">
       <div class="control">
-        <%= submit "Change Profile", class: "button is-secondary" %>
+        <%= submit "Update Profile", class: "button is-secondary" %>
       </div>
     </div>
   <% end %>
 </div>
 
 <div class="box">
-  <h2 class="title is-2 mb-5 has-text-centered-mobile">Change Password</h2>
+  <h2 class="title is-2 mb-5 has-text-centered-mobile">Update Password</h2>
 
   <%= form_for @password_changeset, Routes.user_settings_path(@conn, :update), fn f -> %>
     <%= hidden_input f, :action, name: "action", value: "update_password" %>
+
+    <div class="field">
+      <%= label f, :current_password, class: "label" %>
+
+      <div class="control">
+        <%= password_input f, :current_password, class: input_classes(f, :password), required: true, name: "current_password" %>
+      </div>
+
+      <%= error_tag f, :current_password %>
+    </div>
 
     <div class="field">
       <%= label f, :password, "New Password", class: "label" %>
@@ -160,19 +170,9 @@
       <%= error_tag f, :password_confirmation %>
     </div>
 
-    <div class="field">
-      <%= label f, :current_password, class: "label" %>
-
-      <div class="control">
-        <%= password_input f, :current_password, class: input_classes(f, :password), required: true, name: "current_password" %>
-      </div>
-
-      <%= error_tag f, :current_password %>
-    </div>
-
     <div class="buttons is-right mt-5">
       <div class="control">
-        <%= submit "Change Password", class: "button is-secondary" %>
+        <%= submit "Update Password", class: "button is-secondary" %>
       </div>
     </div>
   <% end %>
