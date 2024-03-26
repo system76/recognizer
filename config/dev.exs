@@ -63,3 +63,5 @@ config :recognizer, Recognizer.BigCommerce,
   logout_uri: "http://localhost/logout",
   http_client: HTTPoison,
   enabled?: false
+
+config :recognizer, Recognizer.Accounts, cache_expiry: 60 * 60 * 24 * 7

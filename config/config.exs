@@ -95,4 +95,6 @@ config :spandex_ecto, SpandexEcto.EctoLogger,
 config :spandex_phoenix, tracer: Recognizer.Tracer
 config :spandex, :decorators, tracer: Recognizer.Tracer
 
+config :recognizer, Recognizer.Accounts, cache_expiry: 60 * 15
+
 import_config "#{Mix.env()}.exs"

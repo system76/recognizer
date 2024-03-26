@@ -25,6 +25,9 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
        ]
        when action in [:resend]
 
+  @doc """
+  Prompt the user for a two factor code on login
+  """
   def new(conn, _params) do
     current_user_id = get_session(conn, :two_factor_user_id)
     current_user = Accounts.get_user!(current_user_id)
@@ -37,7 +40,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   end
 
   @doc """
-  Handle a user creating a session with a two factor code
+  Verify a user creating a session with a two factor code
   """
   def create(conn, %{"user" => %{"two_factor_code" => two_factor_code}}) do
     current_user_id = get_session(conn, :two_factor_user_id)

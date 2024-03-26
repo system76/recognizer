@@ -9,7 +9,7 @@ defmodule Recognizer.Accounts.NotificationPreference do
   alias __MODULE__, as: NotificationPreference
 
   schema "notification_preferences" do
-    field :two_factor, Recognizer.TwoFactorPreference, default: :text
+    field :two_factor, Recognizer.TwoFactorPreference, default: :app
 
     belongs_to :user, User
 

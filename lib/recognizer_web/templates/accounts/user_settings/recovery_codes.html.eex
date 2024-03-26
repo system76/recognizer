@@ -1,0 +1,27 @@
+<div class="box">
+    <h2 class="title is-2 mb-5 has-text-centered-mobile">Copy Recovery Codes</h2>
+
+    <div>
+        <p class="py-4">
+            Recovery codes are used to access your account if you have lost access to your device.
+        </p>
+
+        <p class="py-4">
+            <strong>
+                Download, print or copy your recovery codes before continuing
+                two-factor authentication setup.
+            </strong>
+        </p>
+    </div>
+
+    <div>
+        <pre><code><%= @recovery_block %></code></pre>
+    </div>
+
+    <div class="buttons is-right mt-5">
+        <div class="control">
+            <%= link "Copy and Continue", to: Routes.user_settings_path(@conn, :two_factor_init), class: "button is-secondary", id: "copy-text", data: [recovery_block: @recovery_block] %>
+        </div>
+    </div>
+
+</div>

@@ -6,6 +6,9 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
   import Recognizer.BigCommerceTestHelpers
 
   alias Recognizer.Accounts
+  alias Recognizer.Accounts.User
+  alias Recognizer.Repo
+  alias RecognizerWeb.Authentication
 
   setup :register_and_log_in_user
 
@@ -52,7 +55,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         })
 
       response = html_response(old_password_conn, 200)
-      assert response =~ "Change Password</h2>"
+      assert response =~ "Update Password</h2>"
       assert response =~ "must contain a number"
       assert response =~ "does not match password"
       assert response =~ "is not valid"
@@ -84,7 +87,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         })
 
       response = html_response(conn, 200)
-      assert response =~ "Change Profile</h2>"
+      assert response =~ "Update Profile</h2>"
       assert response =~ "must have the @ sign, no spaces and a top level domain"
     end
 
@@ -96,7 +99,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         })
 
       response = html_response(conn, 200)
-      assert response =~ "Change Profile</h2>"
+      assert response =~ "Update Profile</h2>"
       assert response =~ "must not contain special characters"
     end
 
@@ -108,8 +111,107 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         })
 
       response = html_response(conn, 200)
-      assert response =~ "Change Profile</h2>"
+      assert response =~ "Update Profile</h2>"
       assert response =~ "must not contain special characters"
+    end
+
+    test "update two-factor redirects for text method without phone number", %{conn: conn, user: user} do
+      stub(HTTPoisonMock, :put, fn _, _, _ -> ok_bigcommerce_response() end)
+      Accounts.update_user(user, %{phone_number: nil})
+
+      conn =
+        put(conn, Routes.user_settings_path(conn, :update), %{
+          "action" => "update_two_factor",
+          "user" => %{"notification_preference" => %{"two_factor" => "text"}}
+        })
+
+      assert redirected_to(conn) =~ "/settings"
+      assert get_flash(conn, :error) =~ "Phone number required"
+    end
+
+    test "update two-factor allows app setup without a phone number", %{conn: conn, user: user} do
+      stub(HTTPoisonMock, :put, fn _, _, _ -> ok_bigcommerce_response() end)
+      Accounts.update_user(user, %{phone_number: nil})
+
+      conn =
+        put(conn, Routes.user_settings_path(conn, :edit), %{
+          "action" => "update_two_factor",
+          "user" => %{"notification_preference" => %{"two_factor" => "app"}}
+        })
+
+      assert redirected_to(conn) =~ "/settings/two-factor/review"
+      refute get_flash(conn, :error)
+    end
+  end
+
+  describe "GET /users/settings/two-factor/review (backup codes)" do
+    test "gets review page after 2fa setup", %{conn: conn, user: user} do
+      Accounts.generate_and_cache_new_two_factor_settings(user, "app")
+      conn = get(conn, Routes.user_settings_path(conn, :review))
+      assert html_response(conn, 200) =~ "copy your recovery codes"
+    end
+
+    test "review 2fa without cached codes is redirected with flash error", %{conn: conn} do
+      conn = get(conn, Routes.user_settings_path(conn, :review))
+      _response = html_response(conn, 302)
+      assert get_flash(conn, :error) == "Two factor setup expired or not yet initiated"
+    end
+  end
+
+  describe "GET /users/settings/two-factor (init)" do
+    test "/two-factor page is rendered for with settings for app, doesn't rate limit", %{conn: conn, user: user} do
+      Accounts.generate_and_cache_new_two_factor_settings(user, "app")
+      conn = get(conn, Routes.user_settings_path(conn, :two_factor_init))
+      assert html_response(conn, 200) =~ "Configure App"
+      result2 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
+      assert html_response(result2, 200) =~ "Configure App"
+      result3 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
+      assert html_response(result3, 200) =~ "Configure App"
+      refute get_flash(result3, :error)
+    end
+
+    test "/two-factor loads for text, limits retries", %{conn: conn, user: user} do
+      Accounts.generate_and_cache_new_two_factor_settings(user, "text")
+      result1 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
+      assert html_response(result1, 200) =~ "Enter the provided 6-digit code"
+      result2 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
+      assert html_response(result2, 200) =~ "Enter the provided 6-digit code"
+      result3 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
+      assert html_response(result3, 200) =~ "Enter the provided 6-digit code"
+      assert get_flash(result3, :error) =~ "Too many requests"
+    end
+  end
+
+  describe "POST /users/settings/two-factor (confirm)" do
+    test "confirm saves and clears cache", %{conn: conn, user: user} do
+      settings = Accounts.generate_and_cache_new_two_factor_settings(user, "app")
+
+      token = Authentication.generate_token(settings)
+      params = %{"two_factor_code" => token}
+
+      conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
+
+      assert redirected_to(conn) =~ "/settings"
+      assert get_flash(conn, :info) =~ "Two factor code verified"
+
+      %{recovery_codes: recovery_codes} =
+        User
+        |> Repo.get(user.id)
+        |> Repo.preload(:recovery_codes)
+
+      refute Enum.empty?(recovery_codes)
+
+      assert {:ok, nil} = Accounts.get_new_two_factor_settings(user)
+    end
+
+    test "confirm redirects without cached settings", %{conn: conn, user: user} do
+      settings = Accounts.generate_and_cache_new_two_factor_settings(user, "app")
+      token = Authentication.generate_token(settings)
+      Accounts.clear_two_factor_settings(user)
+      params = %{"two_factor_code" => token}
+      conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
+      assert redirected_to(conn) =~ "/two-factor"
+      assert get_flash(conn, :error) =~ "Two factor code is invalid"
     end
   end
 end

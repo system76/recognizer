@@ -4,43 +4,97 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   alias Recognizer.Accounts
   alias RecognizerWeb.Authentication
 
+  @one_minute 60_000
+
   plug :assign_email_and_password_changesets
 
+  plug Hammer.Plug,
+       [
+         rate_limit: {"user_settings:two_factor", @one_minute, 2},
+         by: {:conn, &__MODULE__.two_factor_rate_key/1},
+         when_nil: :pass,
+         on_deny: &__MODULE__.two_factor_rate_limited/2
+       ]
+       when action in [:two_factor_init]
+
   def edit(conn, _params) do
-    if Application.get_env(:recognizer, :redirect_url) do
+    if Application.get_env(:recognizer, :redirect_url) && !get_session(conn, :bc) do
       redirect(conn, external: Application.get_env(:recognizer, :redirect_url))
     else
       render(conn, "edit.html")
     end
   end
 
-  def two_factor(conn, _params) do
+  @doc """
+  Generate codes for a new two factor setup
+  """
+  def two_factor_init(conn, _params) do
     user = Authentication.fetch_current_user(conn)
-    {:ok, %{two_factor_seed: seed}} = Accounts.get_new_two_factor_settings(user)
 
-    render(conn, "confirm_two_factor.html",
-      barcode: Authentication.generate_totp_barcode(user, seed),
-      totp_app_url: Authentication.get_totp_app_url(user, seed)
-    )
+    {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}} = settings} =
+      Accounts.get_new_two_factor_settings(user)
+
+    if method == "text" || method == "voice" do
+      :ok = Accounts.send_new_two_factor_notification(user, settings)
+      render(conn, "confirm_two_factor_external.html")
+    else
+      render(conn, "confirm_two_factor.html",
+        barcode: Authentication.generate_totp_barcode(user, seed),
+        totp_app_url: Authentication.get_totp_app_url(user, seed)
+      )
+    end
   end
 
+  @doc """
+  Rate limit 2fa setup only for text & voice, bypass for app.
+  """
+  def two_factor_rate_key(conn) do
+    user = Authentication.fetch_current_user(conn)
+
+    case Accounts.get_new_two_factor_settings(user) do
+      {:ok, %{notification_preference: %{two_factor: "app"}}} ->
+        nil
+
+      _ ->
+        get_user_id_from_request(conn)
+    end
+  end
+
+  @doc """
+  Graceful error for 2fa retry rate limits
+  """
+  def two_factor_rate_limited(conn, _params) do
+    conn
+    |> put_flash(:error, "Too many requests, please wait and try again")
+    |> render("confirm_two_factor_external.html")
+    |> halt()
+  end
+
+  @doc """
+  Confirming and saving a new two factor setup with user-provided code
+  """
   def two_factor_confirm(conn, params) do
     two_factor_code = Map.get(params, "two_factor_code", "")
     user = Authentication.fetch_current_user(conn)
 
     case Accounts.confirm_and_save_two_factor_settings(two_factor_code, user) do
       {:ok, _updated_user} ->
+        Accounts.clear_two_factor_settings(user)
+
         conn
-        |> put_flash(:info, "Two factor code verified.")
+        |> put_flash(:info, "Two factor code verified")
         |> redirect(to: Routes.user_settings_path(conn, :edit))
 
       _ ->
         conn
-        |> put_flash(:error, "Two factor code is invalid.")
-        |> redirect(to: Routes.user_settings_path(conn, :confirm_two_factor))
+        |> put_flash(:error, "Two factor code is invalid")
+        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
     end
   end
 
+  @doc """
+  Form submission for settings applied
+  """
   def update(conn, %{"action" => "update", "user" => user_params}) do
     user = Authentication.fetch_current_user(conn)
 
@@ -73,6 +127,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
+  # disable 2fa
   def update(conn, %{"action" => "update_two_factor", "user" => %{"two_factor_enabled" => "0"}}) do
     user = Authentication.fetch_current_user(conn)
 
@@ -83,13 +138,44 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
-  def update(conn, %{"action" => "update_two_factor", "user" => user_params}) do
+  # enable 2fa
+  def update(conn, %{
+        "action" => "update_two_factor",
+        "user" => %{"notification_preference" => %{"two_factor" => preference}}
+      }) do
+    %{phone_number: phone_number} = user = Authentication.fetch_current_user(conn)
+
+    # phone number required for text/voice
+    if (preference == "text" || preference == "voice") && phone_number == nil do
+      conn
+      |> put_flash(:error, "Phone number required for text and voice two-factor methods")
+      |> redirect(to: Routes.user_settings_path(conn, :edit))
+    else
+      Accounts.generate_and_cache_new_two_factor_settings(user, preference)
+      redirect(conn, to: Routes.user_settings_path(conn, :review))
+    end
+  end
+
+  @doc """
+  Review recovery codes for copying.
+  """
+  def review(conn, _params) do
     user = Authentication.fetch_current_user(conn)
-    preference = get_in(user_params, ["notification_preference", "two_factor"])
 
-    Accounts.generate_and_cache_new_two_factor_settings(user, preference)
+    case Accounts.get_new_two_factor_settings(user) do
+      {:ok, %{recovery_codes: recovery_codes}} ->
+        recovery_block =
+          recovery_codes
+          |> Enum.map_join("\n", & &1.code)
 
-    redirect(conn, to: Routes.user_settings_path(conn, :two_factor))
+        conn
+        |> render("recovery_codes.html", recovery_block: recovery_block)
+
+      _ ->
+        conn
+        |> put_flash(:error, "Two factor setup expired or not yet initiated")
+        |> redirect(to: Routes.user_settings_path(conn, :edit))
+    end
   end
 
   defp assign_email_and_password_changesets(conn, _opts) do
