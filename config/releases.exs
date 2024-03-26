@@ -77,6 +77,6 @@ config :recognizer, Recognizer.BigCommerce,
   login_uri: recognizer_config["BIGCOMMERCE_LOGIN_URI"],
   logout_uri: recognizer_config["BIGCOMMERCE_LOGOUT_URI"],
   http_client: HTTPoison,
-  enabled?: false
+  enabled?: true
 
 config :recognizer, Recognizer.Accounts, cache_expiry: recognizer_config["ACCOUNT_CACHE_EXPIRY_SECONDS"]
