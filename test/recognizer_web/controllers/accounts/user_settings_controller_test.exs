@@ -55,7 +55,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         })
 
       response = html_response(old_password_conn, 200)
-      assert response =~ "Change Password</h2>"
+      assert response =~ "Update Password</h2>"
       assert response =~ "must contain a number"
       assert response =~ "does not match password"
       assert response =~ "is not valid"
@@ -87,7 +87,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         })
 
       response = html_response(conn, 200)
-      assert response =~ "Change Profile</h2>"
+      assert response =~ "Update Profile</h2>"
       assert response =~ "must have the @ sign, no spaces and a top level domain"
     end
 
@@ -99,7 +99,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         })
 
       response = html_response(conn, 200)
-      assert response =~ "Change Profile</h2>"
+      assert response =~ "Update Profile</h2>"
       assert response =~ "must not contain special characters"
     end
 
@@ -111,7 +111,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         })
 
       response = html_response(conn, 200)
-      assert response =~ "Change Profile</h2>"
+      assert response =~ "Update Profile</h2>"
       assert response =~ "must not contain special characters"
     end
 
