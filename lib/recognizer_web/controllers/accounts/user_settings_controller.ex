@@ -2,6 +2,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   use RecognizerWeb, :controller
 
   alias Recognizer.Accounts
+  alias Recognizer.Accounts.Role
   alias RecognizerWeb.Authentication
 
   @one_minute 60_000
@@ -17,11 +18,20 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
        ]
        when action in [:two_factor_init]
 
+  @doc """
+  Prompt the user to edit account settings, main edit page
+  """
   def edit(conn, _params) do
     if Application.get_env(:recognizer, :redirect_url) && !get_session(conn, :bc) do
       redirect(conn, external: Application.get_env(:recognizer, :redirect_url))
     else
-      render(conn, "edit.html")
+      # disable phone/text 2fa methods for admins
+      is_admin =
+        conn
+        |> Authentication.fetch_current_user()
+        |> Role.admin?()
+
+      render(conn, "edit.html", allow_phone_methods: !is_admin)
     end
   end
 
