@@ -24,6 +24,14 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       conn = get(conn, Routes.user_settings_path(conn, :edit))
       assert redirected_to(conn) == Routes.user_session_path(conn, :new)
     end
+
+    test "hides text/voice options for admin", %{conn: conn} do
+      %{conn: conn} = register_and_log_in_admin(%{conn: conn})
+      conn = get(conn, Routes.user_settings_path(conn, :edit))
+      response = html_response(conn, 200)
+      assert response =~ "Authenticator App"
+      refute response =~ "Text Message"
+    end
   end
 
   describe "PUT /users/settings (change password form)" do
