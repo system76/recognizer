@@ -128,7 +128,7 @@
 
     <div class="buttons is-right mt-5">
       <div class="control">
-        <%= submit "Update Profile", class: "button is-secondary" %>
+        <%= submit "Update Profile", class: "button is-secondary", disabled: false %>
       </div>
     </div>
   <% end %>
@@ -220,6 +220,8 @@
         every time you log in.
       </p>
 
+      <% phone_allowed = Map.get(assigns, :allow_phone_methods, true) %>
+
       <%= inputs_for f, :notification_preference, fn n -> %>
         <div class="label mt-4">
           Authentication Method Preference
@@ -232,23 +234,28 @@
               Authenticator App
             <% end %>
 
-            <%= label class: "label" do %>
-              <%= radio_button n, :two_factor, "text" %>
-              Text Message
-            <% end %>
+            <%= if phone_allowed do %>
 
-            <%= label class: "label" do %>
-              <%= radio_button n, :two_factor, "voice" %>
-              Phone Call
+              <%= label class: "label" do %>
+                <%= radio_button n, :two_factor, "text" %>
+                Text Message
+              <% end %>
+
+              <%= label class: "label" do %>
+                <%= radio_button n, :two_factor, "voice" %>
+                Phone Call
+              <% end %>
             <% end %>
           </div>
         </div>
       <% end %>
 
-      <p class="is-size-7">
-        Message and data rates may apply for text message and phone call
-        methods.
-      </p>
+      <%= if phone_allowed do %>
+        <p class="is-size-7">
+          Message and data rates may apply for text message and phone call
+          methods.
+        </p>
+      <% end %>
 
       <div class="buttons is-right mt-5">
         <div class="control">
