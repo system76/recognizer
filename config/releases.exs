@@ -12,8 +12,7 @@ config :recognizer,
 
 config :recognizer, RecognizerWeb.Endpoint,
        url: [host: System.get_env("DOMAIN")],
-       secret_key_base: recognizer_config["SECRET_KEY_BASE"],
-       live_view: [signing_salt: recognizer_config["LIVE_VIEW_SALT"]]
+       secret_key_base: recognizer_config["SECRET_KEY_BASE"]
 
 config :recognizer, Recognizer.Repo,
   username: recognizer_config["DB_USER"],
