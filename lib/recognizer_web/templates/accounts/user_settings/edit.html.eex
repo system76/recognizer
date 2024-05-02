@@ -110,7 +110,7 @@
 
     <div class="buttons is-right mt-5">
       <div class="control">
-        <%= submit "Update Profile", class: "button is-secondary", disabled: false %>
+        <%= submit "Update Profile", class: "button is-secondary" %>
       </div>
     </div>
   <% end %>
