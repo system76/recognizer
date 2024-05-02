@@ -17,6 +17,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       conn = get(conn, Routes.user_settings_path(conn, :edit))
       response = html_response(conn, 200)
       assert response =~ "Log Out</h2>"
+      assert response =~ "Text Message"
     end
 
     test "redirects if user is not logged in" do
