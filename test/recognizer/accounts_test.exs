@@ -79,6 +79,18 @@ defmodule Recognizer.AccountsTest do
              } = errors_on(changeset)
     end
 
+    test "validates email does not have a preceding newline" do
+      {:error, changeset} = Accounts.register_user(%{email: "\nhacker@example.com"})
+
+      assert %{email: ["must have the @ sign, no spaces and a top level domain"]} = errors_on(changeset)
+    end
+
+    test "validates email does not have a trailing newline" do
+      {:error, changeset} = Accounts.register_user(%{email: "hacker@example.com\n"})
+
+      assert %{email: ["must have the @ sign, no spaces and a top level domain"]} = errors_on(changeset)
+    end
+
     test "validates maximum values for email and password for security" do
       too_long = String.duplicate("db", 100)
       {:error, changeset} = Accounts.register_user(%{email: too_long, password: too_long})
