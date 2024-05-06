@@ -142,7 +142,7 @@ defmodule Recognizer.Accounts.User do
   defp validate_email(changeset) do
     changeset
     |> validate_required([:email])
-    |> validate_format(:email, ~r/^[^\s]+@[^\s]+\.[\w]+$/,
+    |> validate_format(:email, ~r/\A[^\s]+@[^\s]+\.[\w]+\z/,
       message: "must have the @ sign, no spaces and a top level domain"
     )
     |> validate_length(:email, max: 160)
