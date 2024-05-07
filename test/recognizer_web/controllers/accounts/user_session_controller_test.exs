@@ -101,7 +101,7 @@ defmodule RecognizerWeb.Accounts.UserSessionControllerTest do
       assert redirected_to(conn) == "/"
     end
 
-    test "redirects if the redirect_uri is given", %{conn: conn} do
+    test "redirects if the redirect_uri is given and allowed", %{conn: conn} do
       conn =
         get(
           conn,
@@ -111,6 +111,12 @@ defmodule RecognizerWeb.Accounts.UserSessionControllerTest do
         )
 
       assert redirected_to(conn) == "http://localhost:3000/logged-out"
+    end
+
+    test "does not redirect to an arbitrary uri", %{conn: conn} do
+      conn = get(conn, Routes.user_session_path(conn, :delete, %{"redirect_uri" => "http://example.org/some/url"}))
+
+      assert redirected_to(conn) == "/"
     end
 
     test "redirects to bigcommerce logout", %{conn: conn} do
