@@ -65,3 +65,6 @@ config :recognizer, Recognizer.BigCommerce,
   enabled?: false
 
 config :recognizer, Recognizer.Accounts, cache_expiry: 60 * 60 * 24 * 7
+
+config :recognizer, RecognizerWeb.Authentication,
+  logout_redirect_uris: "http://localhost:3000/logged-out https://example.com/logout"

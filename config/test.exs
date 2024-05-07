@@ -41,3 +41,6 @@ config :recognizer, Recognizer.BigCommerce,
   logout_uri: "http://localhost/logout",
   http_client: HTTPoisonMock,
   enabled?: true
+
+config :recognizer, RecognizerWeb.Authentication,
+  logout_redirect_uris: "http://localhost:3000/logged-out https://example.com/logout"
