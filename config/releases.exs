@@ -81,5 +81,4 @@ config :recognizer, Recognizer.BigCommerce,
 
 config :recognizer, Recognizer.Accounts, cache_expiry: recognizer_config["ACCOUNT_CACHE_EXPIRY_SECONDS"]
 
-config :recognizer, RecognizerWeb.Authentication,
-  logout_redirect_uris: recognizer_config["LOGOUT_REDIRECT_URIS"]
+config :recognizer, RecognizerWeb.Authentication, logout_redirect_uris: recognizer_config["LOGOUT_REDIRECT_URIS"]
