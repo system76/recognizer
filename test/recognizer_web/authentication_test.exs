@@ -55,7 +55,7 @@ defmodule RecognizerWeb.AuthenticationTest do
 
   describe "logout_user/1" do
     test "works even if user is already logged out", %{conn: conn} do
-      conn = conn |> fetch_cookies() |> Authentication.log_out_user()
+      conn = conn |> fetch_cookies() |> fetch_query_params() |> Authentication.log_out_user()
       assert redirected_to(conn) == "/"
     end
   end

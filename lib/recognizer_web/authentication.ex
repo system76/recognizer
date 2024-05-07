@@ -106,7 +106,7 @@ defmodule RecognizerWeb.Authentication do
       get_session(conn, :bc) ->
         [external: BigCommerce.logout_redirect_uri()]
 
-      Map.has_key?(conn.query_params, "redirect_uri") ->
+      valid_logout_redirect?(conn.query_params["redirect_uri"]) ->
         [external: conn.query_params["redirect_uri"]]
 
       Application.get_env(:recognizer, :redirect_url) ->
@@ -115,6 +115,10 @@ defmodule RecognizerWeb.Authentication do
       true ->
         [to: Routes.homepage_path(conn, :index)]
     end
+  end
+
+  defp valid_logout_redirect?(redirect_uri) do
+    redirect_uri in String.split(config(:logout_redirect_uris))
   end
 
   @doc """
@@ -182,4 +186,8 @@ defmodule RecognizerWeb.Authentication do
   def valid_token?(token, %{two_factor_seed: two_factor_seed}), do: valid_token?(token, two_factor_seed)
   def valid_token?(_token, nil), do: false
   def valid_token?(token, two_factor_seed), do: :pot.valid_totp(token, two_factor_seed, window: 1, addwindow: 1)
+
+  defp config(key) do
+    Application.get_env(:recognizer, __MODULE__)[key]
+  end
 end
