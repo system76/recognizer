@@ -48,7 +48,7 @@ defmodule RecognizerWeb.Accounts.UserRecoveryCodeControllerTest do
         })
 
       assert redirected_to(conn) == "/recovery-code"
-      assert get_flash(conn, :error) =~ "invalid"
+      assert Flash.get(conn.assigns.flash, :error) =~ "invalid"
     end
   end
 end

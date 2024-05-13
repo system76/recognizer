@@ -75,7 +75,7 @@ defmodule RecognizerWeb.Accounts.UserOauthControllerTest do
         |> assign(:ueberauth_auth, auth)
         |> UserOAuthController.callback(%{})
 
-      assert get_flash(conn, :error) ==
+      assert Flash.get(conn.assigns.flash, :error) ==
                "An error occurred. This may indicate you have previously created an account using the email and password combination."
     end
 
@@ -89,7 +89,7 @@ defmodule RecognizerWeb.Accounts.UserOauthControllerTest do
         |> assign(:ueberauth_auth, auth)
         |> UserOAuthController.callback(%{})
 
-      assert get_flash(conn, :error) == "An error occurred. Please contact support."
+      assert Flash.get(conn.assigns.flash, :error) == "An error occurred. Please contact support."
     end
   end
 end
