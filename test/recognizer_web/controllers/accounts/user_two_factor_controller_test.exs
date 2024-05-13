@@ -48,7 +48,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
         })
 
       assert redirected_to(conn) == "/two-factor"
-      assert get_flash(conn, :error) =~ "Invalid"
+      assert Flash.get(conn.assigns.flash, :error) =~ "Invalid"
     end
   end
 
@@ -57,7 +57,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
       conn = post(conn, Routes.user_two_factor_path(conn, :resend))
 
       assert redirected_to(conn) == "/two-factor"
-      assert get_flash(conn, :info) =~ "resent"
+      assert Flash.get(conn.assigns.flash, :info) =~ "resent"
     end
 
     test "rate limited", %{conn: conn} do
@@ -76,7 +76,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
       conn = post(conn, Routes.user_two_factor_path(conn, :resend))
 
       assert redirected_to(conn) == "/two-factor"
-      assert get_flash(conn, :info) =~ "resent"
+      assert Flash.get(conn.assigns.flash, :info) =~ "resent"
     end
   end
 end

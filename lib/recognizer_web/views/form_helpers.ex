@@ -3,7 +3,9 @@ defmodule RecognizerWeb.FormHelpers do
   Conveniences for building forms with Bulma css tags.
   """
 
-  use Phoenix.HTML
+  import Phoenix.HTML.Form
+
+  use PhoenixHTMLHelpers
 
   alias RecognizerWeb.ErrorHelpers
 

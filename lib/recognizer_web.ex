@@ -39,7 +39,7 @@ defmodule RecognizerWeb do
 
       # Import convenience functions from controllers
       import Phoenix.Controller,
-        only: [get_flash: 1, get_flash: 2, view_module: 1, view_template: 1]
+        only: [view_module: 1, view_template: 1]
 
       # Include shared imports and aliases for views
       unquote(view_helpers())
@@ -64,15 +64,15 @@ defmodule RecognizerWeb do
 
   defp view_helpers do
     quote do
-      # Use all HTML functionality (forms, tags, etc)
-      use Phoenix.HTML
-
-      # Import basic rendering functionality (render, render_layout, etc)
+      import Phoenix.HTML
+      import Phoenix.HTML.Form
       import Phoenix.View
 
       import RecognizerWeb.ErrorHelpers
       import RecognizerWeb.FormHelpers
       import RecognizerWeb.Gettext
+
+      use PhoenixHTMLHelpers
 
       alias RecognizerWeb.Router.Helpers, as: Routes
     end

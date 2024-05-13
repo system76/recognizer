@@ -17,12 +17,21 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       conn = get(conn, Routes.user_settings_path(conn, :edit))
       response = html_response(conn, 200)
       assert response =~ "Log Out</h2>"
+      assert response =~ "Text Message"
     end
 
     test "redirects if user is not logged in" do
       conn = build_conn()
       conn = get(conn, Routes.user_settings_path(conn, :edit))
       assert redirected_to(conn) == Routes.user_session_path(conn, :new)
+    end
+
+    test "hides text/voice options for admin", %{conn: conn} do
+      %{conn: conn} = register_and_log_in_admin(%{conn: conn})
+      conn = get(conn, Routes.user_settings_path(conn, :edit))
+      response = html_response(conn, 200)
+      assert response =~ "Authenticator App"
+      refute response =~ "Text Message"
     end
   end
 
@@ -39,7 +48,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         })
 
       assert redirected_to(new_password_conn) == Routes.user_settings_path(conn, :edit)
-      assert get_flash(new_password_conn, :info) =~ "Password updated successfully"
+      assert Flash.get(new_password_conn.assigns.flash, :info) =~ "Password updated successfully"
       assert Accounts.get_user_by_email_and_password(user.email, "NeWVa3!pa33wor@d")
     end
 
@@ -75,7 +84,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         })
 
       assert redirected_to(conn) == Routes.user_settings_path(conn, :edit)
-      assert get_flash(conn, :info) =~ "Your settings have been updated"
+      assert Flash.get(conn.assigns.flash, :info) =~ "Your settings have been updated"
       refute Accounts.get_user_by_email(user.email)
     end
 
@@ -126,7 +135,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         })
 
       assert redirected_to(conn) =~ "/settings"
-      assert get_flash(conn, :error) =~ "Phone number required"
+      assert Flash.get(conn.assigns.flash, :error) =~ "Phone number required"
     end
 
     test "update two-factor allows app setup without a phone number", %{conn: conn, user: user} do
@@ -140,7 +149,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         })
 
       assert redirected_to(conn) =~ "/settings/two-factor/review"
-      refute get_flash(conn, :error)
+      refute Flash.get(conn.assigns.flash, :error)
     end
   end
 
@@ -154,7 +163,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
     test "review 2fa without cached codes is redirected with flash error", %{conn: conn} do
       conn = get(conn, Routes.user_settings_path(conn, :review))
       _response = html_response(conn, 302)
-      assert get_flash(conn, :error) == "Two factor setup expired or not yet initiated"
+      assert Flash.get(conn.assigns.flash, :error) == "Two factor setup expired or not yet initiated"
     end
   end
 
@@ -167,7 +176,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       assert html_response(result2, 200) =~ "Configure App"
       result3 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
       assert html_response(result3, 200) =~ "Configure App"
-      refute get_flash(result3, :error)
+      refute Flash.get(result3.assigns.flash, :error)
     end
 
     test "/two-factor loads for text, limits retries", %{conn: conn, user: user} do
@@ -178,7 +187,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       assert html_response(result2, 200) =~ "Enter the provided 6-digit code"
       result3 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
       assert html_response(result3, 200) =~ "Enter the provided 6-digit code"
-      assert get_flash(result3, :error) =~ "Too many requests"
+      assert Flash.get(result3.assigns.flash, :error) =~ "Too many requests"
     end
   end
 
@@ -192,7 +201,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
 
       assert redirected_to(conn) =~ "/settings"
-      assert get_flash(conn, :info) =~ "Two factor code verified"
+      assert Flash.get(conn.assigns.flash, :info) =~ "Two factor code verified"
 
       %{recovery_codes: recovery_codes} =
         User
@@ -211,7 +220,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       params = %{"two_factor_code" => token}
       conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
       assert redirected_to(conn) =~ "/two-factor"
-      assert get_flash(conn, :error) =~ "Two factor code is invalid"
+      assert Flash.get(conn.assigns.flash, :error) =~ "Two factor code is invalid"
     end
   end
 end
