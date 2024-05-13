@@ -11,8 +11,8 @@ config :recognizer,
   hal_token: recognizer_config["HAL_TOKEN"]
 
 config :recognizer, RecognizerWeb.Endpoint,
-       url: [host: System.get_env("DOMAIN")],
-       secret_key_base: recognizer_config["SECRET_KEY_BASE"]
+  url: [host: System.get_env("DOMAIN")],
+  secret_key_base: recognizer_config["SECRET_KEY_BASE"]
 
 config :recognizer, Recognizer.Repo,
   username: recognizer_config["DB_USER"],
