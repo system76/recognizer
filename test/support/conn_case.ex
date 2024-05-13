@@ -25,6 +25,7 @@ defmodule RecognizerWeb.ConnCase do
       import RecognizerWeb.ConnCase
 
       alias RecognizerWeb.Router.Helpers, as: Routes
+      alias Phoenix.Flash
 
       # The default endpoint for testing
       @endpoint RecognizerWeb.Endpoint
