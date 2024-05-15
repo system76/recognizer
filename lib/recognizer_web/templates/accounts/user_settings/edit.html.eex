@@ -1,15 +1,6 @@
-<div class="box">
-  <h2 class="title is-2 mb-5 has-text-centered-mobile">Log Out</h2>
-
-  <p>
-    This will log you out of this website, but <b>not</b> the system76.com
-    website, or any other third party websites you have logged in on.
-  </p>
-
-  <div class="buttons is-right mt-5">
-    <div class="control">
-      <%= link "Log Out", to: Routes.user_session_path(@conn, :delete), class: "button is-danger" %>
-    </div>
+<div class="buttons is-centered mt-5">
+  <div class="control">
+    <%= link "Continue Shopping", to: @redirect_home, class: "button is-link" %>
   </div>
 </div>
 
@@ -211,8 +202,6 @@
         every time you log in.
       </p>
 
-      <% phone_allowed = Map.get(assigns, :allow_phone_methods, true) %>
-
       <%= inputs_for f, :notification_preference, fn n -> %>
         <div class="label mt-4">
           Authentication Method Preference
@@ -225,7 +214,7 @@
               Authenticator App
             <% end %>
 
-            <%= if phone_allowed do %>
+            <%= if @allow_phone_methods do %>
 
               <%= label class: "label" do %>
                 <%= radio_button n, :two_factor, "text" %>
@@ -241,7 +230,7 @@
         </div>
       <% end %>
 
-      <%= if phone_allowed do %>
+      <%= if @allow_phone_methods do %>
         <p class="is-size-7">
           Message and data rates may apply for text message and phone call
           methods.

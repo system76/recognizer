@@ -16,7 +16,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
     test "renders settings page", %{conn: conn} do
       conn = get(conn, Routes.user_settings_path(conn, :edit))
       response = html_response(conn, 200)
-      assert response =~ "Log Out</h2>"
+      assert response =~ "Update Profile</h2>"
       assert response =~ "Text Message"
     end
 
