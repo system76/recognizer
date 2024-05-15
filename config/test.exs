@@ -37,8 +37,9 @@ config :recognizer, Recognizer.BigCommerce,
   client_secret: "bc_secret",
   access_token: "bc_access_token",
   store_hash: "bc_store_hash",
-  login_uri: "http://localhost/login/",
-  logout_uri: "http://localhost/logout",
+  store_home_uri: "http://localhost",
+  login_path: "/login/",
+  logout_path: "/logout",
   http_client: HTTPoisonMock,
   enabled?: true
 
