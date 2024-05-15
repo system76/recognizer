@@ -3,11 +3,13 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   alias Recognizer.Accounts
   alias Recognizer.Accounts.Role
+  alias Recognizer.BigCommerce
   alias RecognizerWeb.Authentication
 
   @one_minute 60_000
 
   plug :assign_email_and_password_changesets
+  plug :assign_common
 
   plug Hammer.Plug,
        [
@@ -25,13 +27,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     if Application.get_env(:recognizer, :redirect_url) && !get_session(conn, :bc) do
       redirect(conn, external: Application.get_env(:recognizer, :redirect_url))
     else
-      # disable phone/text 2fa methods for admins
-      is_admin =
-        conn
-        |> Authentication.fetch_current_user()
-        |> Role.admin?()
-
-      render(conn, "edit.html", allow_phone_methods: !is_admin)
+      render(conn, "edit.html")
     end
   end
 
@@ -195,5 +191,19 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     |> assign(:changeset, Accounts.change_user(user))
     |> assign(:password_changeset, Accounts.change_user_password(user))
     |> assign(:two_factor_changeset, Accounts.change_user_two_factor(user))
+  end
+
+  defp assign_common(conn, _opts) do
+    home_uri = BigCommerce.home_redirect_uri()
+
+    # disable phone/text 2fa methods for admins
+    is_admin =
+      conn
+      |> Authentication.fetch_current_user()
+      |> Role.admin?()
+
+    conn
+    |> assign(:redirect_home, home_uri)
+    |> assign(:allow_phone_methods, !is_admin)
   end
 end
