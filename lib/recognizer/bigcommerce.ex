@@ -37,14 +37,11 @@ defmodule Recognizer.BigCommerce do
     end
   end
 
-  def home_redirect_uri(), do:
-    config(:store_home_uri)
+  def home_redirect_uri(), do: config(:store_home_uri)
 
-  def login_redirect_uri(user), do:
-    home_redirect_uri() <> config(:login_path) <> generate_login_jwt(user)
+  def login_redirect_uri(user), do: home_redirect_uri() <> config(:login_path) <> generate_login_jwt(user)
 
-  def logout_redirect_uri(), do:
-    home_redirect_uri() <> config(:logout_path)
+  def logout_redirect_uri(), do: home_redirect_uri() <> config(:logout_path)
 
   defp generate_login_jwt(user) do
     {:ok, token, _claims} =
