@@ -41,7 +41,20 @@ defmodule Recognizer.BigCommerce do
 
   def login_redirect_uri(user), do: home_redirect_uri() <> config(:login_path) <> generate_login_jwt(user)
 
+  def checkout_redirect_uri(user), do: home_redirect_uri() <> config(:login_path) <> generate_checkout_login_jwt(user)
+
   def logout_redirect_uri(), do: home_redirect_uri() <> config(:logout_path)
+
+  defp generate_checkout_login_jwt(user) do
+    {:ok, token, _claims} =
+      user
+      |> Recognizer.Repo.preload(:bigcommerce_user)
+      |> jwt_claims()
+      |> Map.put("redirect_to", "/checkout")
+      |> Token.generate_and_sign(jwt_signer())
+
+    token
+  end
 
   defp generate_login_jwt(user) do
     {:ok, token, _claims} =
