@@ -26,9 +26,42 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
 
     test "redirects to bigcommerce if already logged in", %{conn: conn} do
       %{user: user} = insert(:bc_customer_user)
-      conn = conn |> log_in_user(user) |> get(Routes.user_registration_path(conn, :new, %{"bc" => "true"}))
 
-      assert redirected_to(conn) =~ "http://localhost/login/"
+      redirect =
+        conn
+        |> log_in_user(user)
+        |> get(Routes.user_registration_path(conn, :new, %{"bc" => "true"}))
+        |> redirected_to()
+
+      jwt_payload =
+        redirect
+        |> then(&Regex.named_captures(~r/\.(?<payload>.+)\./, &1))
+        |> then(fn %{"payload" => base64} -> base64 end)
+        |> Base.decode64!(padding: false)
+        |> Jason.decode!(keys: :atoms)
+
+      assert redirect =~ "http://localhost/login/"
+      refute :redirect_to in Map.keys(jwt_payload)
+    end
+
+    test "redirects to bigcommerce checkout if already logged in", %{conn: conn} do
+      %{user: user} = insert(:bc_customer_user)
+
+      redirect =
+        conn
+        |> log_in_user(user)
+        |> get(Routes.user_registration_path(conn, :new, %{"bc" => "true", "checkout" => "true"}))
+        |> redirected_to()
+
+      jwt_payload =
+        redirect
+        |> then(&Regex.named_captures(~r/\.(?<payload>.+)\./, &1))
+        |> then(fn %{"payload" => base64} -> base64 end)
+        |> Base.decode64!(padding: false)
+        |> Jason.decode!(keys: :atoms)
+
+      assert redirect =~ "http://localhost/login/"
+      assert %{redirect_to: "/checkout"} = jwt_payload
     end
   end
 
