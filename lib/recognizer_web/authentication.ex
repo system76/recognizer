@@ -84,6 +84,9 @@ defmodule RecognizerWeb.Authentication do
   """
   def login_redirect(conn, user) do
     cond do
+      get_session(conn, :bc_checkout) ->
+        [external: BigCommerce.checkout_redirect_uri(user)]
+
       get_session(conn, :bc) ->
         [external: BigCommerce.login_redirect_uri(user)]
 
