@@ -61,6 +61,7 @@ defmodule Recognizer.BigCommerce do
       user
       |> Recognizer.Repo.preload(:bigcommerce_user)
       |> jwt_claims()
+      |> Map.put("redirect_to", "/")
       |> Token.generate_and_sign(jwt_signer())
 
     token

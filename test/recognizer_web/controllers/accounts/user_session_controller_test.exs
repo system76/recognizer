@@ -40,7 +40,7 @@ defmodule RecognizerWeb.Accounts.UserSessionControllerTest do
         |> Jason.decode!(keys: :atoms)
 
       assert redirect =~ "http://localhost/login/"
-      refute :redirect_to in Map.keys(jwt_payload)
+      assert %{redirect_to: "/"} = jwt_payload
     end
 
     test "redirects to bigcommerce checkout if already logged in", %{conn: conn, user: user} do
