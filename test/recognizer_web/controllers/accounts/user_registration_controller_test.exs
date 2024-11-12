@@ -68,7 +68,21 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
   describe "POST /users/register" do
     @tag :capture_log
     test "creates account and prompts for verification", %{conn: conn} do
+      expect(HTTPoisonMock, :get, 1, fn _, _, _ -> empty_bigcommerce_response() end)
       expect(HTTPoisonMock, :post, 1, fn _, _, _ -> ok_bigcommerce_response() end)
+
+      conn =
+        post(conn, Routes.user_registration_path(conn, :create), %{
+          "user" => params_for(:user)
+        })
+
+      refute Recognizer.Guardian.Plug.current_resource(conn)
+      assert redirected_to(conn) =~ "/prompt/verification"
+      assert Repo.get_by(BCCustomerUser, bc_id: 1001)
+    end
+
+    test "creates account linked to existing bigcommerce account", %{conn: conn} do
+      expect(HTTPoisonMock, :get, 1, fn _, _, _ -> ok_bigcommerce_response() end)
 
       conn =
         post(conn, Routes.user_registration_path(conn, :create), %{
@@ -95,6 +109,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
 
     @tag :capture_log
     test "renders an error page for a bigcommerce failure", %{conn: conn} do
+      expect(HTTPoisonMock, :get, 1, fn _, _, _ -> empty_bigcommerce_response() end)
       expect(HTTPoisonMock, :post, 1, fn _, _, _ -> bad_bigcommerce_response() end)
 
       conn =
@@ -109,6 +124,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
     end
 
     test "rate limits account creation", %{conn: conn} do
+      stub(HTTPoisonMock, :get, fn _, _, _ -> empty_bigcommerce_response() end)
       stub(HTTPoisonMock, :post, fn _, _, _ -> ok_bigcommerce_response() end)
 
       Enum.each(0..20, fn _ ->

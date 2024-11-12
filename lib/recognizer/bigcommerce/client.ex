@@ -77,6 +77,53 @@ defmodule Recognizer.BigCommerce.Client do
     end
   end
 
+  def get_customers(queries \\ []) do
+    with params <- customer_queries_as_params(queries),
+         full_uri <- customers_uri(),
+         headers <- default_headers(),
+         :ok <- Logger.debug("GET bigcommerce customers by params: #{inspect(params)}"),
+         {:ok, %Response{body: response, status_code: 200}} <-
+           http_client().get(full_uri, headers, params: params),
+         {:ok, %{"data" => customers}} <- Jason.decode(response),
+         customer_ids <- Enum.map(customers, fn %{"id" => id} -> id end) do
+      {:ok, customer_ids}
+    else
+      {:ok, %Response{status_code: 429, headers: headers}} ->
+        sleep_for_rate_limit(headers)
+        get_customers(queries)
+
+      {:ok, %Response{status_code: 503}} ->
+        sleep_for_rate_limit(@default_retry_ms)
+        get_customers(queries)
+
+      {_, %Response{body: body, status_code: code}} ->
+        Logger.error("Unexpected http response #{inspect(code)}: #{inspect(body)}")
+        {:error, code}
+
+      e ->
+        Logger.error("cannot get customers with error: #{inspect(e)}")
+        {:error, e}
+    end
+  end
+
+  defp customer_queries_as_params(queries) do
+    []
+    |> Keyword.merge(
+      case Keyword.get(queries, :emails) do
+        nil -> []
+        [] -> []
+        emails -> [{"email:in", Enum.join(emails, ",")}]
+      end
+    )
+    |> Keyword.merge(
+      case Keyword.get(queries, :ids) do
+        nil -> []
+        [] -> []
+        ids -> [{"id:in", Enum.join(ids, ",")}]
+      end
+    )
+  end
+
   defp get_id(response) do
     case Jason.decode(response) do
       {:ok, %{"data" => [%{"id" => id}]}} -> {:ok, id}

@@ -61,6 +61,11 @@ defmodule Recognizer.AccountsTest do
   end
 
   describe "register_user/1" do
+    setup do
+      stub(HTTPoisonMock, :get, fn _, _, _ -> empty_bigcommerce_response() end)
+      :ok
+    end
+
     test "requires email and password to be set" do
       {:error, changeset} = Accounts.register_user(%{})
 
