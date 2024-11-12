@@ -13,6 +13,11 @@ defmodule RecognizerWeb.Api.UserRegistrationControllerTest do
   setup :verify_on_exit!
   setup :register_and_log_in_admin
 
+  setup do
+    stub(HTTPoisonMock, :get, fn _, _, _ -> empty_bigcommerce_response() end)
+    :ok
+  end
+
   describe "POST /api/create-account" do
     test "POST /api/create-account is limited to staff only", %{conn: conn} do
       user = %{
