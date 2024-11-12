@@ -109,19 +109,19 @@ defmodule Recognizer.BigCommerce.Client do
   defp customer_queries_as_params(queries) do
     []
     |> Keyword.merge(
-         case Keyword.get(queries, :emails) do
-           nil -> []
-           [] -> []
-           emails -> [{"email:in", Enum.join(emails, ",")}]
-         end
-       )
+      case Keyword.get(queries, :emails) do
+        nil -> []
+        [] -> []
+        emails -> [{"email:in", Enum.join(emails, ",")}]
+      end
+    )
     |> Keyword.merge(
-         case Keyword.get(queries, :ids) do
-           nil -> []
-           [] -> []
-           ids -> [{"id:in", Enum.join(ids, ",")}]
-         end
-       )
+      case Keyword.get(queries, :ids) do
+        nil -> []
+        [] -> []
+        ids -> [{"id:in", Enum.join(ids, ",")}]
+      end
+    )
   end
 
   defp get_id(response) do
