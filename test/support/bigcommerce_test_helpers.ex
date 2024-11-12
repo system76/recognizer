@@ -7,6 +7,12 @@ defmodule Recognizer.BigCommerceTestHelpers do
     {:ok, %HTTPoison.Response{body: body, status_code: 200}}
   end
 
+  def empty_bigcommerce_response() do
+    body = Jason.encode!(%{data: []})
+
+    {:ok, %HTTPoison.Response{body: body, status_code: 200}}
+  end
+
   def bad_bigcommerce_response() do
     body = Jason.encode!(%{errors: [%{failure: 1}]})
 
