@@ -70,6 +70,7 @@ defmodule Recognizer.Notifications.Account do
 
   def two_factor_method(:text), do: :TWO_FACTOR_METHOD_SMS
   def two_factor_method(:voice), do: :TWO_FACTOR_METHOD_VOICE
+  def two_factor_method(:email), do: :TWO_FACTOR_METHOD_EMAIL
 
   @doc """
   Deliver user recovery code used notification.
