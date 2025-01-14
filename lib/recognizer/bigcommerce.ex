@@ -28,6 +28,7 @@ defmodule Recognizer.BigCommerce do
 
   def get_or_create_customer(%{email: email, id: id} = user) do
     case Client.get_customers(emails: [email]) do
+
       {:ok, []} ->
         create_customer(user)
 
