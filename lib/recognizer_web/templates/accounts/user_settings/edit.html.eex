@@ -110,7 +110,7 @@
 
     <div class="buttons is-right mt-5">
       <div class="control">
-        <%= submit "Update Profile", class: "button is-secondary" %>
+        <%= submit "Update Profile", class: "button is-secondary", disabled: false %>
       </div>
     </div>
   <% end %>
@@ -201,6 +201,8 @@
         Enabling it will protect your account even more by requiring a token
         every time you log in.
       </p>
+
+      <% phone_allowed = Map.get(assigns, :allow_phone_methods, true) %>
 
       <%= inputs_for f, :notification_preference, fn n -> %>
         <div class="label mt-4">

@@ -27,7 +27,13 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     if Application.get_env(:recognizer, :redirect_url) && !get_session(conn, :bc) do
       redirect(conn, external: Application.get_env(:recognizer, :redirect_url))
     else
-      render(conn, "edit.html")
+      # disable phone/text 2fa methods for admins
+      is_admin =
+        conn
+        |> Authentication.fetch_current_user()
+        |> Role.admin?()
+
+      render(conn, "edit.html", allow_phone_methods: !is_admin)
     end
   end
 
