@@ -202,8 +202,6 @@
         every time you log in.
       </p>
 
-      <% phone_allowed = Map.get(assigns, :allow_phone_methods, true) %>
-
       <%= inputs_for f, :notification_preference, fn n -> %>
         <div class="label mt-4">
           Authentication Method Preference
@@ -217,10 +215,14 @@
             <% end %>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             <%= if @allow_phone_methods do %>
 =======
             <%= if phone_allowed do %>
 >>>>>>> 172c859 (hide phone/text 2fa options for admins)
+=======
+            <%= if @allow_phone_methods do %>
+>>>>>>> 8a634c7 (simplify phone assign)
 
               <%= label class: "label" do %>
                 <%= radio_button n, :two_factor, "text" %>
@@ -237,10 +239,14 @@
       <% end %>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
       <%= if @allow_phone_methods do %>
 =======
       <%= if phone_allowed do %>
 >>>>>>> 172c859 (hide phone/text 2fa options for admins)
+=======
+      <%= if @allow_phone_methods do %>
+>>>>>>> 8a634c7 (simplify phone assign)
         <p class="is-size-7">
           Message and data rates may apply for text message and phone call
           methods.
