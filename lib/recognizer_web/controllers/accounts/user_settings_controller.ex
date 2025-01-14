@@ -3,7 +3,10 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   alias Recognizer.Accounts
   alias Recognizer.Accounts.Role
+<<<<<<< HEAD
   alias Recognizer.BigCommerce
+=======
+>>>>>>> 172c859 (hide phone/text 2fa options for admins)
   alias RecognizerWeb.Authentication
 
   @one_minute 60_000

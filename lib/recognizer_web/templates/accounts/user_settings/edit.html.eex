@@ -216,7 +216,11 @@
               Authenticator App
             <% end %>
 
+<<<<<<< HEAD
             <%= if @allow_phone_methods do %>
+=======
+            <%= if phone_allowed do %>
+>>>>>>> 172c859 (hide phone/text 2fa options for admins)
 
               <%= label class: "label" do %>
                 <%= radio_button n, :two_factor, "text" %>
@@ -232,7 +236,11 @@
         </div>
       <% end %>
 
+<<<<<<< HEAD
       <%= if @allow_phone_methods do %>
+=======
+      <%= if phone_allowed do %>
+>>>>>>> 172c859 (hide phone/text 2fa options for admins)
         <p class="is-size-7">
           Message and data rates may apply for text message and phone call
           methods.
