@@ -40,7 +40,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}} = settings} =
       Accounts.get_new_two_factor_settings(user)
 
-    if method == "text" || method == "voice" do
+    if method == "text" || method == "voice" || method == "email" do
       :ok = Accounts.send_new_two_factor_notification(user, settings)
       render(conn, "confirm_two_factor_external.html")
     else

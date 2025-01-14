@@ -170,15 +170,10 @@
       <%= hidden_input f, :two_factor_enabled, value: "0" %>
 
       <%= case two_factor_method(@two_factor_changeset) do %>
-        <% :text -> %>
+        <% :email -> %>
           <p>
             Two factor authentication is enabled for your account. You will
-            receive a <strong>text message</strong> every time you try to log in.
-          </p>
-        <% :voice -> %>
-          <p>
-            Two factor authentication is enabled for your account. You will
-            receive a <strong>phone call</strong> every time you try to log in.
+            receive a <strong>Email</strong> every time you try to log in.
           </p>
         <% _ -> %>
           <p>
@@ -202,6 +197,8 @@
         every time you log in.
       </p>
 
+      <% phone_allowed = Map.get(assigns, :allow_phone_methods, true) %>
+
       <%= inputs_for f, :notification_preference, fn n -> %>
         <div class="label mt-4">
           Authentication Method Preference
@@ -214,15 +211,7 @@
               Authenticator App
             <% end %>
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-            <%= if @allow_phone_methods do %>
-=======
-            <%= if phone_allowed do %>
->>>>>>> 172c859 (hide phone/text 2fa options for admins)
-=======
-            <%= if @allow_phone_methods do %>
->>>>>>> 8a634c7 (simplify phone assign)
+            <%= if @allow_phone_methods && false do %>
 
               <%= label class: "label" do %>
                 <%= radio_button n, :two_factor, "text" %>
@@ -233,20 +222,18 @@
                 <%= radio_button n, :two_factor, "voice" %>
                 Phone Call
               <% end %>
+
             <% end %>
+            <%= label class: "label" do %>
+              <%= radio_button n, :two_factor, "email" %>
+              Email
+            <% end %>
+
           </div>
         </div>
       <% end %>
 
-<<<<<<< HEAD
-<<<<<<< HEAD
       <%= if @allow_phone_methods do %>
-=======
-      <%= if phone_allowed do %>
->>>>>>> 172c859 (hide phone/text 2fa options for admins)
-=======
-      <%= if @allow_phone_methods do %>
->>>>>>> 8a634c7 (simplify phone assign)
         <p class="is-size-7">
           Message and data rates may apply for text message and phone call
           methods.
