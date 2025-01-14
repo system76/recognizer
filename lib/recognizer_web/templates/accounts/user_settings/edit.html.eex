@@ -197,8 +197,6 @@
         every time you log in.
       </p>
 
-      <% phone_allowed = Map.get(assigns, :allow_phone_methods, true) %>
-
       <%= inputs_for f, :notification_preference, fn n -> %>
         <div class="label mt-4">
           Authentication Method Preference
