@@ -21,9 +21,9 @@
 
     <div class="content">
         <button id="resend-button" disabled>Resend Two Factor Code</button>
-        <span id="timer">05:00</span>
+        <span id="timer">01:00</span>
         <p id="message" style="color: gray; font-size: 0.9em; margin-top: 10px;">
-        The Resend button will be activated after 5 minutes.
+        The Resend button will be activated after 1 minutes.
         </p>
     </div>
 
@@ -32,7 +32,7 @@
         const button = document.getElementById('resend-button');
         const timerElement = document.getElementById('timer');
         const messageElement = document.getElementById('message');
-        let countdown = 5 * 60; // 5 minutes in seconds
+        let countdown = 1 * 60; // 1 minutes in seconds
         let timerInterval;
 
         // Format seconds into MM:SS
@@ -44,11 +44,11 @@
 
         // Start the countdown timer
         function startTimer() {
-            countdown = 5 * 60; // Reset countdown to 5 minutes
+            countdown = 1 * 60; // Reset countdown to 1 minutes
             timerElement.textContent = formatTime(countdown);
             button.disabled = true; // Disable the button
             button.classList.add('disabled'); // Optional: Add a class for styling
-            messageElement.textContent = "The Resend button will be activated after 5 minutes.";
+            messageElement.textContent = "The resend button will be activated after 1 minutes.";
             timerInterval = setInterval(updateTimer, 1000); // Start updating timer
         }
 
@@ -61,7 +61,7 @@
             clearInterval(timerInterval); // Stop the timer
             button.disabled = false; // Enable the button
             button.classList.remove('disabled'); // Optional: Remove styling class
-            messageElement.textContent = "The button is now activated!"; // Update message
+            messageElement.textContent = "The resend button is now activated!"; // Update message
             }
         }
 
@@ -71,7 +71,7 @@
         // Handle button click event
         button.addEventListener('click', () => {
             alert('Two Factor Code resent!'); // Replace this with actual backend logic
-            startTimer(); // Restart the timer after a button click
+            window.location.href="/two-factor";
         });
         })();
     </script>

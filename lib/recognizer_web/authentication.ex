@@ -181,14 +181,14 @@ defmodule RecognizerWeb.Authentication do
   Generate a Time Based One Time Password
   """
   def generate_token(%{two_factor_seed: two_factor_seed}), do: generate_token(two_factor_seed)
-  def generate_token(two_factor_seed), do: :pot.totp(two_factor_seed, addwindow: 1)
+  def generate_token(two_factor_seed), do: :pot.totp(two_factor_seed, interval: 300)
 
   @doc """
   Validate a user provided token is valid
   """
   def valid_token?(token, %{two_factor_seed: two_factor_seed}), do: valid_token?(token, two_factor_seed)
   def valid_token?(_token, nil), do: false
-  def valid_token?(token, two_factor_seed), do: :pot.valid_totp(token, two_factor_seed, window: 1, addwindow: 1)
+  def valid_token?(token, two_factor_seed), do: :pot.valid_totp(token, two_factor_seed, interval: 300)
 
   defp config(key) do
     Application.get_env(:recognizer, __MODULE__)[key]

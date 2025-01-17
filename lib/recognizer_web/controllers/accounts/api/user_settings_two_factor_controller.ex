@@ -5,18 +5,18 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
   alias RecognizerWeb.{Authentication, ErrorView}
 
   @one_minute 60_000
-  @one_day 86_400_000
+  @one_hour 3_600_000
 
   plug Hammer.Plug,
        [
-         rate_limit: {"api:two_factor", @one_minute, 2},
+         rate_limit: {"api:two_factor", @one_minute, 1},
          by: {:conn, &get_user_id_from_request/1}
        ]
        when action in [:send]
 
   plug Hammer.Plug,
        [
-         rate_limit: {"api:two_factor_daily", @one_day, 6},
+         rate_limit: {"api:two_factor_daily", @one_hour, 6},
          by: {:conn, &get_user_id_from_request/1}
        ]
        when action in [:send]

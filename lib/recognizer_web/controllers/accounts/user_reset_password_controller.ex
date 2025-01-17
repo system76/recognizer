@@ -8,7 +8,7 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user:reset_password", @one_minute, 2},
+         rate_limit: {"user:reset_password", @one_minute, 1},
          by: {:conn, &get_email_from_request/1}
        ]
        when action in [:create]
