@@ -625,6 +625,7 @@ defmodule Recognizer.Accounts do
   def update_two_factor_issue_time(user, attrs, issue_time) do
     %{
       notification_preference: %{two_factor: preference},
+      two_factor_enabled: enabled,
       two_factor_seed: seed
     } = attrs
 
@@ -633,7 +634,7 @@ defmodule Recognizer.Accounts do
       notification_preference: %{two_factor: preference},
       recovery_codes: generate_new_recovery_codes(user),
       two_factor_seed: seed,
-      two_factor_enabled: true,
+      two_factor_enabled: enabled,
       two_factor_issue_time: issue_time
     }
 
@@ -647,11 +648,17 @@ defmodule Recognizer.Accounts do
         "XX"
     ])
 
-    attrs
+    updated_attrs
   end
 
 
 
+  # 토큰 발송 로직을 별도 함수로 분리해 중복 제거
+  defp deliver_two_factor_token(user, seed, preference, two_factor_issue_time) do
+    IO.inspect("deliver_two_factor_token", label: "deliver_two_factor_token")
+    token = Authentication.generate_token(preference, two_factor_issue_time, seed)
+    Notification.deliver_two_factor_token(user, token, String.to_existing_atom(preference))
+  end
 
   @doc """
   Sends a new notification message to the user to verify their _new_ two factor
@@ -662,12 +669,6 @@ defmodule Recognizer.Accounts do
     send_new_two_factor_notification(user, attrs)
   end
 
-  # 토큰 발송 로직을 별도 함수로 분리해 중복 제거
-  defp deliver_two_factor_token(user, seed, preference, two_factor_issue_time) do
-    IO.inspect("deliver_two_factor_token", label: "deliver_two_factor_token")
-    token = Authentication.generate_token(preference, two_factor_issue_time, seed)
-    Notification.deliver_two_factor_token(user, token, String.to_existing_atom(preference))
-  end
 
   def send_new_two_factor_notification(user, attrs) do
     # attrs에서 preference와 seed 추출
