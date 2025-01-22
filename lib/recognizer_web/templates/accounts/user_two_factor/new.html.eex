@@ -99,8 +99,9 @@
 
       // Handle button click event
       button.addEventListener('click', () => {
-        alert('Two Factor Code resent!'); // Replace this with actual backend logic
-        window.location.href="/two-factor";
+        location.reload();
+        //alert('Two Factor Code resent!'); // Replace this with actual backend logic
+        //window.location.href="/two-factor";
       });
     })();
   </script>

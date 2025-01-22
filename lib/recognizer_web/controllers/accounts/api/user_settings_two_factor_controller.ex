@@ -9,17 +9,19 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"api:two_factor", @one_minute, 1},
+         rate_limit: {"api:two_factor", @one_minute, 3},
          by: {:conn, &get_user_id_from_request/1}
        ]
        when action in [:send]
+      #  when action in [:send, :update]
 
   plug Hammer.Plug,
        [
-         rate_limit: {"api:two_factor_daily", @one_hour, 6},
+         rate_limit: {"api:two_factor_hour", @one_hour, 6},
          by: {:conn, &get_user_id_from_request/1}
        ]
        when action in [:send]
+      #  when action in [:send, :update]
 
   def show(conn, _params) do
     user = Authentication.fetch_current_user(conn)
@@ -31,7 +33,7 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
 
   def update(conn, %{"enabled" => false}) do
     user = Authentication.fetch_current_user(conn)
-
+    IO.inspect(false, label: "enabled")
     with {:ok, updated_user} <- Accounts.update_user_two_factor(user, %{"two_factor_enabled" => false}) do
       render(conn, "show.json", user: updated_user)
     end
@@ -40,6 +42,8 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
   def update(conn, %{"enabled" => true, "type" => preference}) do
     user = Authentication.fetch_current_user(conn)
     settings = Accounts.generate_and_cache_new_two_factor_settings(user, preference)
+    IO.inspect(true, label: "enabled")
+    IO.inspect(preference, label: "preference")
 
     conn
     |> put_status(202)
@@ -48,8 +52,10 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
 
   def update(conn, %{"verification" => code}) do
     user = Authentication.fetch_current_user(conn)
+    counter = get_session(conn, :two_factor_issue_time)
+    IO.inspect(code, label: "code")
 
-    case Accounts.confirm_and_save_two_factor_settings(code, user) do
+    case Accounts.confirm_and_save_two_factor_settings(code, user, counter) do
       {:ok, updated_user} ->
         render(conn, "show.json", user: updated_user)
 

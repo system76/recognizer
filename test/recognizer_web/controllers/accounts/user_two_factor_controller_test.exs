@@ -36,7 +36,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
 
   describe "POST /two-factor" do
     test "redirects to user settings for successful security codes", %{conn: conn, user: user} do
-      token = Authentication.generate_token(user)
+      token = Authentication.generate_token("app", 0, user)
       conn = post(conn, Routes.user_two_factor_path(conn, :create), %{"user" => %{"two_factor_code" => token}})
       assert redirected_to(conn) == "/settings"
     end

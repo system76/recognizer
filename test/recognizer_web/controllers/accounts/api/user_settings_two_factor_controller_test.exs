@@ -16,7 +16,7 @@ defmodule RecognizerWeb.Api.UserSettingsTwoFactorControllerTest do
     conn = Phoenix.ConnTest.build_conn()
     user = :user |> insert()
 
-    Recognizer.Accounts.generate_and_cache_new_two_factor_settings(user, "text")
+    Recognizer.Accounts.generate_and_cache_new_two_factor_settings(user, "email")
     log_in_user(conn, user)
   end
 
@@ -65,9 +65,9 @@ defmodule RecognizerWeb.Api.UserSettingsTwoFactorControllerTest do
 
     test "confirms the two factor code and updates the user's settings", %{conn: conn, user: user} do
       %{recovery_codes: recovery_codes, two_factor_seed: seed} =
-        Recognizer.Accounts.generate_and_cache_new_two_factor_settings(user, "text")
+        Recognizer.Accounts.generate_and_cache_new_two_factor_settings(user, "email")
 
-      valid_code = RecognizerWeb.Authentication.generate_token(seed)
+      valid_code = RecognizerWeb.Authentication.generate_token("email", 0, seed)
       conn = put(conn, "/api/settings/two-factor", %{"verification" => valid_code})
 
       assert json_response(conn, 200)

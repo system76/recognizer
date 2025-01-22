@@ -65,7 +65,7 @@ defmodule Recognizer.MixProject do
       {:phoenix_view, "~> 2.0.3"},
       {:phoenix, "~> 1.7.1"},
       {:plug_cowboy, "~> 2.4"},
-      {:pot, "~> 1.0"},
+      {:pot, "~> 1.0.2"},
       {:saxy, "~> 1.1"},
       {:spandex, "~> 3.0.3"},
       {:spandex_datadog, "~> 1.1.0"},

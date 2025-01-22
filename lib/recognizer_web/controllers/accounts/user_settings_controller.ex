@@ -82,8 +82,8 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   def two_factor_confirm(conn, params) do
     two_factor_code = Map.get(params, "two_factor_code", "")
     user = Authentication.fetch_current_user(conn)
-
-    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, user) do
+    counter = get_session(conn, :two_factor_issue_time)
+    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, user, counter) do
       {:ok, _updated_user} ->
         Accounts.clear_two_factor_settings(user)
 

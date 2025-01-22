@@ -179,8 +179,8 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       refute Flash.get(result3.assigns.flash, :error)
     end
 
-    test "/two-factor loads for text, limits retries", %{conn: conn, user: user} do
-      Accounts.generate_and_cache_new_two_factor_settings(user, "text")
+    test "/two-factor loads for email, limits retries", %{conn: conn, user: user} do
+      Accounts.generate_and_cache_new_two_factor_settings(user, "email")
       result1 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
       assert html_response(result1, 200) =~ "Enter the provided 6-digit code"
       result2 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
@@ -195,7 +195,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
     test "confirm saves and clears cache", %{conn: conn, user: user} do
       settings = Accounts.generate_and_cache_new_two_factor_settings(user, "app")
 
-      token = Authentication.generate_token(settings)
+      token = Authentication.generate_token("app", 0, settings)
       params = %{"two_factor_code" => token}
 
       conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
@@ -215,7 +215,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
 
     test "confirm redirects without cached settings", %{conn: conn, user: user} do
       settings = Accounts.generate_and_cache_new_two_factor_settings(user, "app")
-      token = Authentication.generate_token(settings)
+      token = Authentication.generate_token("app", 0, settings)
       Accounts.clear_two_factor_settings(user)
       params = %{"two_factor_code" => token}
       conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
