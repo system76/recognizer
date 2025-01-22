@@ -622,6 +622,37 @@ defmodule Recognizer.Accounts do
     attrs
   end
 
+  def update_two_factor_issue_time(user, attrs, issue_time) do
+    %{
+      notification_preference: %{two_factor: preference},
+      two_factor_seed: seed
+    } = attrs
+
+
+    updated_attrs = %{
+      notification_preference: %{two_factor: preference},
+      recovery_codes: generate_new_recovery_codes(user),
+      two_factor_seed: seed,
+      two_factor_enabled: true,
+      two_factor_issue_time: issue_time
+    }
+
+    :ok =
+      Redix.noreply_command(:redix, [
+        "SET",
+        "two_factor_settings:#{user.id}",
+        Jason.encode!(updated_attrs),
+        "EX",
+        config(:cache_expiry),
+        "XX"
+    ])
+
+    attrs
+  end
+
+
+
+
   @doc """
   Sends a new notification message to the user to verify their _new_ two factor
   settings.
@@ -637,7 +668,6 @@ defmodule Recognizer.Accounts do
     token = Authentication.generate_token(preference, two_factor_issue_time, seed)
     Notification.deliver_two_factor_token(user, token, String.to_existing_atom(preference))
   end
-
 
   def send_new_two_factor_notification(user, attrs) do
     # attrs에서 preference와 seed 추출
@@ -702,26 +732,7 @@ defmodule Recognizer.Accounts do
       case new_issue_time do
 
         {:ok, issue_time} ->
-          # 필요한 필드를 attrs(혹은 updated_attrs)에 담아 Redis에 저장
-          updated_attrs = %{
-            notification_preference: %{two_factor: preference},
-            recovery_codes: generate_new_recovery_codes(user),
-            two_factor_seed: seed,
-            two_factor_enabled: true,
-            two_factor_issue_time: issue_time
-          }
-
-          IO.inspect(updated_attrs, label: "updated_attrs")
-
-          # 기존 키가 있을 때만 XX 옵션으로 업데이트(덮어쓰기)
-          Redix.command(:redix, [
-            "SET",
-            "two_factor_settings:#{user.id}",
-            Jason.encode!(updated_attrs),
-            "EX",
-            config(:cache_expiry),
-            "XX"
-          ])
+          update_two_factor_issue_time(user, attrs, issue_time)
 
         {:error, msg} ->
           IO.inspect(msg, label: "Error or No Settings")
@@ -751,10 +762,14 @@ defmodule Recognizer.Accounts do
   """
 
 
-  def confirm_and_save_two_factor_settings(code, user, counter) do
+  def confirm_and_save_two_factor_settings(code, counter, user) do
+    IO.inspect(code, label: "code")
+    IO.inspect(counter, label: "counter")
+    IO.inspect(user, label: "user")
     with {:ok, %{ notification_preference: %{two_factor: preference},
     two_factor_seed: seed} = attrs} <- get_new_two_factor_settings(user),
     true <- Authentication.valid_token?(preference, code, counter, seed) do
+
       user
       |> Repo.preload([:notification_preference, :recovery_codes])
       |> User.two_factor_changeset(attrs)

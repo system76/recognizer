@@ -82,19 +82,42 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   def two_factor_confirm(conn, params) do
     two_factor_code = Map.get(params, "two_factor_code", "")
     user = Authentication.fetch_current_user(conn)
-    counter = get_session(conn, :two_factor_issue_time)
-    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, user, counter) do
+
+    updated_conn = case get_session(conn, :two_factor_issue_time) do
+      nil ->
+        current_time = System.system_time(:second)
+        conn = put_session(conn, :two_factor_issue_time, current_time)
+        conn
+
+      _ -> conn
+    end
+
+    counter =
+      case get_session(conn, :two_factor_issue_time) do
+        nil ->
+          current_time = System.system_time(:second)
+          conn = put_session(conn, :two_factor_issue_time, current_time)
+          current_time
+
+        existing_counter -> existing_counter
+      end
+
+    IO.inspect(params, label: "params")
+    IO.inspect(counter, label: "two_factor_confirm")
+
+    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, counter, user) do
       {:ok, _updated_user} ->
         Accounts.clear_two_factor_settings(user)
 
-        conn
+        updated_conn
+        |> configure_session(drop: true) # Optional: Ensure a fresh session
         |> put_flash(:info, "Two factor code verified")
-        |> redirect(to: Routes.user_settings_path(conn, :edit))
+        |> redirect(to: Routes.user_settings_path(updated_conn, :edit))
 
       _ ->
-        conn
+        updated_conn
         |> put_flash(:error, "Two factor code is invalid")
-        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
+        |> redirect(to: Routes.user_settings_path(updated_conn, :two_factor_confirm))
     end
   end
 

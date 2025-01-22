@@ -180,8 +180,11 @@ defmodule RecognizerWeb.Authentication do
   @doc """
   Generate a Time Based One Time Password
   """
-  def generate_token(preference, counter, %{two_factor_seed: two_factor_seed}) do
-    if preference == "app" do
+  def generate_token(preference, counter, %{two_factor_seed: two_factor_seed}), do: generate_token(preference, counter, two_factor_seed)
+
+
+  def generate_token(preference, counter, two_factor_seed) do
+      if preference == "app" do
       generate_token_app(two_factor_seed)
     else
       generate_token_external(two_factor_seed, counter)
@@ -216,9 +219,6 @@ defmodule RecognizerWeb.Authentication do
     IO.inspect(two_factor_seed, label: "two_factor_seed")
     IO.inspect(token, label: "token")
     IO.inspect(counter, label: "counter")
-    IO.inspect(:pot.hotp(two_factor_seed, counter), label: "hotp")
-    IO.inspect(:pot.hotp(two_factor_seed, counter), label: "hotp")
-    IO.inspect(:pot.hotp(two_factor_seed, counter), label: "hotp")
     IO.inspect(:pot.hotp(two_factor_seed, counter), label: "hotp")
     IO.inspect(:pot.valid_hotp(token, two_factor_seed, [last: counter]), label: "valid_hotp")
     :pot.valid_hotp(token, two_factor_seed, [last: counter])

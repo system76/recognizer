@@ -138,7 +138,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
         # (2) 이미 발송 이력이 있고, 60초 이상 지난 경우
         current_time - two_factor_issue_time > 60 ->
 
-          token = Authentication.generate_token(method, two_factor_issue_time, current_user)
+          token = Authentication.generate_token(method, current_time, current_user)
           IO.inspect(token, label: "60secs after token")
 
           new_conn = conn

@@ -54,8 +54,9 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
     user = Authentication.fetch_current_user(conn)
     counter = get_session(conn, :two_factor_issue_time)
     IO.inspect(code, label: "code")
+    IO.inspect(counter, label: "update")
 
-    case Accounts.confirm_and_save_two_factor_settings(code, user, counter) do
+    case Accounts.confirm_and_save_two_factor_settings(code, counter, user) do
       {:ok, updated_user} ->
         render(conn, "show.json", user: updated_user)
 
