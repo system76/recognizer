@@ -88,30 +88,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     send_two_factor_notification(conn, current_user, method)
   end
 
-  # defp send_two_factor_notification(conn, current_user, method) do
-
-  #   if get_session(conn, :two_factor_sent) == false and :app != method do
-  #     IO.inspect(get_session(conn, :two_factor_issue_time), label: "TWO_FACTOR_ISSUE_TIME")
-  #     two_factor_issue_time = get_session(conn, :two_factor_issue_time)
-  #     current_time = System.system_time(:second)
-  #     if two_factor_issue_time == nil do
-  #       token = Authentication.generate_token(current_user)
-  #       IO.inspect(token, label: "token")
-  #       Account.deliver_two_factor_token(current_user, token, method)
-  #       put_session(conn, :two_factor_sent, true)
-  #       put_session(conn, :two_factor_issue_time, current_time)
-  #     else
-  #       if current_time - two_factor_issue_time > 60 do
-  #         token = Authentication.generate_token(current_user)
-  #         IO.inspect(token, label: "token")
-  #         Account.deliver_two_factor_token(current_user, token, method)
-  #         put_session(conn, :two_factor_sent, true)
-  #         put_session(conn, :two_factor_issue_time, current_time)
-  #       end
-  #     end
-  #   end
-  # end
-
   defp send_two_factor_notification(conn, current_user, method) do
     if method != :app do
       two_factor_issue_time = get_session(conn, :two_factor_issue_time)
