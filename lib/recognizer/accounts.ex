@@ -700,11 +700,11 @@ defmodule Recognizer.Accounts do
               # 기존 발급 시간 존재
               last_issue_time = settings.two_factor_issue_time
               # 로직상: 현재 시각 - 기존 발급 시각 > 60초 => 즉, 1분 이상이면 토큰을 재발송
-              IO.inspect(current_time - last_issue_time, label: "time diff")
+              IO.inspect(current_time - current_time, label: "time diff")
               if current_time - last_issue_time > 60 do
                 IO.inspect("true", label: "true true")  # 실제론 '너무 이르다'일 수도 있음
-                deliver_two_factor_token(user, seed, preference, last_issue_time)
-                {:ok, last_issue_time}
+                deliver_two_factor_token(user, seed, preference, current_time)
+                {:ok, current_time}
               else
                 IO.inspect("true", label: "true false")
                 # 여기서는 별도 토큰 발송 없이 기존 시간만 유지
@@ -766,6 +766,8 @@ defmodule Recognizer.Accounts do
     IO.inspect(code, label: "code")
     IO.inspect(counter, label: "counter")
     IO.inspect(user, label: "user")
+
+
     with {:ok, %{ notification_preference: %{two_factor: preference},
     two_factor_seed: seed} = attrs} <- get_new_two_factor_settings(user),
     true <- Authentication.valid_token?(preference, code, counter, seed) do
