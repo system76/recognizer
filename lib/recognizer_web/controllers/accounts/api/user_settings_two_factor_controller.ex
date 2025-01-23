@@ -87,20 +87,20 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
 
       case Accounts.send_new_two_factor_notification(user, settings, issue_time) do
         {:ok, updated_issue_time} when not is_nil(updated_issue_time) ->
-          IO.inspect(updated_issue_time, label: "Updated Issue Time")
+          IO.inspect(updated_issue_time, label: "send - Updated Issue Time")
 
           conn
           |> put_session(:two_factor_issue_time, updated_issue_time)
           |> put_status(202)
           |> render("show.json", settings: settings, user: user)
+          conn
 
         {:ok, nil} ->
           IO.inspect("No issue time updated", label: "TwoFactorNotification")
-
           conn
           |> put_status(202)
           |> render("show.json", settings: settings, user: user)
-
+          conn
         {:error, reason} ->
           conn
           |> put_status(400)

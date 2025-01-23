@@ -60,7 +60,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       case Accounts.send_new_two_factor_notification(user, settings, issue_time) do
         {:ok, update_issue_time} ->
           updated_conn = put_session(conn, :two_factor_issue_time, update_issue_time)
-          IO.inspect(update_issue_time, label: "Updated Issue Time")
+          IO.inspect(update_issue_time, label: "two_factor_init-Updated Issue Time")
           updated_conn
       end
       render(updated_conn, "confirm_two_factor_external.html")
@@ -103,23 +103,21 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   def two_factor_confirm(conn, params) do
     two_factor_code = Map.get(params, "two_factor_code", "")
     user = Authentication.fetch_current_user(conn)
+    current_time = System.system_time(:second)
+    IO.inspect(current_time, label: "Generated from two_factor_confirm - current time")
 
+    sessnion_time = get_session(conn, :two_factor_issue_time)
+    IO.inspect(sessnion_time, label: "Generated from two_factor_confirm - session time")
     updated_conn = case get_session(conn, :two_factor_issue_time) do
       nil ->
-        current_time = System.system_time(:second)
-        IO.inspect(current_time, label: "Generated from two_factor_confirm - current time")
         conn = put_session(conn, :two_factor_issue_time, current_time)
         conn
-
-      _ -> conn
+      _ ->
+        conn
     end
 
     counter = get_session(updated_conn, :two_factor_issue_time)
     IO.inspect(counter, label: "Generated from two_factor_confirm - counter time")
-
-    IO.inspect(params, label: "params")
-    IO.inspect(counter, label: "two_factor_confirm")
-
     case Accounts.confirm_and_save_two_factor_settings(two_factor_code, counter, user) do
       {:ok, _updated_user} ->
         Accounts.clear_two_factor_settings(user)

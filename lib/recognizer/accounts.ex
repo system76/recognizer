@@ -626,6 +626,8 @@ defmodule Recognizer.Accounts do
   defp deliver_two_factor_token(user, seed, preference, two_factor_issue_time) do
     IO.inspect("deliver_two_factor_token", label: "deliver_two_factor_token")
     token = Authentication.generate_token(preference, two_factor_issue_time, seed)
+    IO.inspect(two_factor_issue_time, label: "deliver_two_factor_token - two_factor_issue_time")
+    IO.inspect(token, label: "deliver_two_factor_token - token")
     Notification.deliver_two_factor_token(user, token, String.to_existing_atom(preference))
   end
 
@@ -635,7 +637,7 @@ defmodule Recognizer.Accounts do
   """
   def send_new_two_factor_notification(user) do
     {:ok, attrs} = get_new_two_factor_settings(user)
-    send_new_two_factor_notification(user, attrs, System.system_time(:second))
+    send_new_two_factor_notification(user, attrs, 100)
   end
 
 
