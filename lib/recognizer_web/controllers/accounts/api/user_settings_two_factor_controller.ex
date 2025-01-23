@@ -74,11 +74,44 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
   def send(conn, _params) do
     user = Authentication.fetch_current_user(conn)
 
-    with {:ok, settings} <- Accounts.get_new_two_factor_settings(user),
-         :ok <- Accounts.send_new_two_factor_notification(user, settings) do
-      conn
-      |> put_status(202)
-      |> render("show.json", settings: settings, user: user)
+    with {:ok, settings} <- Accounts.get_new_two_factor_settings(user) do
+      # Get or initialize the two_factor_issue_time from the session
+
+      conn =
+        case get_session(conn, :two_factor_issue_time) do
+          nil -> put_session(conn, :two_factor_issue_time, System.system_time(:second))
+          _ -> conn
+        end
+
+      issue_time = get_session(conn, :two_factor_issue_time)
+
+      case Accounts.send_new_two_factor_notification(user, settings, issue_time) do
+        {:ok, updated_issue_time} when not is_nil(updated_issue_time) ->
+          IO.inspect(updated_issue_time, label: "Updated Issue Time")
+
+          conn
+          |> put_session(:two_factor_issue_time, updated_issue_time)
+          |> put_status(202)
+          |> render("show.json", settings: settings, user: user)
+
+        {:ok, nil} ->
+          IO.inspect("No issue time updated", label: "TwoFactorNotification")
+
+          conn
+          |> put_status(202)
+          |> render("show.json", settings: settings, user: user)
+
+        {:error, reason} ->
+          conn
+          |> put_status(400)
+          |> json(%{error: reason})
+      end
+    else
+      {:error, reason} ->
+        conn
+        |> put_status(400)
+        |> json(%{error: reason})
     end
   end
+
 end

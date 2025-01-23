@@ -106,7 +106,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
           |> put_session(:two_factor_sent, true)
           |> put_session(:two_factor_issue_time, current_time)
 
-          IO.inspect(get_session(conn, :two_factor_issue_time))
+          IO.inspect(get_session(conn, :two_factor_issue_time), label: "send_two_factor_notification - two_factor_issue_time(1)")
 
           Account.deliver_two_factor_token(current_user, token, method)
           new_conn
@@ -120,6 +120,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
           new_conn = conn
           |> put_session(:two_factor_sent, true)
           |> put_session(:two_factor_issue_time, current_time)
+          IO.inspect(get_session(conn, :two_factor_issue_time), label: "send_two_factor_notification - two_factor_issue_time(2)")
 
           Account.deliver_two_factor_token(current_user, token, method)
           new_conn
@@ -135,6 +136,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
             |> put_session(:two_factor_sent, true)
             |> put_session(:two_factor_issue_time, two_factor_issue_time)
 
+            IO.inspect(get_session(conn, :two_factor_issue_time), label: "send_two_factor_notification - two_factor_issue_time (3)")
             Account.deliver_two_factor_token(current_user, token, method)
             new_conn
 

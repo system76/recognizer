@@ -41,8 +41,29 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       Accounts.get_new_two_factor_settings(user)
 
     if method == "text" || method == "voice" || method == "email" do
-      :ok = Accounts.send_new_two_factor_notification(user, settings)
-      render(conn, "confirm_two_factor_external.html")
+      current_time = System.system_time(:second)
+      updated_conn = case get_session(conn, :two_factor_issue_time) do
+        nil ->
+          conn
+          |> put_session(:two_factor_issue_time, current_time)
+          conn
+        _ ->
+          conn
+      end
+      issue_time = case get_session(updated_conn, :two_factor_issue_time) do
+        nil ->
+          current_time
+        _ ->
+          get_session(updated_conn, :two_factor_issue_time)
+      end
+
+      case Accounts.send_new_two_factor_notification(user, settings, issue_time) do
+        {:ok, update_issue_time} ->
+          updated_conn = put_session(conn, :two_factor_issue_time, update_issue_time)
+          IO.inspect(update_issue_time, label: "Updated Issue Time")
+          updated_conn
+      end
+      render(updated_conn, "confirm_two_factor_external.html")
     else
       render(conn, "confirm_two_factor.html",
         barcode: Authentication.generate_totp_barcode(user, seed),
@@ -86,21 +107,15 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     updated_conn = case get_session(conn, :two_factor_issue_time) do
       nil ->
         current_time = System.system_time(:second)
+        IO.inspect(current_time, label: "Generated from two_factor_confirm - current time")
         conn = put_session(conn, :two_factor_issue_time, current_time)
         conn
 
       _ -> conn
     end
 
-    counter =
-      case get_session(conn, :two_factor_issue_time) do
-        nil ->
-          current_time = System.system_time(:second)
-          conn = put_session(conn, :two_factor_issue_time, current_time)
-          current_time
-
-        existing_counter -> existing_counter
-      end
+    counter = get_session(updated_conn, :two_factor_issue_time)
+    IO.inspect(counter, label: "Generated from two_factor_confirm - counter time")
 
     IO.inspect(params, label: "params")
     IO.inspect(counter, label: "two_factor_confirm")

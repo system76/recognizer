@@ -622,37 +622,6 @@ defmodule Recognizer.Accounts do
     attrs
   end
 
-  def update_two_factor_issue_time(user, attrs, issue_time) do
-    %{
-      notification_preference: %{two_factor: preference},
-      two_factor_enabled: enabled,
-      two_factor_seed: seed
-    } = attrs
-
-
-    updated_attrs = %{
-      notification_preference: %{two_factor: preference},
-      recovery_codes: generate_new_recovery_codes(user),
-      two_factor_seed: seed,
-      two_factor_enabled: enabled,
-      two_factor_issue_time: issue_time
-    }
-
-    :ok =
-      Redix.noreply_command(:redix, [
-        "SET",
-        "two_factor_settings:#{user.id}",
-        Jason.encode!(updated_attrs),
-        "EX",
-        config(:cache_expiry),
-        "XX"
-    ])
-
-    updated_attrs
-  end
-
-
-
   # 토큰 발송 로직을 별도 함수로 분리해 중복 제거
   defp deliver_two_factor_token(user, seed, preference, two_factor_issue_time) do
     IO.inspect("deliver_two_factor_token", label: "deliver_two_factor_token")
@@ -666,11 +635,11 @@ defmodule Recognizer.Accounts do
   """
   def send_new_two_factor_notification(user) do
     {:ok, attrs} = get_new_two_factor_settings(user)
-    send_new_two_factor_notification(user, attrs)
+    send_new_two_factor_notification(user, attrs, System.system_time(:second))
   end
 
 
-  def send_new_two_factor_notification(user, attrs) do
+  def send_new_two_factor_notification(user, attrs, two_factor_issue_time) do
     # attrs에서 preference와 seed 추출
     %{
       notification_preference: %{two_factor: preference},
@@ -684,66 +653,19 @@ defmodule Recognizer.Accounts do
       # 현재 시각(초 단위)
       current_time = System.system_time(:second)
 
-      # Redis에서 기존 2FA 설정 조회
-      redis_result = get_new_two_factor_settings(user)
       # 이 변수를 통해 최종적으로 two_factor_issue_time에 어떤 값을 넣을지 결정
-      new_issue_time =
-        case redis_result do
-          # 1) Redis에 설정이 없음
-          {:ok, nil} ->
-            {:error, "No settings found for user #{user.id}"}
-
-          # 2) Redis에서 JSON 맵을 정상적으로 읽어옴
-          {:ok, settings} when is_map(settings) ->
-            IO.inspect(settings, label: "settings")
-
-            if Map.has_key?(settings, :two_factor_issue_time) do
-              # 기존 발급 시간 존재
-              last_issue_time = settings.two_factor_issue_time
-              # 로직상: 현재 시각 - 기존 발급 시각 > 60초 => 즉, 1분 이상이면 토큰을 재발송
-              IO.inspect(current_time - current_time, label: "time diff")
-              if current_time - last_issue_time > 60 do
-                IO.inspect("true", label: "true true")  # 실제론 '너무 이르다'일 수도 있음
-                deliver_two_factor_token(user, seed, preference, current_time)
-                {:ok, current_time}
-              else
-                IO.inspect("true", label: "true false")
-                # 여기서는 별도 토큰 발송 없이 기존 시간만 유지
-                {:ok, last_issue_time}
-              end
-
-            else
-              # 기존 발급 시간이 없으면(키 자체는 있지만 필드 누락)
-              IO.inspect("false", label: "false")
-              # 새로 토큰 발급
-              deliver_two_factor_token(user, seed, preference, current_time)
-              # 이번 발급 시각을 기록
-              {:ok, current_time}
-            end
-
-          # 3) Redis 에러 또는 예기치 않은 값
-          {:error, reason} ->
-            {:error, "Failed to fetch or decode settings: #{inspect(reason)}"}
-
-          other ->
-            {:error, "Unexpected result: #{inspect(other)}"}
-        end
-
-      # 위 case 결과에 따라 Redis에 다시 저장
-      case new_issue_time do
-
-        {:ok, issue_time} ->
-          update_two_factor_issue_time(user, attrs, issue_time)
-
-        {:error, msg} ->
-          IO.inspect(msg, label: "Error or No Settings")
-          # 필요 시 추가 처리 가능 (return, 로그 등)
-
-          IO.inspect("No operation performed", label: "No Update")
+      if current_time - two_factor_issue_time > 60 do
+        IO.inspect(current_time, label: "two_factor_issue_time exist > 60")
+        deliver_two_factor_token(user, seed, preference, current_time)
+        {:ok, current_time}
+      else
+        IO.inspect(two_factor_issue_time, label: "two_factor_issue_time exist < 60")
+        # 여기서는 별도 토큰 발송 없이 기존 시간만 유지
+        {:ok, two_factor_issue_time}
       end
+    else
+      {:ok, nil}
     end
-
-    :ok
   end
 
   @doc """
@@ -764,11 +686,6 @@ defmodule Recognizer.Accounts do
 
 
   def confirm_and_save_two_factor_settings(code, counter, user) do
-    IO.inspect(code, label: "code")
-    IO.inspect(counter, label: "counter")
-    IO.inspect(user, label: "user")
-
-
     with {:ok, %{ notification_preference: %{two_factor: preference},
     two_factor_seed: seed} = attrs} <- get_new_two_factor_settings(user),
     true <- Authentication.valid_token?(preference, code, counter, seed) do

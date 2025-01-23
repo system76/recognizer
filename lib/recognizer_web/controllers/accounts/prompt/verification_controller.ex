@@ -34,6 +34,7 @@ defmodule RecognizerWeb.Accounts.Prompt.VerificationController do
   end
 
   def resend(%{assigns: %{user: %{verified_at: nil} = user}} = conn, _params) do
+    IO.inspect(user, label: "########################### user from resend!!!!!! Why?????")
     Accounts.resend_verification_code(user, &Routes.verification_code_url(conn, :new, &1))
     render(conn, "new.html", resend?: true, email: user.email)
   end
