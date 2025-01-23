@@ -211,16 +211,7 @@ defmodule RecognizerWeb.Authentication do
   def valid_token_app?(token, two_factor_seed), do: :pot.valid_totp(token, two_factor_seed, [interval: 30])
 
   def valid_token_external?(token, two_factor_seed, counter) do
-    #secret_binary = :pot.secret32decode(two_factor_seed)
-    # secret_binary = :pot.secret32encode(two_factor_seed)
-    # secret_binary = Base32.encode(two_factor_seed)
-    # :pot.valid_hotp([secret: secret_binary], token, counter)
-    IO.inspect("valid_token_external", label: "valid_token_external")
-    IO.inspect(two_factor_seed, label: "two_factor_seed")
-    IO.inspect(token, label: "token")
-    IO.inspect(counter, label: "counter")
-    IO.inspect(:pot.hotp(two_factor_seed, counter), label: "hotp")
-    IO.inspect(:pot.valid_hotp(token, two_factor_seed, [last: counter]), label: "valid_hotp")
+    ## TODO : check valid_hotp and move to it
     :pot.valid_hotp(token, two_factor_seed, [last: counter])
     token == :pot.hotp(two_factor_seed, counter)
   end

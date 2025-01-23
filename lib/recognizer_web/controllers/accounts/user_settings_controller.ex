@@ -42,9 +42,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
     if method == "text" || method == "voice" || method == "email" do
       current_time = System.system_time(:second)
-      IO.inspect(current_time, label: "two_factor_init-Current Time")
       session_time = get_session(conn, :two_factor_issue_time)
-      IO.inspect(session_time, label: "two_factor_init-Session Time")
 
       issue_time = if session_time == nil do
         current_time - 61
@@ -54,9 +52,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
       updated_conn = case Accounts.send_new_two_factor_notification(user, settings, issue_time) do
         {:ok, update_issue_time} ->
-          IO.inspect(update_issue_time, label: "two_factor_init- updated issue time")
           conn = put_session(conn, :two_factor_issue_time, update_issue_time)
-          IO.inspect(update_issue_time, label: "two_factor_init-Updated Issue Time")
           conn
       end
       render(updated_conn, "confirm_two_factor_external.html")
@@ -100,10 +96,8 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     two_factor_code = Map.get(params, "two_factor_code", "")
     user = Authentication.fetch_current_user(conn)
     current_time = System.system_time(:second)
-    IO.inspect(current_time, label: "Generated from two_factor_confirm - current time")
 
     session_time = get_session(conn, :two_factor_issue_time)
-    IO.inspect(session_time, label: "Generated from two_factor_confirm - session time")
     updated_conn = if session_time == nil do
       conn = put_session(conn, :two_factor_issue_time, current_time)
       conn
@@ -112,7 +106,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
 
     counter = get_session(updated_conn, :two_factor_issue_time)
-    IO.inspect(counter, label: "Generated from two_factor_confirm - counter time")
     case Accounts.confirm_and_save_two_factor_settings(two_factor_code, counter, user) do
       {:ok, _updated_user} ->
         Accounts.clear_two_factor_settings(user)
