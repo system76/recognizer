@@ -102,14 +102,13 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     current_time = System.system_time(:second)
     IO.inspect(current_time, label: "Generated from two_factor_confirm - current time")
 
-    sessnion_time = get_session(conn, :two_factor_issue_time)
-    IO.inspect(sessnion_time, label: "Generated from two_factor_confirm - session time")
-    updated_conn = case get_session(conn, :two_factor_issue_time) do
-      nil ->
-        conn = put_session(conn, :two_factor_issue_time, current_time)
-        conn
-      _ ->
-        conn
+    session_time = get_session(conn, :two_factor_issue_time)
+    IO.inspect(session_time, label: "Generated from two_factor_confirm - session time")
+    updated_conn = if session_time == nil do
+      conn = put_session(conn, :two_factor_issue_time, current_time)
+      conn
+    else
+      conn
     end
 
     counter = get_session(updated_conn, :two_factor_issue_time)
@@ -119,7 +118,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
         Accounts.clear_two_factor_settings(user)
 
         updated_conn
-        |> configure_session(drop: true) # Optional: Ensure a fresh session
         |> put_flash(:info, "Two factor code verified")
         |> redirect(to: Routes.user_settings_path(updated_conn, :edit))
 
