@@ -13,7 +13,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user_settings:two_factor", @one_minute, 2},
+         rate_limit: {"user_settings:two_factor", @one_minute, 200},
          by: {:conn, &__MODULE__.two_factor_rate_key/1},
          when_nil: :pass,
          on_deny: &__MODULE__.two_factor_rate_limited/2
@@ -42,26 +42,22 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
     if method == "text" || method == "voice" || method == "email" do
       current_time = System.system_time(:second)
-      updated_conn = case get_session(conn, :two_factor_issue_time) do
-        nil ->
-          conn
-          |> put_session(:two_factor_issue_time, current_time)
-          conn
-        _ ->
-          conn
-      end
-      issue_time = case get_session(updated_conn, :two_factor_issue_time) do
-        nil ->
-          current_time
-        _ ->
-          get_session(updated_conn, :two_factor_issue_time)
+      IO.inspect(current_time, label: "two_factor_init-Current Time")
+      session_time = get_session(conn, :two_factor_issue_time)
+      IO.inspect(session_time, label: "two_factor_init-Session Time")
+
+      issue_time = if session_time == nil do
+        current_time - 61
+      else
+        session_time
       end
 
-      case Accounts.send_new_two_factor_notification(user, settings, issue_time) do
+      updated_conn = case Accounts.send_new_two_factor_notification(user, settings, issue_time) do
         {:ok, update_issue_time} ->
-          updated_conn = put_session(conn, :two_factor_issue_time, update_issue_time)
+          IO.inspect(update_issue_time, label: "two_factor_init- updated issue time")
+          conn = put_session(conn, :two_factor_issue_time, update_issue_time)
           IO.inspect(update_issue_time, label: "two_factor_init-Updated Issue Time")
-          updated_conn
+          conn
       end
       render(updated_conn, "confirm_two_factor_external.html")
     else
