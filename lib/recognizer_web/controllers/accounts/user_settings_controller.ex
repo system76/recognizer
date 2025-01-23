@@ -13,7 +13,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user_settings:two_factor", @one_minute, 200},
+         rate_limit: {"user_settings:two_factor", @one_minute, 2},
          by: {:conn, &__MODULE__.two_factor_rate_key/1},
          when_nil: :pass,
          on_deny: &__MODULE__.two_factor_rate_limited/2

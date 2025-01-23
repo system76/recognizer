@@ -13,7 +13,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user:two_factor", @one_minute, 3},
+         rate_limit: {"user:two_factor", @one_minute, 2},
          by: {:session, :two_factor_user_id}
        ]
        when action in [:resend]
@@ -88,6 +88,16 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     send_two_factor_notification(conn, current_user, method)
   end
 
+
+  defp deliver_and_update_token(conn, current_user, method, issue_time) do
+    token = Authentication.generate_token(method, issue_time, current_user)
+
+    conn
+    |> put_session(:two_factor_sent, true)
+    |> put_session(:two_factor_issue_time, issue_time)
+    |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
+  end
+
   defp send_two_factor_notification(conn, current_user, method) do
     if method != :app do
       two_factor_issue_time = get_session(conn, :two_factor_issue_time)
@@ -95,38 +105,17 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
       cond do
         two_factor_issue_time == nil ->
-          token = Authentication.generate_token(method, two_factor_issue_time, current_user)
-
-          new_conn = conn
-          |> put_session(:two_factor_sent, true)
-          |> put_session(:two_factor_issue_time, current_time)
-
-
-          Account.deliver_two_factor_token(current_user, token, method)
-          new_conn
+          conn
+          |> deliver_and_update_token(current_user, method, current_time)
 
         current_time - two_factor_issue_time > 60 ->
-
-          token = Authentication.generate_token(method, current_time, current_user)
-
-          new_conn = conn
-          |> put_session(:two_factor_sent, true)
-          |> put_session(:two_factor_issue_time, current_time)
-
-          Account.deliver_two_factor_token(current_user, token, method)
-          new_conn
+          conn
+          |> deliver_and_update_token(current_user, method, current_time)
 
         true ->
           if get_session(conn, :two_factor_sent) == false do
-            token = Authentication.generate_token(method, two_factor_issue_time, current_user)
-
-            new_conn = conn
-            |> put_session(:two_factor_sent, true)
-            |> put_session(:two_factor_issue_time, two_factor_issue_time)
-
-            Account.deliver_two_factor_token(current_user, token, method)
-            new_conn
-
+            conn
+            |> deliver_and_update_token(current_user, method, two_factor_issue_time)
           else
             conn
           end
