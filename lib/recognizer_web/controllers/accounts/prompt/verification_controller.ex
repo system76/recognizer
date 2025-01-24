@@ -11,7 +11,7 @@ defmodule RecognizerWeb.Accounts.Prompt.VerificationController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user:verification", @one_minute, 1},
+         rate_limit: {"user:verification", @one_minute, 2},
          by: {:conn, &get_user_id_from_unverified_request/1}
        ]
        when action in [:resend]

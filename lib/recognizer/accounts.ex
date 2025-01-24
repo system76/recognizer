@@ -622,12 +622,8 @@ defmodule Recognizer.Accounts do
     attrs
   end
 
-  # 토큰 발송 로직을 별도 함수로 분리해 중복 제거
   defp deliver_two_factor_token(user, seed, preference, two_factor_issue_time) do
-    IO.inspect("deliver_two_factor_token", label: "deliver_two_factor_token")
     token = Authentication.generate_token(preference, two_factor_issue_time, seed)
-    IO.inspect(two_factor_issue_time, label: "deliver_two_factor_token - two_factor_issue_time")
-    IO.inspect(token, label: "deliver_two_factor_token - token")
     Notification.deliver_two_factor_token(user, token, String.to_existing_atom(preference))
   end
 
@@ -642,27 +638,18 @@ defmodule Recognizer.Accounts do
 
 
   def send_new_two_factor_notification(user, attrs, two_factor_issue_time) do
-    # attrs에서 preference와 seed 추출
     %{
       notification_preference: %{two_factor: preference},
       two_factor_seed: seed
     } = attrs
 
-    IO.inspect("send_new_two_factor_notification", label: "send_new_two_factor_notification")
-
-    # preference가 "app"이 아닐 때만 처리
     if preference != "app" do
-      # 현재 시각(초 단위)
       current_time = System.system_time(:second)
 
-      # 이 변수를 통해 최종적으로 two_factor_issue_time에 어떤 값을 넣을지 결정
       if current_time - two_factor_issue_time > 60 do
-        IO.inspect(current_time, label: "two_factor_issue_time exist > 60")
         deliver_two_factor_token(user, seed, preference, current_time)
         {:ok, current_time}
       else
-        IO.inspect(two_factor_issue_time, label: "two_factor_issue_time exist < 60")
-        # 여기서는 별도 토큰 발송 없이 기존 시간만 유지
         {:ok, two_factor_issue_time}
       end
     else

@@ -231,7 +231,7 @@
         </div>
       <% end %>
 
-      <%= if @allow_phone_methods do %>
+      <%= if @allow_phone_methods && false do %>
         <p class="is-size-7">
           Message and data rates may apply for text message and phone call
           methods.

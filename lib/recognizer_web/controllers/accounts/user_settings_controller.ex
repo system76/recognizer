@@ -13,7 +13,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user_settings:two_factor", @one_minute, 200},
+         rate_limit: {"user_settings:two_factor", @one_minute, 2},
          by: {:conn, &__MODULE__.two_factor_rate_key/1},
          when_nil: :pass,
          on_deny: &__MODULE__.two_factor_rate_limited/2
@@ -31,6 +31,24 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
+
+  def resend(conn, _params) do
+
+    IO.inspect("resend")
+    # current_user_id = get_session(conn, :two_factor_user_id)
+    # current_user = Accounts.get_user!(current_user_id)
+    current_user = Authentication.fetch_current_user(conn)
+
+    conn
+    |> send_two_factor_notification(current_user)
+
+    conn
+    |> put_flash(:info, "Two factor code has been resent")
+    |> render("confirm_two_factor_external.html")
+    |> halt()
+
+  end
+
   @doc """
   Generate codes for a new two factor setup
   """
@@ -41,6 +59,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       Accounts.get_new_two_factor_settings(user)
 
     if method == "text" || method == "voice" || method == "email" do
+      IO.inspect("trigger", label: "two_factor_init")
       current_time = System.system_time(:second)
       session_time = get_session(conn, :two_factor_issue_time)
 
@@ -97,27 +116,42 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     user = Authentication.fetch_current_user(conn)
     current_time = System.system_time(:second)
 
-    session_time = get_session(conn, :two_factor_issue_time)
-    updated_conn = if session_time == nil do
-      conn = put_session(conn, :two_factor_issue_time, current_time)
+    if get_session(conn, :two_factor_issue_time) == nil do
       conn
-    else
-      conn
+        |> put_session(:two_factor_issue_time, current_time)
     end
 
-    counter = get_session(updated_conn, :two_factor_issue_time)
-    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, counter, user) do
+    two_factor_issue_time = get_session(conn, :two_factor_issue_time)
+
+
+    # session_time = get_session(conn, :two_factor_issue_time)
+    # updated_conn = if session_time == nil do
+    #   conn = put_session(conn, :two_factor_issue_time, current_time)
+    #   conn
+    # else
+    #   conn
+    # end
+
+    # counter = get_session(updated_conn, :two_factor_issue_time)
+    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, two_factor_issue_time, user) do
       {:ok, _updated_user} ->
-        Accounts.clear_two_factor_settings(user)
 
-        updated_conn
-        |> put_flash(:info, "Two factor code verified")
-        |> redirect(to: Routes.user_settings_path(updated_conn, :edit))
+        if current_time - two_factor_issue_time > 900 do
+          conn
+          |> put_session(:two_factor_issue_time, current_time)
+          |> put_flash(:error, "Two factor code is expired, Check new Two factor code and please try again")
+          |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
+        else
+          Accounts.clear_two_factor_settings(user)
 
+          conn
+          |> put_flash(:info, "Two factor code verified")
+          |> redirect(to: Routes.user_settings_path(conn, :edit))
+        end
       _ ->
-        updated_conn
+        conn
         |> put_flash(:error, "Two factor code is invalid")
-        |> redirect(to: Routes.user_settings_path(updated_conn, :two_factor_confirm))
+        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
     end
   end
 
@@ -229,4 +263,39 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     |> assign(:redirect_home, home_uri)
     |> assign(:allow_phone_methods, !is_admin)
   end
+
+  defp send_two_factor_notification(conn, %{notification_preference: %{two_factor: method}} = current_user) do
+    send_two_factor_notification(conn, current_user, method)
+  end
+
+
+  defp send_two_factor_notification(conn, current_user, method) do
+    if method != :app do
+      two_factor_issue_time = get_session(conn, :two_factor_issue_time)
+      current_time = System.system_time(:second)
+
+      if two_factor_issue_time == nil do
+        conn
+        |> deliver_and_update_token(current_user, method, current_time)
+      else
+        if current_time - two_factor_issue_time > 60 do
+          conn
+          |> deliver_and_update_token(current_user, method, current_time)
+        else
+          conn
+        end
+      end
+    end
+  end
+
+  defp deliver_and_update_token(conn, current_user, method, issue_time) do
+    Authentication.generate_token(method, issue_time, current_user)
+
+    conn
+    |> put_session(:two_factor_sent, true)
+    |> put_session(:two_factor_issue_time, issue_time)
+    # |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
+  end
+
+
 end

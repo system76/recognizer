@@ -13,7 +13,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user:two_factor", @one_minute, 3},
+         rate_limit: {"user:two_factor", @one_minute, 2},
          by: {:session, :two_factor_user_id}
        ]
        when action in [:resend]
@@ -36,7 +36,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
     %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
     conn
-    |> maybe_send_two_factor_notification(current_user, two_factor_method)
+    # |> maybe_send_two_factor_notification(current_user, two_factor_method)
     |> render("new.html", two_factor_method: two_factor_method)
   end
 
@@ -45,28 +45,33 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   """
   def create(conn, %{"user" => %{"two_factor_code" => two_factor_code}}) do
     current_user_id = get_session(conn, :two_factor_user_id)
-    two_factor_issue_time = get_session(conn, :two_factor_issue_time)
     current_user = Accounts.get_user!(current_user_id)
+    current_time = System.system_time(:second)
     %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
 
-    if two_factor_issue_time == nil do
-      current_time = System.system_time(:second)
+    if get_session(conn, :two_factor_issue_time) == nil do
       conn
         |> put_session(:two_factor_issue_time, current_time)
-      if Authentication.valid_token?(two_factor_method, two_factor_code, current_time, current_user) do
-        Authentication.log_in_user(conn, current_user)
+    end
 
-      else
-        conn
-        |> put_flash(:error, "Invalid security code")
-        |> redirect(to: Routes.user_two_factor_path(conn, :new))
-      end
+    two_factor_issue_time = get_session(conn, :two_factor_issue_time)
 
+    if current_time - two_factor_issue_time > 900 do # 15 minutes
+      IO.inspect("Two factor code is expired, Check new Two factor code and please try again", label: "Two factor code is expired, Check new Two factor code and please try again")
+
+      conn
+      |> send_two_factor_notification(current_user, two_factor_method)
+
+      conn
+      |> put_flash(:error, "Two factor code is expired, Check new Two factor code and please try again")
+      |> redirect(to: Routes.user_two_factor_path(conn, :new))
     else
-
+      IO.inspect("Two factor code is valid", label: "Two factor code is valid")
       if Authentication.valid_token?(two_factor_method, two_factor_code, two_factor_issue_time, current_user) do
         Authentication.log_in_user(conn, current_user)
+
       else
+        IO.inspect("Two factor code is invalid", label: "Two factor code is invalid")
         conn
         |> put_flash(:error, "Invalid security code")
         |> redirect(to: Routes.user_two_factor_path(conn, :new))
@@ -74,71 +79,87 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     end
   end
 
+  @spec resend(Plug.Conn.t(), any()) :: Plug.Conn.t()
   def resend(conn, _params) do
     current_user_id = get_session(conn, :two_factor_user_id)
     current_user = Accounts.get_user!(current_user_id)
+    current_time = System.system_time(:second)
+
+    %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
+
+    # conn
+    # |> put_session(:two_factor_sent, true)
+    # |> put_session(:two_factor_issue_time, current_time)
+
+
+    if current_user_id != nil do
+      conn
+      |> put_session(:two_factor_sent, true)
+      |> put_session(:two_factor_issue_time, current_time)
+      |> render("new.html", two_factor_method: two_factor_method)
+    else
+      redirect(conn, to: Routes.user_two_factor_path(conn, :create))
+    end
+
+
+
+    %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
+
+    # updated_conn =
+    # updated_conn
 
     conn
-    |> send_two_factor_notification(current_user)
+    |> put_session(:two_factor_sent, true)
+    |> put_session(:two_factor_issue_time, current_time)
+
+    conn
+    |> send_two_factor_notification(current_user, two_factor_method)
+
+    conn
     |> put_flash(:info, "Two factor code has been resent")
     |> redirect(to: Routes.user_two_factor_path(conn, :new))
+  end
+
+  defp deliver_and_update_token(conn, current_user, method, issue_time) do
+    token = Authentication.generate_token(method, issue_time, current_user)
+
+    conn
+    |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
   end
 
   defp send_two_factor_notification(conn, %{notification_preference: %{two_factor: method}} = current_user) do
     send_two_factor_notification(conn, current_user, method)
   end
 
+
   defp send_two_factor_notification(conn, current_user, method) do
     if method != :app do
       two_factor_issue_time = get_session(conn, :two_factor_issue_time)
       current_time = System.system_time(:second)
 
-      cond do
-        two_factor_issue_time == nil ->
-          token = Authentication.generate_token(method, two_factor_issue_time, current_user)
-
-          new_conn = conn
-          |> put_session(:two_factor_sent, true)
-          |> put_session(:two_factor_issue_time, current_time)
-
-
-          Account.deliver_two_factor_token(current_user, token, method)
-          new_conn
-
-        current_time - two_factor_issue_time > 60 ->
-
-          token = Authentication.generate_token(method, current_time, current_user)
-
-          new_conn = conn
-          |> put_session(:two_factor_sent, true)
-          |> put_session(:two_factor_issue_time, current_time)
-
-          Account.deliver_two_factor_token(current_user, token, method)
-          new_conn
-
-        true ->
-          if get_session(conn, :two_factor_sent) == false do
-            token = Authentication.generate_token(method, two_factor_issue_time, current_user)
-
-            new_conn = conn
-            |> put_session(:two_factor_sent, true)
-            |> put_session(:two_factor_issue_time, two_factor_issue_time)
-
-            Account.deliver_two_factor_token(current_user, token, method)
-            new_conn
-
-          else
-            conn
-          end
+      IO.inspect(two_factor_issue_time, label: "Two factor issue time")
+      IO.inspect(current_time, label: "current_time")
+      if two_factor_issue_time == nil do
+        IO.inspect("Two factor issue time is nil", label: "Two factor issue time is nil")
+        conn
+        |> deliver_and_update_token(current_user, method, current_time)
+      else
+        conn
       end
-    else
-      conn
+
+      if true and current_time - two_factor_issue_time > 60 do
+        IO.inspect("send_two_factor_notification - Two factor issue time", label: "send_two_factor_notification - Two factor issue time")
+        conn
+        |> deliver_and_update_token(current_user, method, current_time)
+      else
+        conn
+      end
     end
   end
 
   defp maybe_send_two_factor_notification(conn, current_user, method) do
-    updated_conn = send_two_factor_notification(conn, current_user, method)
-    updated_conn
+    conn
+    |>send_two_factor_notification(current_user, method)
   end
 
   defp verify_user_id(conn, _params) do
