@@ -56,17 +56,16 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
         conn
       end
 
+    IO.inspect(get_session(conn, :two_factor_issue_time), label: "Two factor issue time session")
+    IO.inspect(current_time, label: "Two factor issue time current time")
+    conn
+    |> send_two_factor_notification(current_user, two_factor_method)
+
+
     two_factor_issue_time = get_session(conn, :two_factor_issue_time)
 
     if current_time - two_factor_issue_time > 900 do # 15 minutes
       IO.inspect("Two factor code is expired, Check new Two factor code and please try again", label: "Two factor code is expired, Check new Two factor code and please try again")
-
-      conn = put_session(conn, :two_factor_issue_time, current_time)
-
-      IO.inspect(get_session(conn, :two_factor_issue_time), label: "Two factor issue time session")
-      IO.inspect(current_time, label: "Two factor issue time current time")
-      conn
-      |> send_two_factor_notification(current_user, two_factor_method)
 
       conn
       |> put_flash(:error, "Two factor code is expired, Check new Two factor code and please try again")
@@ -134,13 +133,8 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
         conn
         |> deliver_and_update_token(current_user, method, current_time)
       else
-        if true or current_time - two_factor_issue_time > 60 do
-          IO.inspect(two_factor_issue_time, label: "send_two_factor_notification - Two factor issue time")
-          conn
-          |> deliver_and_update_token(current_user, method, current_time)
-        else
-          conn
-        end
+        conn
+        |> deliver_and_update_token(current_user, method, current_time)
       end
 
     end

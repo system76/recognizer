@@ -68,23 +68,14 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       Accounts.get_new_two_factor_settings(user)
 
     if method == "text" || method == "voice" || method == "email" do
-      IO.inspect("trigger", label: "two_factor_init")
+      IO.inspect("basic routine", label: "two_factor_init")
       current_time = System.system_time(:second)
-      session_time = get_session(conn, :two_factor_issue_time)
+      conn = put_session(conn, :two_factor_issue_time, current_time)
 
-      issue_time = if session_time == nil do
-        current_time - 61
-      else
-        session_time
-      end
+      conn
+      |> send_two_factor_notification(user, settings)
+      |> render("confirm_two_factor_external.html")
 
-
-      updated_conn = case Accounts.send_new_two_factor_notification(user, settings, issue_time) do
-        {:ok, update_issue_time} ->
-          conn = put_session(conn, :two_factor_issue_time, update_issue_time)
-          conn
-      end
-      render(updated_conn, "confirm_two_factor_external.html")
     else
       render(conn, "confirm_two_factor.html",
         barcode: Authentication.generate_totp_barcode(user, seed),

@@ -644,14 +644,7 @@ defmodule Recognizer.Accounts do
     } = attrs
 
     if preference != "app" do
-      current_time = System.system_time(:second)
-
-      if true or current_time - two_factor_issue_time > 60 do
-        deliver_two_factor_token(user, seed, preference, current_time)
-        {:ok, current_time}
-      else
-        {:ok, two_factor_issue_time}
-      end
+      {:ok, two_factor_issue_time}
     else
       {:ok, nil}
     end
