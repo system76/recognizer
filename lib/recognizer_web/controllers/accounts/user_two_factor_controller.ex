@@ -134,7 +134,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
         conn
         |> deliver_and_update_token(current_user, method, current_time)
       else
-        if true and current_time - two_factor_issue_time > 60 do
+        if true or current_time - two_factor_issue_time > 60 do
           IO.inspect(two_factor_issue_time, label: "send_two_factor_notification - Two factor issue time")
           conn
           |> deliver_and_update_token(current_user, method, current_time)

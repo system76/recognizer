@@ -78,6 +78,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
         session_time
       end
 
+
       updated_conn = case Accounts.send_new_two_factor_notification(user, settings, issue_time) do
         {:ok, update_issue_time} ->
           conn = put_session(conn, :two_factor_issue_time, update_issue_time)
@@ -281,7 +282,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
         conn
         |> deliver_and_update_token(current_user, method, current_time)
       else
-        if current_time - two_factor_issue_time > 60 do
+        if true or current_time - two_factor_issue_time > 60 do
           conn
           |> deliver_and_update_token(current_user, method, current_time)
         else
