@@ -13,7 +13,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user:two_factor", @one_minute, 2},
+         rate_limit: {"user:two_factor", @one_minute, 20},
          by: {:session, :two_factor_user_id}
        ]
        when action in [:resend]
@@ -21,7 +21,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user:two_factor_hour", @one_hour, 6},
+         rate_limit: {"user:two_factor_hour", @one_hour, 60},
          by: {:session, :two_factor_user_id}
        ]
        when action in [:resend]
@@ -49,16 +49,22 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     current_time = System.system_time(:second)
     %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
 
-    if get_session(conn, :two_factor_issue_time) == nil do
-      conn
-        |> put_session(:two_factor_issue_time, current_time)
-    end
+    conn =
+      if get_session(conn, :two_factor_issue_time) == nil do
+        put_session(conn, :two_factor_issue_time, current_time)
+      else
+        conn
+      end
 
     two_factor_issue_time = get_session(conn, :two_factor_issue_time)
 
     if current_time - two_factor_issue_time > 900 do # 15 minutes
       IO.inspect("Two factor code is expired, Check new Two factor code and please try again", label: "Two factor code is expired, Check new Two factor code and please try again")
 
+      conn = put_session(conn, :two_factor_issue_time, current_time)
+
+      IO.inspect(get_session(conn, :two_factor_issue_time), label: "Two factor issue time session")
+      IO.inspect(current_time, label: "Two factor issue time current time")
       conn
       |> send_two_factor_notification(current_user, two_factor_method)
 
@@ -66,8 +72,8 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
       |> put_flash(:error, "Two factor code is expired, Check new Two factor code and please try again")
       |> redirect(to: Routes.user_two_factor_path(conn, :new))
     else
-      IO.inspect("Two factor code is valid", label: "Two factor code is valid")
       if Authentication.valid_token?(two_factor_method, two_factor_code, two_factor_issue_time, current_user) do
+        IO.inspect("Two factor code is valid", label: "Two factor code is valid")
         Authentication.log_in_user(conn, current_user)
 
       else
@@ -84,23 +90,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     current_user_id = get_session(conn, :two_factor_user_id)
     current_user = Accounts.get_user!(current_user_id)
     current_time = System.system_time(:second)
-
-    %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
-
-    # conn
-    # |> put_session(:two_factor_sent, true)
-    # |> put_session(:two_factor_issue_time, current_time)
-
-
-    if current_user_id != nil do
-      conn
-      |> put_session(:two_factor_sent, true)
-      |> put_session(:two_factor_issue_time, current_time)
-      |> render("new.html", two_factor_method: two_factor_method)
-    else
-      redirect(conn, to: Routes.user_two_factor_path(conn, :create))
-    end
-
 
 
     %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
@@ -139,21 +128,21 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
       IO.inspect(two_factor_issue_time, label: "Two factor issue time")
       IO.inspect(current_time, label: "current_time")
+
       if two_factor_issue_time == nil do
         IO.inspect("Two factor issue time is nil", label: "Two factor issue time is nil")
         conn
         |> deliver_and_update_token(current_user, method, current_time)
       else
-        conn
+        if true and current_time - two_factor_issue_time > 60 do
+          IO.inspect(two_factor_issue_time, label: "send_two_factor_notification - Two factor issue time")
+          conn
+          |> deliver_and_update_token(current_user, method, current_time)
+        else
+          conn
+        end
       end
 
-      if true and current_time - two_factor_issue_time > 60 do
-        IO.inspect("send_two_factor_notification - Two factor issue time", label: "send_two_factor_notification - Two factor issue time")
-        conn
-        |> deliver_and_update_token(current_user, method, current_time)
-      else
-        conn
-      end
     end
   end
 
