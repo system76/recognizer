@@ -214,7 +214,6 @@ defmodule RecognizerWeb.Authentication do
     ## TODO : check valid_hotp and move to it
     :pot.valid_hotp(token, two_factor_seed, [last: counter])
     token == :pot.hotp(two_factor_seed, counter)
-    token == token
   end
 
   defp config(key) do
