@@ -89,6 +89,9 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     else
       if Authentication.valid_token?(two_factor_method, two_factor_code, two_factor_issue_time, current_user) do
         IO.inspect("Two factor code is valid", label: "Two factor code is valid")
+        conn = put_session(conn, :two_factor_sent, false)
+        conn = put_session(conn, :two_factor_issue_time, nil)
+
         Authentication.log_in_user(conn, current_user)
 
       else

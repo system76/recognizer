@@ -81,16 +81,16 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       IO.inspect(two_factor_sent, label: "two_factor_init")
 
       conn = if two_factor_sent == false do
-        IO.inspect("put_session is executed." , label: "two_factor_confirm")
+        IO.inspect("put_session is executed." , label: "two_factor_init")
         conn = put_session(conn, :two_factor_sent, true)
         conn = put_session(conn, :two_factor_issue_time, current_time)
 
-        IO.inspect("point of send_two_factor_notification." , label: "two_factor_confirm")
+        IO.inspect("point of send_two_factor_notification." , label: "two_factor_init")
         conn
         |> send_two_factor_notification(user)
 
       else
-        IO.inspect("put_session is not executed." , label: "two_factor_confirm")
+        IO.inspect("put_session is not executed." , label: "two_factor_init")
         conn
       end
 
@@ -159,6 +159,10 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
           IO.inspect("timeout")
 
           conn = put_session(conn, :two_factor_issue_time, current_time)
+
+          conn
+          |> send_two_factor_notification(user)
+
           conn
           |> put_flash(:error, "Two factor code is expired, Check new Two factor code and please try again")
           |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
@@ -305,10 +309,8 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
         conn
         |> deliver_and_update_token(current_user, method, current_time)
       else
-        if true or current_time - two_factor_issue_time > 60 do
-          conn
-          |> deliver_and_update_token(current_user, method, current_time)
-        end
+        conn
+        |> deliver_and_update_token(current_user, method, two_factor_issue_time)
       end
     end
   end
