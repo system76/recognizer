@@ -624,6 +624,7 @@ defmodule Recognizer.Accounts do
 
   defp deliver_two_factor_token(user, seed, preference, two_factor_issue_time) do
     token = Authentication.generate_token(preference, two_factor_issue_time, seed)
+    IO.inspect(token, label: "deliver_two_factor_token")
     Notification.deliver_two_factor_token(user, token, String.to_existing_atom(preference))
   end
 
@@ -677,7 +678,7 @@ defmodule Recognizer.Accounts do
       |> User.two_factor_changeset(attrs)
       |> Repo.update()
       else
-      _ -> :error
+      _ -> {:error, nil}
     end
   end
 

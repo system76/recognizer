@@ -184,7 +184,7 @@ defmodule RecognizerWeb.Authentication do
 
 
   def generate_token(preference, counter, two_factor_seed) do
-      if preference == "app" do
+    if preference == "app" do
       generate_token_app(two_factor_seed)
     else
       generate_token_external(two_factor_seed, counter)
@@ -212,6 +212,9 @@ defmodule RecognizerWeb.Authentication do
 
   def valid_token_external?(token, two_factor_seed, counter) do
     ## TODO : check valid_hotp and move to it
+    IO.inspect(token)
+    IO.inspect(:pot.hotp(two_factor_seed, counter))
+
     :pot.valid_hotp(token, two_factor_seed, [last: counter])
     token == :pot.hotp(two_factor_seed, counter)
     # token == token
