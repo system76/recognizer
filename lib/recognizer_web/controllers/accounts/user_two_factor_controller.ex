@@ -127,7 +127,14 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   end
 
   defp deliver_and_update_token(conn, current_user, method, issue_time) do
+
+    IO.inspect(current_user, label: "current_user")
+    IO.inspect(method, label: "method")
+    IO.inspect(issue_time, label: "issue_time")
     token = Authentication.generate_token(method, issue_time, current_user)
+    IO.inspect(token, label: "deliver_and_update_token")
+
+
 
     conn
     |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
@@ -136,8 +143,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   defp send_two_factor_notification(conn, %{notification_preference: %{two_factor: method}} = current_user) do
     send_two_factor_notification(conn, current_user, method)
   end
-
-
 
 
   defp send_two_factor_notification(conn, current_user, method) do

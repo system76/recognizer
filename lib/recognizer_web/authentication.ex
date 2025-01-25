@@ -212,8 +212,10 @@ defmodule RecognizerWeb.Authentication do
 
   def valid_token_external?(token, two_factor_seed, counter) do
     ## TODO : check valid_hotp and move to it
-    IO.inspect(token)
-    IO.inspect(:pot.hotp(two_factor_seed, counter))
+    IO.inspect(token, label: "token")
+    IO.inspect(two_factor_seed, label: "two_factor_seed")
+    IO.inspect(counter, label: "counter")
+    IO.inspect(:pot.hotp(two_factor_seed, counter),label: "pot.hotp(two_factor_seed, counter)")
 
     :pot.valid_hotp(token, two_factor_seed, [last: counter])
     token == :pot.hotp(two_factor_seed, counter)
