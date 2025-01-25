@@ -138,16 +138,19 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   end
 
 
+
+
   defp send_two_factor_notification(conn, current_user, method) do
     if method != :app do
       two_factor_issue_time = get_session(conn, :two_factor_issue_time)
       current_time = System.system_time(:second)
 
+      IO.inspect(two_factor_issue_time, label: "send_two_factor_notification")
       IO.inspect(two_factor_issue_time, label: "Two factor issue time")
       IO.inspect(current_time, label: "current_time")
 
       if two_factor_issue_time == nil do
-        IO.inspect("Two factor issue time is nil", label: "Two factor issue time is nil")
+        IO.inspect("Two factor issue time is nil", label: "send_two_factor_notification")
         conn
         |> deliver_and_update_token(current_user, method, current_time)
       else
@@ -157,6 +160,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
     end
   end
+
 
   defp maybe_send_two_factor_notification(conn, current_user, method) do
     conn
