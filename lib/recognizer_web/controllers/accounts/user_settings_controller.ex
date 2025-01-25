@@ -319,7 +319,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   end
 
   defp deliver_and_update_token(conn, current_user, method, issue_time) do
-    Authentication.generate_token(method, issue_time, current_user)
+    token = Authentication.generate_token(method, issue_time, current_user)
 
     conn
     |> put_session(:two_factor_sent, true)
