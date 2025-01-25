@@ -2,6 +2,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   use RecognizerWeb, :controller
 
   alias Recognizer.Accounts
+  alias Recognizer.Notifications.Account
   alias Recognizer.Accounts.Role
   alias Recognizer.BigCommerce
   alias RecognizerWeb.Authentication
@@ -322,8 +323,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     token = Authentication.generate_token(method, issue_time, current_user)
 
     conn
-    |> put_session(:two_factor_sent, true)
-    |> put_session(:two_factor_issue_time, issue_time)
     |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
   end
 
