@@ -15,7 +15,18 @@
     </div>
 
     <div>
-        <pre><code><%= @recovery_block %></code></pre>
+        <pre><code>
+            <%=
+            @recovery_block
+            |> String.split("\n")          # 줄 단위로 분리
+            |> Enum.with_index(1)          # 각 줄에 인덱스를 추가
+            |> Enum.map(fn {line, index} ->
+                "Code #{String.pad_leading(Integer.to_string(index), 2, "0")}: #{line}"
+            end)
+            |> Enum.join("\n")             # 다시 하나의 문자열로 결합
+            %>
+        </code></pre>
+
     </div>
 
     <div class="buttons is-right mt-5">
