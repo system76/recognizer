@@ -10,28 +10,27 @@
             <strong>
                 Download, print or copy your recovery codes before continuing
                 two-factor authentication setup.
-
-
             </strong>
         </p>
     </div>
 
     <div>
-        <pre><code>
-            <%=
+        <%
+          base_recovery_block =
             @recovery_block
             |> String.split("\n")          # 줄 단위로 분리
             |> Enum.with_index(1)          # 각 줄에 인덱스를 추가
             |> Enum.map(fn {line, index} ->
-                "Code #{String.pad_leading(Integer.to_string(index), 2, "0")}: #{line}"
+              "Code #{String.pad_leading(Integer.to_string(index), 2, "0")}: #{line}"
             end)
-            |> Enum.join("\n")             # 다시 하나의 문자열로 결합
-            %>
-        </code>
-One time use recovery codes.
-Use one code per recovery attempt.
-        </pre>
+            |> Enum.join("\n")
 
+          formatted_recovery_block =
+            base_recovery_block <>
+            "\n\nOne time use recovery codes.\nUse one code per recovery attempt."
+        %>
+
+        <pre><code><%= formatted_recovery_block %></code></pre>
     </div>
 
     <div class="buttons is-right mt-5">
@@ -41,19 +40,8 @@ Use one code per recovery attempt.
                 to: Routes.user_settings_path(@conn, :two_factor_init),
                 class: "button is-secondary",
                 id: "copy-text",
-                data: [
-                recovery_block: (
-                    @recovery_block
-                    |> String.split("\n")          # 줄 단위로 나누기
-                    |> Enum.with_index(1)          # 인덱스 추가
-                    |> Enum.map(fn {line, index} ->
-                    "Code #{String.pad_leading(Integer.to_string(index), 2, "0")}: #{line}"
-                    end)
-                    |> Enum.join("\n")             # 다시 하나의 문자열로 결합
-                )
-                ]
+                data: [recovery_block: formatted_recovery_block] # 메시지가 추가된 상태로 전달
             %>
         </div>
     </div>
-
 </div>
