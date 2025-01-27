@@ -57,6 +57,12 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
     conn =
       if two_factor_sent == false do
+
+        IO.inspect(two_factor_sent, label: "Two factor sent fail")
+
+        conn
+        |> maybe_send_two_factor_notification(current_user, two_factor_method)
+
         conn
         |> put_session(:two_factor_sent, true)
         |> put_session(:two_factor_issue_time, current_time)
@@ -67,7 +73,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     IO.inspect(get_session(conn, :two_factor_issue_time), label: "Two factor issue time")
 
     conn
-    |> maybe_send_two_factor_notification(current_user, two_factor_method)
     |> render("new.html", two_factor_method: two_factor_method)
   end
 
@@ -132,17 +137,36 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
 
     conn
-    |> put_session(:two_factor_sent, true)
+    |> put_session(:two_factor_sent, false)
     |> put_session(:two_factor_issue_time, current_time)
-
-    IO.inspect('send_two_factor_notification', label: "Resend")
-    conn
-    |> send_two_factor_notification(current_user, two_factor_method)
-
-    conn
-    |> put_flash(:info, "Two factor code has been resent")
+    |> put_flash(:info, "Two factor code has been reset")
     |> redirect(to: Routes.user_two_factor_path(conn, :new))
   end
+
+  # @spec resend(Plug.Conn.t(), any()) :: Plug.Conn.t()
+  # def resend(conn, _params) do
+  #   current_user_id = get_session(conn, :two_factor_user_id)
+  #   current_user = Accounts.get_user!(current_user_id)
+  #   current_time = System.system_time(:second)
+
+  #   IO.inspect('init', label: "Resend")
+
+  #   %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
+
+  #   conn
+  #   |> put_session(:two_factor_sent, true)
+  #   |> put_session(:two_factor_issue_time, current_time)
+
+  #   IO.inspect('send_two_factor_notification', label: "Resend")
+  #   conn
+  #   |> send_two_factor_notification(current_user, two_factor_method)
+
+  #   conn
+  #   |> put_flash(:info, "Two factor code has been resent")
+  #   |> redirect(to: Routes.user_two_factor_path(conn, :new))
+  # end
+
+
 
   defp deliver_and_update_token(conn, current_user, method, issue_time) do
 
@@ -151,8 +175,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     IO.inspect(issue_time, label: "issue_time")
     token = Authentication.generate_token(method, issue_time, current_user)
     IO.inspect(token, label: "deliver_and_update_token")
-
-
 
     conn
     |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
