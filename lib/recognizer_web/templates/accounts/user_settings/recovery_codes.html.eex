@@ -3,13 +3,15 @@
 
     <div>
         <p class="py-4">
-            Recovery codes are used to access your account if you have lost access to your device.
+            Recovery codes are used to access your account if you have lost access to your device.<br/>
         </p>
 
         <p class="py-4">
             <strong>
                 Download, print or copy your recovery codes before continuing
                 two-factor authentication setup.
+
+
             </strong>
         </p>
     </div>
@@ -25,13 +27,32 @@
             end)
             |> Enum.join("\n")             # 다시 하나의 문자열로 결합
             %>
-        </code></pre>
+        </code>
+One time use recovery codes.
+Use one code per recovery attempt.
+        </pre>
 
     </div>
 
     <div class="buttons is-right mt-5">
         <div class="control">
-            <%= link "Copy and Continue", to: Routes.user_settings_path(@conn, :two_factor_init), class: "button is-secondary", id: "copy-text", data: [recovery_block: @recovery_block] %>
+            <%=
+            link "Copy and Continue",
+                to: Routes.user_settings_path(@conn, :two_factor_init),
+                class: "button is-secondary",
+                id: "copy-text",
+                data: [
+                recovery_block: (
+                    @recovery_block
+                    |> String.split("\n")          # 줄 단위로 나누기
+                    |> Enum.with_index(1)          # 인덱스 추가
+                    |> Enum.map(fn {line, index} ->
+                    "Code #{String.pad_leading(Integer.to_string(index), 2, "0")}: #{line}"
+                    end)
+                    |> Enum.join("\n")             # 다시 하나의 문자열로 결합
+                )
+                ]
+            %>
         </div>
     </div>
 
