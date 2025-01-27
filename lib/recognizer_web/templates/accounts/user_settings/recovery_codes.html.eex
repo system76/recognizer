@@ -18,8 +18,8 @@
         <%
           base_recovery_block =
             @recovery_block
-            |> String.split("\n")          # 줄 단위로 분리
-            |> Enum.with_index(1)          # 각 줄에 인덱스를 추가
+            |> String.split("\n")
+            |> Enum.with_index(1)
             |> Enum.map(fn {line, index} ->
               "Code #{String.pad_leading(Integer.to_string(index), 2, "0")}: #{line}"
             end)
@@ -40,7 +40,7 @@
                 to: Routes.user_settings_path(@conn, :two_factor_init),
                 class: "button is-secondary",
                 id: "copy-text",
-                data: [recovery_block: formatted_recovery_block] # 메시지가 추가된 상태로 전달
+                data: [recovery_block: formatted_recovery_block]
             %>
         </div>
     </div>
