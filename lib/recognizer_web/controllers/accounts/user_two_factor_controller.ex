@@ -107,6 +107,9 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
       IO.inspect(get_session(conn, :two_factor_issue_time), label: "Two factor issue time session")
 
       conn
+      |> maybe_send_two_factor_notification(current_user, two_factor_method)
+
+      conn
       |> put_flash(:error, "Two factor code is expired, Check new Two factor code and please try again")
       |> redirect(to: Routes.user_two_factor_path(conn, :new))
     else
