@@ -35,7 +35,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   def resend(conn, _params) do
 
-    IO.inspect("resend")
     # current_user_id = get_session(conn, :two_factor_user_id)
     # current_user = Accounts.get_user!(current_user_id)
     current_user = Authentication.fetch_current_user(conn)
@@ -65,18 +64,9 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}} = settings} =
       Accounts.get_new_two_factor_settings(user)
 
-    IO.inspect(seed ,label: "two_factor_init - two_factor_seed - from get_new_two_factor_settings")
-
-    IO.inspect(method, label: "two_factor_init - method - original")
-
     method_atom = normalize_to_atom(method)
 
-    # IO.inspect(seed, label: "two_factor_init - seed")
-
-    IO.inspect(method, label: "two_factor_init method")
-
     if method_atom == :text || method_atom == :voice || method_atom == :email do
-      IO.inspect("basic routine", label: "two_factor_init")
       current_time = System.system_time(:second)
       # conn = put_session(conn, :two_factor_issue_time, current_time)
 
@@ -89,27 +79,16 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
 
       two_factor_issue_time = get_session(conn, :two_factor_issue_time)
-      IO.inspect(two_factor_issue_time, label: "two_factor_init time")
       two_factor_sent = get_session(conn, :two_factor_sent)
-      IO.inspect(two_factor_sent, label: "two_factor_init")
 
       conn = if two_factor_sent do
         conn
       else
-        IO.inspect("put_session is executed." , label: "two_factor_init")
-        # conn = put_session(conn, :two_factor_sent, true)
-        # conn = put_session(conn, :two_factor_issue_time, current_time)
-
-        IO.inspect("point of send_two_factor_notification." , label: "two_factor_init")
         conn
         |> send_two_factor_notification(user, method_atom)
 
       end
 
-
-
-      debug_msg = get_session(conn, :two_factor_issue_time)
-      IO.inspect(debug_msg, label: "two_factor_init")
       render(conn, "confirm_two_factor_external.html")
 
     else
@@ -124,13 +103,10 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   Confirming and saving a new two factor setup with user-provided code
   """
   def two_factor_confirm(conn, params) do
-    IO.inspect("two_factor_confirm")
 
     user = Authentication.fetch_current_user(conn)
     two_factor_code = Map.get(params, "two_factor_code", "")
-    IO.inspect(params, label: "two_factor_confirm - params")
     current_time = System.system_time(:second)
-
 
     # %{notification_preference: %{two_factor: method}, two_factor_seed: seed} = user
     {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}} = settings} =
@@ -145,23 +121,15 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
         conn
       end
 
-    IO.inspect(method_atom, label: "two_factor_confirm - method")
-    IO.inspect(seed, label: "two_factor_confirm - seed")
-
-
     two_factor_issue_time = get_session(conn, :two_factor_issue_time)
-    IO.inspect(two_factor_issue_time, label: "two_factor_confirm time")
     two_factor_sent = get_session(conn, :two_factor_sent)
-    IO.inspect(two_factor_sent, label: "two_factor_confirm")
 
     # counter = get_session(updated_conn, :two_factor_issue_time)
     case Accounts.confirm_and_save_two_factor_settings(two_factor_code, two_factor_issue_time, user) do
       {:ok, _updated_user} ->
-        if current_time - two_factor_issue_time > 90 do
-          IO.inspect("timeout")
+        if current_time - two_factor_issue_time > 900 do
 
           conn = put_session(conn, :two_factor_issue_time, current_time)
-
           conn
           |> send_two_factor_notification(user, method_atom)
 
@@ -169,17 +137,15 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
           |> put_flash(:error, "Two factor code is expired, Check new Two factor code and please try again")
           |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
         else
-          IO.inspect("Two factor code verified")
           Accounts.clear_two_factor_settings(user)
-          conn = put_session(conn, :two_factor_sent, false)
-          conn = put_session(conn, :two_factor_issue_time, nil)
 
           conn
+          |> put_session(:two_factor_sent, false)
+          |> put_session(:two_factor_issue_time, nil)
           |> put_flash(:info, "Two factor code verified")
           |> redirect(to: Routes.user_settings_path(conn, :edit))
         end
       _ ->
-        IO.inspect("Two factor code invalid")
         conn
         |> put_flash(:error, "Two factor code is invalid")
         |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
@@ -291,8 +257,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   """
   def review(conn, _params) do
     user = Authentication.fetch_current_user(conn)
-    IO.inspect(user, label: "review")
-    IO.inspect(Accounts.get_new_two_factor_settings(user), label: "review")
     case Accounts.get_new_two_factor_settings(user) do
       {:ok, %{recovery_codes: recovery_codes}} ->
         conn = put_session(conn, :two_factor_sent, false)
@@ -339,18 +303,14 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
 
   defp send_two_factor_notification(conn, current_user, method) do
-    IO.inspect(method, label: "send_two_factor_notification")
 
     if method == "app" do
       conn
     else
       two_factor_issue_time = get_session(conn, :two_factor_issue_time)
       current_time = System.system_time(:second)
-      IO.inspect(two_factor_issue_time, label: "Two factor issue time")
-      IO.inspect(current_time, label: "current_time")
 
       if two_factor_issue_time == nil do
-        IO.inspect("Two factor issue time is nil", label: "send_two_factor_notification")
         conn
         |> deliver_and_update_token(current_user, method, current_time)
       else
@@ -368,21 +328,13 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     {:ok, %{two_factor_seed: two_factor_seed}} =
       Accounts.get_new_two_factor_settings(current_user)
 
-    IO.inspect(two_factor_seed, label: "deliver_and_update_token - two_factor_seed")
-    IO.inspect(method, label: "deliver_and_update_token - method")
-
     # method_atom = String.to_existing_atom(method)
 
-    IO.inspect(issue_time, label: "deliver_and_update_token - issue_time")
-    # token = Authentication.generate_token(method, issue_time, current_user)
     token = if method == :app || method == "app" do
       Authentication.generate_token_app(two_factor_seed)
     else
       Authentication.generate_token_external(two_factor_seed, issue_time)
     end
-    # token = Authentication.generate_token_external(two_factor_seed, issue_time)
-    IO.inspect(token, label: "deliver_and_update_token - token")
-
 
     conn
     |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
