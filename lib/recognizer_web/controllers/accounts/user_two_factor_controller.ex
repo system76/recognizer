@@ -31,10 +31,14 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   Prompt the user for a two factor code on login
   """
   def new(conn, _params) do
+    IO.inspect("send_two_factor_notification" , label: "New")
     current_user_id = get_session(conn, :two_factor_user_id)
     current_user = Accounts.get_user!(current_user_id)
     current_time = System.system_time(:second)
     %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
+
+    IO.inspect(current_user, label: "current_user")
+    IO.inspect(two_factor_method, label: "two_factor_method")
 
     conn =
       if get_session(conn, :two_factor_issue_time) == nil do
@@ -51,21 +55,35 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
     IO.inspect(two_factor_sent, label: "Two factor sent")
 
-    conn = if two_factor_sent == false do
-      IO.inspect("send_two_factor_notification" , label: "New")
+    conn =
+      if two_factor_sent == false do
+        conn
+        |> put_session(:two_factor_sent, true)
+        |> put_session(:two_factor_issue_time, current_time)
+      else
+        conn
+      end
 
-      conn
-      |> put_session(:two_factor_sent, true)
-      |> put_session(:two_factor_issue_time, current_time)
-      |> send_two_factor_notification(current_user, two_factor_method)
-    else
-      conn
-    end
+    IO.inspect(get_session(conn, :two_factor_issue_time), label: "Two factor issue time")
 
     conn
-    # |> maybe_send_two_factor_notification(current_user, two_factor_method)
+    |> maybe_send_two_factor_notification(current_user, two_factor_method)
     |> render("new.html", two_factor_method: two_factor_method)
   end
+
+
+  # def new(conn, _params) do
+  #   current_user_id = get_session(conn, :two_factor_user_id)
+  #   current_user = Accounts.get_user!(current_user_id)
+
+  #   %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
+
+  #   conn
+  #   |> maybe_send_two_factor_notification(current_user, two_factor_method)
+  #   |> render("new.html", two_factor_method: two_factor_method)
+  # end
+
+
 
   @doc """
   Verify a user creating a session with a two factor code
@@ -146,7 +164,9 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
 
   defp send_two_factor_notification(conn, current_user, method) do
-    if method != :app do
+    if method == :app || method == "app" do
+      conn
+    else
       two_factor_issue_time = get_session(conn, :two_factor_issue_time)
       current_time = System.system_time(:second)
 
@@ -154,15 +174,15 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
       IO.inspect(two_factor_issue_time, label: "Two factor issue time")
       IO.inspect(current_time, label: "current_time")
 
-      if two_factor_issue_time == nil do
-        IO.inspect("Two factor issue time is nil", label: "send_two_factor_notification")
-        conn
-        |> deliver_and_update_token(current_user, method, current_time)
-      else
-        conn
-        |> deliver_and_update_token(current_user, method, current_time)
-      end
-
+      conn = if two_factor_issue_time == nil do
+          IO.inspect("Two factor issue time is nil", label: "send_two_factor_notification")
+          conn
+          |> deliver_and_update_token(current_user, method, current_time)
+        else
+          conn
+          |> deliver_and_update_token(current_user, method, current_time)
+        end
+      conn
     end
   end
 

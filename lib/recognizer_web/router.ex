@@ -151,6 +151,6 @@ defmodule RecognizerWeb.Router do
     get "/settings/two-factor/review", UserSettingsController, :review
     get "/settings/two-factor", UserSettingsController, :two_factor_init
     post "/settings/two-factor", UserSettingsController, :two_factor_confirm
-    get "/setting/two-factor/resend", UserSettingsController, :resend ## TODO - not implemented yet.
+    get "/setting/two-factor/resend", UserSettingsController, :resend
   end
 end

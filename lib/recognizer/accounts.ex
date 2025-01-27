@@ -672,6 +672,14 @@ defmodule Recognizer.Accounts do
     with {:ok, %{ notification_preference: %{two_factor: preference},
     two_factor_seed: seed} = attrs} <- get_new_two_factor_settings(user),
     true <- Authentication.valid_token?(preference, code, counter, seed) do
+    # with {:ok, %{ notification_preference: %{two_factor: preference},
+    # two_factor_seed: seed} = attrs} <- user,
+    # true <- Authentication.valid_token?(preference, code, counter, seed) do
+
+      IO.inspect(preference, label: "confirm_and_save_two_factor_settings - preference")
+      IO.inspect(code, label: "confirm_and_save_two_factor_settings - code")
+      IO.inspect(counter, label: "confirm_and_save_two_factor_settings - counter")
+      IO.inspect(seed, label: "confirm_and_save_two_factor_settings - seed")
 
       user
       |> Repo.preload([:notification_preference, :recovery_codes])

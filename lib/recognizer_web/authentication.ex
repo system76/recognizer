@@ -184,7 +184,7 @@ defmodule RecognizerWeb.Authentication do
 
 
   def generate_token(preference, counter, two_factor_seed) do
-    if preference == "app" do
+    if preference == :app do
       generate_token_app(two_factor_seed)
     else
       generate_token_external(two_factor_seed, counter)
@@ -192,6 +192,7 @@ defmodule RecognizerWeb.Authentication do
   end
 
   def generate_token_app(two_factor_seed), do: :pot.totp(two_factor_seed, [interval: 30])
+
   def generate_token_external(two_factor_seed, counter), do: :pot.hotp(two_factor_seed, counter)
 
   @doc """
@@ -201,7 +202,7 @@ defmodule RecognizerWeb.Authentication do
   def valid_token?(preference, token, counter, %{two_factor_seed: two_factor_seed}), do: valid_token?(preference, token, counter, two_factor_seed)
 
   def valid_token?(preference, token, counter, two_factor_seed) do
-    if preference == "app" do
+    if preference == :app || preference == "app" do
       valid_token_app?(token, two_factor_seed)
     else
       valid_token_external?(token, two_factor_seed, counter)
@@ -212,10 +213,12 @@ defmodule RecognizerWeb.Authentication do
 
   def valid_token_external?(token, two_factor_seed, counter) do
     ## TODO : check valid_hotp and move to it
-    IO.inspect(token, label: "token")
-    IO.inspect(two_factor_seed, label: "two_factor_seed")
-    IO.inspect(counter, label: "counter")
-    IO.inspect(:pot.hotp(two_factor_seed, counter),label: "pot.hotp(two_factor_seed, counter)")
+    IO.inspect(token, label: "valid_token_external - token")
+    IO.inspect(two_factor_seed, label: "valid_token_external - two_factor_seed")
+    IO.inspect(counter, label: "valid_token_external - counter")
+    IO.inspect(generate_token_external(two_factor_seed, counter),label: "valid_token_external - generate_token_external")
+
+    IO.inspect(:pot.hotp(two_factor_seed, counter),label: "valid_token_external - pot.hotp(two_factor_seed, counter)")
 
     :pot.valid_hotp(token, two_factor_seed, [last: counter])
     token == :pot.hotp(two_factor_seed, counter)
