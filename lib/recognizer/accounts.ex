@@ -622,7 +622,6 @@ defmodule Recognizer.Accounts do
     attrs
   end
 
-
   @doc """
   Sends a new notification message to the user to verify their _new_ two factor
   settings.
@@ -664,7 +663,6 @@ defmodule Recognizer.Accounts do
     with {:ok, %{notification_preference: %{two_factor: preference}, two_factor_seed: seed} = attrs} <-
            get_new_two_factor_settings(user),
          true <- Authentication.valid_token?(preference, code, counter, seed) do
-
       user
       |> Repo.preload([:notification_preference, :recovery_codes])
       |> User.two_factor_changeset(attrs)

@@ -101,8 +101,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     current_time = System.system_time(:second)
 
     # %{notification_preference: %{two_factor: method}, two_factor_seed: seed} = user
-    {:ok, %{notification_preference: %{two_factor: method}}} =
-      Accounts.get_new_two_factor_settings(user)
+    {:ok, %{notification_preference: %{two_factor: method}}} = Accounts.get_new_two_factor_settings(user)
 
     method_atom = normalize_to_atom(method)
 
