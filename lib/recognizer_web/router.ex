@@ -53,16 +53,6 @@ defmodule RecognizerWeb.Router do
     end
   end
 
-  defp add_bc_to_session(%{query_params: %{"bc" => "true"}} = conn, _opts) do
-    if Recognizer.BigCommerce.enabled?() do
-      conn
-      |> delete_session(:bc_checkout)
-      |> put_session(:bc, true)
-    else
-      conn
-    end
-  end
-
   defp add_bc_to_session(conn, _opts) do
     conn
   end

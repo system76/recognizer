@@ -53,11 +53,11 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   @doc """
   Generate codes for a new two factor setup
   """
-  def two_factor_init(conn, params) do
+  def two_factor_init(conn, _params) do
     user = Authentication.fetch_current_user(conn)
     # %{two_factor_seed: seed, notification_preference: %{two_factor: method} } = user
 
-    {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}} = settings} =
+    {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}}} =
       Accounts.get_new_two_factor_settings(user)
 
     method_atom = normalize_to_atom(method)
@@ -73,7 +73,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
           conn
         end
 
-      two_factor_issue_time = get_session(conn, :two_factor_issue_time)
       two_factor_sent = get_session(conn, :two_factor_sent)
 
       conn =
@@ -102,7 +101,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     current_time = System.system_time(:second)
 
     # %{notification_preference: %{two_factor: method}, two_factor_seed: seed} = user
-    {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}} = settings} =
+    {:ok, %{notification_preference: %{two_factor: method}}} =
       Accounts.get_new_two_factor_settings(user)
 
     method_atom = normalize_to_atom(method)
@@ -115,7 +114,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       end
 
     two_factor_issue_time = get_session(conn, :two_factor_issue_time)
-    two_factor_sent = get_session(conn, :two_factor_sent)
 
     # counter = get_session(updated_conn, :two_factor_issue_time)
     case Accounts.confirm_and_save_two_factor_settings(two_factor_code, two_factor_issue_time, user) do

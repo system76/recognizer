@@ -622,24 +622,19 @@ defmodule Recognizer.Accounts do
     attrs
   end
 
-  defp deliver_two_factor_token(user, seed, preference, two_factor_issue_time) do
-    token = Authentication.generate_token(preference, two_factor_issue_time, seed)
-    Notification.deliver_two_factor_token(user, token, String.to_existing_atom(preference))
-  end
 
   @doc """
   Sends a new notification message to the user to verify their _new_ two factor
   settings.
   """
-  def send_new_two_factor_notification(user) do
+  def check_two_factor_notification_time(user) do
     {:ok, attrs} = get_new_two_factor_settings(user)
-    send_new_two_factor_notification(user, attrs, 100)
+    check_two_factor_notification_time(attrs, 100)
   end
 
-  def send_new_two_factor_notification(user, attrs, two_factor_issue_time) do
+  def check_two_factor_notification_time(attrs, two_factor_issue_time) do
     %{
-      notification_preference: %{two_factor: preference},
-      two_factor_seed: seed
+      notification_preference: %{two_factor: preference}
     } = attrs
 
     if preference != "app" do

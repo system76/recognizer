@@ -112,11 +112,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
   @spec resend(Plug.Conn.t(), any()) :: Plug.Conn.t()
   def resend(conn, _params) do
-    current_user_id = get_session(conn, :two_factor_user_id)
-    current_user = Accounts.get_user!(current_user_id)
     current_time = System.system_time(:second)
-
-    %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
 
     conn
     |> put_session(:two_factor_sent, false)
@@ -130,10 +126,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
     conn
     |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
-  end
-
-  defp send_two_factor_notification(conn, %{notification_preference: %{two_factor: method}} = current_user) do
-    send_two_factor_notification(conn, current_user, method)
   end
 
   defp send_two_factor_notification(conn, current_user, method) do

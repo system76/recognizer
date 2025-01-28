@@ -83,7 +83,7 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
 
       issue_time = get_session(conn, :two_factor_issue_time)
 
-      case Accounts.send_new_two_factor_notification(user, settings, issue_time) do
+      case Accounts.check_two_factor_notification_time(settings, issue_time) do
         {:ok, updated_issue_time} when not is_nil(updated_issue_time) ->
           conn
           |> put_session(:two_factor_issue_time, updated_issue_time)
