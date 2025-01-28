@@ -636,7 +636,6 @@ defmodule Recognizer.Accounts do
     send_new_two_factor_notification(user, attrs, 100)
   end
 
-
   def send_new_two_factor_notification(user, attrs, two_factor_issue_time) do
     %{
       notification_preference: %{two_factor: preference},
@@ -666,20 +665,16 @@ defmodule Recognizer.Accounts do
   Confirms the user's two factor settings and persists them to the database from our cache
   """
 
-
   def confirm_and_save_two_factor_settings(code, counter, user) do
-    with {:ok, %{ notification_preference: %{two_factor: preference},
-    two_factor_seed: seed} = attrs} <- get_new_two_factor_settings(user),
-    true <- Authentication.valid_token?(preference, code, counter, seed) do
-    # with {:ok, %{ notification_preference: %{two_factor: preference},
-    # two_factor_seed: seed} = attrs} <- user,
-    # true <- Authentication.valid_token?(preference, code, counter, seed) do
+    with {:ok, %{notification_preference: %{two_factor: preference}, two_factor_seed: seed} = attrs} <-
+           get_new_two_factor_settings(user),
+         true <- Authentication.valid_token?(preference, code, counter, seed) do
 
       user
       |> Repo.preload([:notification_preference, :recovery_codes])
       |> User.two_factor_changeset(attrs)
       |> Repo.update()
-      else
+    else
       _ -> {:error, nil}
     end
   end

@@ -15,7 +15,8 @@ defmodule RecognizerWeb.Accounts.Prompt.VerificationController do
          by: {:conn, &get_user_id_from_unverified_request/1}
        ]
        when action in [:resend]
-      #  when action in [:resend, :new]
+
+  #  when action in [:resend, :new]
 
   plug Hammer.Plug,
        [
@@ -23,7 +24,8 @@ defmodule RecognizerWeb.Accounts.Prompt.VerificationController do
          by: {:conn, &get_user_id_from_unverified_request/1}
        ]
        when action in [:resend]
-      #  when action in [:resend, :new]
+
+  #  when action in [:resend, :new]
 
   def new(%{assigns: %{user: %{verified_at: nil} = user}} = conn, _params) do
     render(conn, "new.html", resend?: false, email: user.email)

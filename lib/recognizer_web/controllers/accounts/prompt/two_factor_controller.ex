@@ -41,6 +41,7 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorController do
     case Accounts.confirm_and_save_two_factor_settings(two_factor_code, counter, user) do
       {:ok, updated_user} ->
         Authentication.log_in_user(conn, updated_user, params)
+
       _ ->
         conn
         |> put_flash(:error, "Two factor code is invalid.")

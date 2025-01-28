@@ -13,7 +13,8 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
          by: {:conn, &get_user_id_from_request/1}
        ]
        when action in [:send]
-      #  when action in [:send, :update]
+
+  #  when action in [:send, :update]
 
   plug Hammer.Plug,
        [
@@ -21,7 +22,8 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
          by: {:conn, &get_user_id_from_request/1}
        ]
        when action in [:send]
-      #  when action in [:send, :update]
+
+  #  when action in [:send, :update]
 
   def show(conn, _params) do
     user = Authentication.fetch_current_user(conn)
@@ -33,6 +35,7 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
 
   def update(conn, %{"enabled" => false}) do
     user = Authentication.fetch_current_user(conn)
+
     with {:ok, updated_user} <- Accounts.update_user_two_factor(user, %{"two_factor_enabled" => false}) do
       render(conn, "show.json", user: updated_user)
     end
@@ -82,18 +85,20 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
 
       case Accounts.send_new_two_factor_notification(user, settings, issue_time) do
         {:ok, updated_issue_time} when not is_nil(updated_issue_time) ->
-
           conn
           |> put_session(:two_factor_issue_time, updated_issue_time)
           |> put_status(202)
           |> render("show.json", settings: settings, user: user)
+
           conn
 
         {:ok, nil} ->
           conn
           |> put_status(202)
           |> render("show.json", settings: settings, user: user)
+
           conn
+
         {:error, reason} ->
           conn
           |> put_status(400)
@@ -106,5 +111,4 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
         |> json(%{error: reason})
     end
   end
-
 end

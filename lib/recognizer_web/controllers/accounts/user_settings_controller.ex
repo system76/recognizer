@@ -32,9 +32,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
-
   def resend(conn, _params) do
-
     # current_user_id = get_session(conn, :two_factor_user_id)
     # current_user = Accounts.get_user!(current_user_id)
     current_user = Authentication.fetch_current_user(conn)
@@ -50,14 +48,12 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
 
     # |> redirect(external: Application.get_env(:recognizer, :redirect_url))
-
   end
 
   @doc """
   Generate codes for a new two factor setup
   """
   def two_factor_init(conn, params) do
-
     user = Authentication.fetch_current_user(conn)
     # %{two_factor_seed: seed, notification_preference: %{two_factor: method} } = user
 
@@ -77,20 +73,18 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
           conn
         end
 
-
       two_factor_issue_time = get_session(conn, :two_factor_issue_time)
       two_factor_sent = get_session(conn, :two_factor_sent)
 
-      conn = if two_factor_sent do
-        conn
-      else
-        conn
-        |> send_two_factor_notification(user, method_atom)
-
-      end
+      conn =
+        if two_factor_sent do
+          conn
+        else
+          conn
+          |> send_two_factor_notification(user, method_atom)
+        end
 
       render(conn, "confirm_two_factor_external.html")
-
     else
       render(conn, "confirm_two_factor.html",
         barcode: Authentication.generate_totp_barcode(user, seed),
@@ -103,7 +97,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   Confirming and saving a new two factor setup with user-provided code
   """
   def two_factor_confirm(conn, params) do
-
     user = Authentication.fetch_current_user(conn)
     two_factor_code = Map.get(params, "two_factor_code", "")
     current_time = System.system_time(:second)
@@ -128,8 +121,8 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     case Accounts.confirm_and_save_two_factor_settings(two_factor_code, two_factor_issue_time, user) do
       {:ok, _updated_user} ->
         if current_time - two_factor_issue_time > 900 do
-
           conn = put_session(conn, :two_factor_issue_time, current_time)
+
           conn
           |> send_two_factor_notification(user, method_atom)
 
@@ -145,14 +138,13 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
           |> put_flash(:info, "Two factor code verified")
           |> redirect(to: Routes.user_settings_path(conn, :edit))
         end
+
       _ ->
         conn
         |> put_flash(:error, "Two factor code is invalid")
         |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
     end
   end
-
-
 
   def normalize_to_atom(input) do
     cond do
@@ -161,7 +153,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       true -> raise ArgumentError, "Input must be a string or an atom"
     end
   end
-
 
   @doc """
   Rate limit 2fa setup only for text & voice, bypass for app.
@@ -257,9 +248,11 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   """
   def review(conn, _params) do
     user = Authentication.fetch_current_user(conn)
+
     case Accounts.get_new_two_factor_settings(user) do
       {:ok, %{recovery_codes: recovery_codes}} ->
         conn = put_session(conn, :two_factor_sent, false)
+
         recovery_block =
           recovery_codes
           |> Enum.map_join("\n", & &1.code)
@@ -301,9 +294,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     send_two_factor_notification(conn, current_user, method)
   end
 
-
   defp send_two_factor_notification(conn, current_user, method) do
-
     if method == "app" do
       conn
     else
@@ -321,25 +312,20 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   end
 
   defp deliver_and_update_token(conn, current_user, method, issue_time) do
-
-
     # %{two_factor_seed: two_factor_seed} = current_user
 
-    {:ok, %{two_factor_seed: two_factor_seed}} =
-      Accounts.get_new_two_factor_settings(current_user)
+    {:ok, %{two_factor_seed: two_factor_seed}} = Accounts.get_new_two_factor_settings(current_user)
 
     # method_atom = String.to_existing_atom(method)
 
-    token = if method == :app || method == "app" do
-      Authentication.generate_token_app(two_factor_seed)
-    else
-      Authentication.generate_token_external(two_factor_seed, issue_time)
-    end
+    token =
+      if method == :app || method == "app" do
+        Authentication.generate_token_app(two_factor_seed)
+      else
+        Authentication.generate_token_external(two_factor_seed, issue_time)
+      end
 
     conn
     |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
-
   end
-
-
 end

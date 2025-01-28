@@ -17,7 +17,8 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
          by: {:session, :two_factor_user_id}
        ]
        when action in [:resend]
-      #  when action in [:resend, :create, :new]
+
+  #  when action in [:resend, :create, :new]
 
   plug Hammer.Plug,
        [
@@ -25,7 +26,8 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
          by: {:session, :two_factor_user_id}
        ]
        when action in [:resend]
-      #  when action in [:resend, :create, :new]
+
+  #  when action in [:resend, :create, :new]
 
   @doc """
   Prompt the user for a two factor code on login
@@ -35,7 +37,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     current_user = Accounts.get_user!(current_user_id)
     current_time = System.system_time(:second)
     %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
-
 
     conn =
       if get_session(conn, :two_factor_issue_time) == nil do
@@ -49,7 +50,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
     conn =
       if two_factor_sent == false do
-
         conn
         |> maybe_send_two_factor_notification(current_user, two_factor_method)
 
@@ -64,7 +64,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     |> render("new.html", two_factor_method: two_factor_method)
   end
 
-
   # def new(conn, _params) do
   #   current_user_id = get_session(conn, :two_factor_user_id)
   #   current_user = Accounts.get_user!(current_user_id)
@@ -75,8 +74,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
   #   |> maybe_send_two_factor_notification(current_user, two_factor_method)
   #   |> render("new.html", two_factor_method: two_factor_method)
   # end
-
-
 
   @doc """
   Verify a user creating a session with a two factor code
@@ -89,7 +86,8 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
     two_factor_issue_time = get_session(conn, :two_factor_issue_time)
 
-    if current_time - two_factor_issue_time > 900 do # 15 minutes
+    # 15 minutes
+    if current_time - two_factor_issue_time > 900 do
       conn = put_session(conn, :two_factor_issue_time, current_time)
 
       conn
@@ -104,7 +102,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
         conn = put_session(conn, :two_factor_issue_time, nil)
 
         Authentication.log_in_user(conn, current_user)
-
       else
         conn
         |> put_flash(:error, "Invalid security code")
@@ -119,7 +116,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     current_user = Accounts.get_user!(current_user_id)
     current_time = System.system_time(:second)
 
-
     %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
 
     conn
@@ -128,7 +124,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     |> put_flash(:info, "Two factor code has been reset")
     |> redirect(to: Routes.user_two_factor_path(conn, :new))
   end
-
 
   defp deliver_and_update_token(conn, current_user, method, issue_time) do
     token = Authentication.generate_token(method, issue_time, current_user)
@@ -141,7 +136,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     send_two_factor_notification(conn, current_user, method)
   end
 
-
   defp send_two_factor_notification(conn, current_user, method) do
     if method == :app || method == "app" do
       conn
@@ -149,21 +143,22 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
       two_factor_issue_time = get_session(conn, :two_factor_issue_time)
       current_time = System.system_time(:second)
 
-      conn = if two_factor_issue_time == nil do
+      conn =
+        if two_factor_issue_time == nil do
           conn
           |> deliver_and_update_token(current_user, method, current_time)
         else
           conn
           |> deliver_and_update_token(current_user, method, current_time)
         end
+
       conn
     end
   end
 
-
   defp maybe_send_two_factor_notification(conn, current_user, method) do
     conn
-    |>send_two_factor_notification(current_user, method)
+    |> send_two_factor_notification(current_user, method)
   end
 
   defp verify_user_id(conn, _params) do
