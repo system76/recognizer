@@ -184,7 +184,7 @@ defmodule RecognizerWeb.Authentication do
     do: generate_token(preference, counter, two_factor_seed)
 
   def generate_token(preference, counter, two_factor_seed) do
-    if preference == :app do
+    if preference == :app || preference == "app" do
       generate_token_app(two_factor_seed)
     else
       generate_token_external(two_factor_seed, counter)

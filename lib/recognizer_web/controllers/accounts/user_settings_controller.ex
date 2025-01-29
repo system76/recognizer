@@ -14,7 +14,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user_settings:two_factor", @one_minute, 20},
+         rate_limit: {"user_settings:two_factor", @one_minute, 2},
          by: {:conn, &__MODULE__.two_factor_rate_key/1},
          when_nil: :pass,
          on_deny: &__MODULE__.two_factor_rate_limited/2
@@ -33,8 +33,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   end
 
   def resend(conn, _params) do
-    # current_user_id = get_session(conn, :two_factor_user_id)
-    # current_user = Accounts.get_user!(current_user_id)
     current_user = Authentication.fetch_current_user(conn)
     current_time = System.system_time(:second)
 
@@ -100,45 +98,55 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     two_factor_code = Map.get(params, "two_factor_code", "")
     current_time = System.system_time(:second)
 
-    # %{notification_preference: %{two_factor: method}, two_factor_seed: seed} = user
-    {:ok, %{notification_preference: %{two_factor: method}}} = Accounts.get_new_two_factor_settings(user)
+    case Accounts.get_new_two_factor_settings(user) do
+      {:ok, %{notification_preference: %{two_factor: method}}} ->
+        method_atom = normalize_to_atom(method)
 
-    method_atom = normalize_to_atom(method)
+        conn =
+          if get_session(conn, :two_factor_issue_time) == nil do
+            put_session(conn, :two_factor_issue_time, current_time)
+          else
+            conn
+          end
 
-    conn =
-      if get_session(conn, :two_factor_issue_time) == nil do
-        put_session(conn, :two_factor_issue_time, current_time)
-      else
-        conn
-      end
+        two_factor_issue_time = get_session(conn, :two_factor_issue_time)
 
-    two_factor_issue_time = get_session(conn, :two_factor_issue_time)
+        case Accounts.confirm_and_save_two_factor_settings(two_factor_code, two_factor_issue_time, user) do
+          {:ok, updated_user} ->
+            if current_time - two_factor_issue_time > 900 do
+              conn = put_session(conn, :two_factor_issue_time, current_time)
 
-    # counter = get_session(updated_conn, :two_factor_issue_time)
-    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, two_factor_issue_time, user) do
-      {:ok, _updated_user} ->
-        if current_time - two_factor_issue_time > 900 do
-          conn = put_session(conn, :two_factor_issue_time, current_time)
+              conn
+              |> send_two_factor_notification(user, method_atom)
 
-          conn
-          |> send_two_factor_notification(user, method_atom)
+              conn
+              |> put_flash(:error, "Two factor code is expired, Check new Two factor code and please try again")
+              |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
+            else
+              if updated_user == nil do
+                conn
+                |> put_flash(:error, "Two factor code is invalid")
+                |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
+              else
+                Accounts.clear_two_factor_settings(user)
 
-          conn
-          |> put_flash(:error, "Two factor code is expired, Check new Two factor code and please try again")
-          |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
-        else
-          Accounts.clear_two_factor_settings(user)
-
-          conn
-          |> put_session(:two_factor_sent, false)
-          |> put_session(:two_factor_issue_time, nil)
-          |> put_flash(:info, "Two factor code verified")
-          |> redirect(to: Routes.user_settings_path(conn, :edit))
+                conn
+                |> put_session(:two_factor_sent, false)
+                |> put_session(:two_factor_issue_time, nil)
+                |> put_flash(:info, "Two factor code verified")
+                |> redirect(to: Routes.user_settings_path(conn, :edit))
+              end
+            end
         end
 
-      _ ->
+      {:ok, nil} ->
         conn
         |> put_flash(:error, "Two factor code is invalid")
+        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
+
+      {:error, reason} ->
+        conn
+        |> put_flash(:error, "Error: #{inspect(reason)}")
         |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
     end
   end

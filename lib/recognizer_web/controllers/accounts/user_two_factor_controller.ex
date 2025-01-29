@@ -13,7 +13,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user:two_factor", @one_minute, 20},
+         rate_limit: {"user:two_factor", @one_minute, 2},
          by: {:session, :two_factor_user_id}
        ]
        when action in [:resend]
@@ -22,7 +22,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
   plug Hammer.Plug,
        [
-         rate_limit: {"user:two_factor_hour", @one_hour, 60},
+         rate_limit: {"user:two_factor_hour", @one_hour, 6},
          by: {:session, :two_factor_user_id}
        ]
        when action in [:resend]
@@ -98,10 +98,10 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
       |> redirect(to: Routes.user_two_factor_path(conn, :new))
     else
       if Authentication.valid_token?(two_factor_method, two_factor_code, two_factor_issue_time, current_user) do
-        conn = put_session(conn, :two_factor_sent, false)
-        conn = put_session(conn, :two_factor_issue_time, nil)
-
-        Authentication.log_in_user(conn, current_user)
+        conn
+        |> put_session(:two_factor_sent, false)
+        |> put_session(:two_factor_issue_time, nil)
+        |> Authentication.log_in_user(current_user)
       else
         conn
         |> put_flash(:error, "Invalid security code")
