@@ -3,9 +3,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
 
   import Recognizer.AccountFactory
 
-  # alias RecognizerWeb.Authentication
   alias Recognizer.Accounts
-  alias Recognizer.Notifications.Account
   alias RecognizerWeb.Authentication
 
   setup %{conn: conn} do
