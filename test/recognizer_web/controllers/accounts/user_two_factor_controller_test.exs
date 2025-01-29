@@ -87,4 +87,50 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
       assert Flash.get(conn.assigns.flash, :info) =~ "Two factor code has been reset"
     end
   end
+
+  describe "POST /users/two-factor Email (confirm)" do
+    test "confirm take timeout genereated token with expire_time", %{conn: conn, user: user} do
+      settings = Accounts.generate_and_cache_new_two_factor_settings(user, :email)
+
+      expired_time = System.system_time(:second) - 901
+      conn = put_session(conn, :two_factor_issue_time, expired_time)
+      conn = put_session(conn, :two_factor_sent, true)
+
+      token = Authentication.generate_token(:email, expired_time, settings)
+      params = %{"user" => %{"two_factor_code" => token}}
+
+      conn = post(conn, Routes.user_two_factor_path(conn, :create), params)
+
+      assert redirected_to(conn) =~ "/two-factor"
+      assert Flash.get(conn.assigns.flash, :error) =~ "Two factor code is expired"
+    end
+
+    test "confirm saves and clears cache", %{conn: conn, user: user} do
+      %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(user)
+
+      current_time = System.system_time(:second)
+      conn = put_session(conn, :two_factor_issue_time, current_time)
+      conn = put_session(conn, :two_factor_sent, true)
+
+      token = Authentication.generate_token(two_factor_method, current_time, user)
+      params = %{"user" => %{"two_factor_code" => token}}
+
+      conn = post(conn, Routes.user_two_factor_path(conn, :create), params)
+      assert redirected_to(conn) =~ "/settings"
+    end
+
+    test "confirm redirects without cached settings", %{conn: conn, user: user} do
+      current_time = System.system_time(:second)
+      conn = put_session(conn, :two_factor_issue_time, current_time)
+      conn = put_session(conn, :two_factor_sent, true)
+
+      settings = Accounts.generate_and_cache_new_two_factor_settings(user, :email)
+      token = Authentication.generate_token(:app, 0, settings)
+      Accounts.clear_two_factor_settings(user)
+      params = %{"user" => %{"two_factor_code" => token}}
+      conn = post(conn, Routes.user_two_factor_path(conn, :create), params)
+      assert redirected_to(conn) =~ "/two-factor"
+      assert Flash.get(conn.assigns.flash, :error) =~ "Invalid security code"
+    end
+  end
 end

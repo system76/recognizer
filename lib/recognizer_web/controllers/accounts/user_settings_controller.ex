@@ -134,7 +134,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
-  # 3) confirm 결과(updated_user)에 따른 처리 (만료/유효성/성공)
   defp process_confirm_result(conn, user, updated_user, current_time, two_factor_issue_time, method_atom) do
     if current_time - two_factor_issue_time > 900 do
       conn

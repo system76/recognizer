@@ -177,7 +177,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
     end
   end
 
-  describe "POST /users/settings/two-factor (confirm)" do
+  describe "POST /users/settings/two-factor App (confirm)" do
     test "confirm saves and clears cache", %{conn: conn, user: user} do
       settings = Accounts.generate_and_cache_new_two_factor_settings(user, :app)
 
@@ -201,6 +201,63 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
 
     test "confirm redirects without cached settings", %{conn: conn, user: user} do
       settings = Accounts.generate_and_cache_new_two_factor_settings(user, :app)
+      token = Authentication.generate_token(:app, 0, settings)
+      Accounts.clear_two_factor_settings(user)
+      params = %{"two_factor_code" => token}
+      conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
+      assert redirected_to(conn) =~ "/two-factor"
+      assert Flash.get(conn.assigns.flash, :error) =~ "Two factor code is invalid"
+    end
+  end
+
+  describe "POST /users/settings/two-factor Email (confirm)" do
+    test "confirm take timeout genereated token with expire_time", %{conn: conn, user: user} do
+      settings = Accounts.generate_and_cache_new_two_factor_settings(user, :email)
+
+      expired_time = System.system_time(:second) - 901
+      conn = put_session(conn, :two_factor_issue_time, expired_time)
+      conn = put_session(conn, :two_factor_sent, true)
+
+      token = Authentication.generate_token(:email, expired_time, settings)
+      params = %{"two_factor_code" => token}
+
+      conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
+
+      assert redirected_to(conn) =~ "/two-factor"
+      assert Flash.get(conn.assigns.flash, :error) =~ "Two factor code is expired"
+    end
+
+    test "confirm saves and clears cache", %{conn: conn, user: user} do
+      settings = Accounts.generate_and_cache_new_two_factor_settings(user, :email)
+
+      current_time = System.system_time(:second)
+      conn = put_session(conn, :two_factor_issue_time, current_time)
+      conn = put_session(conn, :two_factor_sent, true)
+
+      token = Authentication.generate_token(:email, current_time, settings)
+      params = %{"two_factor_code" => token}
+
+      conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
+
+      assert redirected_to(conn) =~ "/settings"
+      assert Flash.get(conn.assigns.flash, :info) =~ "Two factor code verified"
+
+      %{recovery_codes: recovery_codes} =
+        User
+        |> Repo.get(user.id)
+        |> Repo.preload(:recovery_codes)
+
+      refute Enum.empty?(recovery_codes)
+
+      assert {:ok, nil} = Accounts.get_new_two_factor_settings(user)
+    end
+
+    test "confirm redirects without cached settings", %{conn: conn, user: user} do
+      current_time = System.system_time(:second)
+      conn = put_session(conn, :two_factor_issue_time, current_time)
+      conn = put_session(conn, :two_factor_sent, true)
+
+      settings = Accounts.generate_and_cache_new_two_factor_settings(user, :email)
       token = Authentication.generate_token(:app, 0, settings)
       Accounts.clear_two_factor_settings(user)
       params = %{"two_factor_code" => token}
