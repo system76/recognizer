@@ -96,48 +96,10 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   def two_factor_confirm(conn, params) do
     user = Authentication.fetch_current_user(conn)
     two_factor_code = Map.get(params, "two_factor_code", "")
-    current_time = System.system_time(:second)
 
     case Accounts.get_new_two_factor_settings(user) do
-      {:ok, %{notification_preference: %{two_factor: method}}} ->
-        method_atom = normalize_to_atom(method)
-
-        conn =
-          if get_session(conn, :two_factor_issue_time) == nil do
-            put_session(conn, :two_factor_issue_time, current_time)
-          else
-            conn
-          end
-
-        two_factor_issue_time = get_session(conn, :two_factor_issue_time)
-
-        case Accounts.confirm_and_save_two_factor_settings(two_factor_code, two_factor_issue_time, user) do
-          {:ok, updated_user} ->
-            if current_time - two_factor_issue_time > 900 do
-              conn = put_session(conn, :two_factor_issue_time, current_time)
-
-              conn
-              |> send_two_factor_notification(user, method_atom)
-
-              conn
-              |> put_flash(:error, "Two factor code is expired, Check new Two factor code and please try again")
-              |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
-            else
-              if updated_user == nil do
-                conn
-                |> put_flash(:error, "Two factor code is invalid")
-                |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
-              else
-                Accounts.clear_two_factor_settings(user)
-
-                conn
-                |> put_session(:two_factor_sent, false)
-                |> put_session(:two_factor_issue_time, nil)
-                |> put_flash(:info, "Two factor code verified")
-                |> redirect(to: Routes.user_settings_path(conn, :edit))
-              end
-            end
-        end
+      {:ok, %{notification_preference: %{two_factor: method}} = _settings} ->
+        handle_two_factor_settings(conn, user, two_factor_code, method)
 
       {:ok, nil} ->
         conn
@@ -150,6 +112,53 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
         |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
     end
   end
+
+  defp handle_two_factor_settings(conn, user, two_factor_code, method) do
+    current_time = System.system_time(:second)
+    conn = ensure_two_factor_issue_time(conn, current_time)
+
+    two_factor_issue_time = get_session(conn, :two_factor_issue_time)
+    method_atom = normalize_to_atom(method)
+
+    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, two_factor_issue_time, user) do
+      {:ok, updated_user} ->
+        process_confirm_result(conn, user, updated_user, current_time, two_factor_issue_time, method_atom)
+    end
+  end
+
+  defp ensure_two_factor_issue_time(conn, current_time) do
+    if get_session(conn, :two_factor_issue_time) == nil do
+      put_session(conn, :two_factor_issue_time, current_time)
+    else
+      conn
+    end
+  end
+
+  # 3) confirm 결과(updated_user)에 따른 처리 (만료/유효성/성공)
+  defp process_confirm_result(conn, user, updated_user, current_time, two_factor_issue_time, method_atom) do
+    if current_time - two_factor_issue_time > 900 do
+      conn
+      |> put_session(:two_factor_issue_time, current_time)
+      |> send_two_factor_notification(user, method_atom)
+      |> put_flash(:error, "Two factor code is expired, Check new Two factor code and please try again")
+      |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
+    else
+      if is_nil(updated_user) do
+        conn
+        |> put_flash(:error, "Two factor code is invalid")
+        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
+      else
+        Accounts.clear_two_factor_settings(user)
+
+        conn
+        |> put_session(:two_factor_sent, false)
+        |> put_session(:two_factor_issue_time, nil)
+        |> put_flash(:info, "Two factor code verified")
+        |> redirect(to: Routes.user_settings_path(conn, :edit))
+      end
+    end
+  end
+
 
   def normalize_to_atom(input) do
     cond do

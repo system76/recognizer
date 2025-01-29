@@ -64,17 +64,6 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     |> render("new.html", two_factor_method: two_factor_method)
   end
 
-  # def new(conn, _params) do
-  #   current_user_id = get_session(conn, :two_factor_user_id)
-  #   current_user = Accounts.get_user!(current_user_id)
-
-  #   %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
-
-  #   conn
-  #   |> maybe_send_two_factor_notification(current_user, two_factor_method)
-  #   |> render("new.html", two_factor_method: two_factor_method)
-  # end
-
   @doc """
   Verify a user creating a session with a two factor code
   """
