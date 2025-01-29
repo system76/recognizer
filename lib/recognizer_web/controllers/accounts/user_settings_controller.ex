@@ -159,7 +159,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
-
   def normalize_to_atom(input) do
     cond do
       is_atom(input) -> input
