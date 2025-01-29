@@ -65,9 +65,12 @@ defmodule RecognizerWeb.Api.UserSettingsTwoFactorControllerTest do
 
     test "confirms the two factor code and updates the user's settings", %{conn: conn, user: user} do
       %{recovery_codes: recovery_codes, two_factor_seed: seed} =
-        Recognizer.Accounts.generate_and_cache_new_two_factor_settings(user, "email")
+        Recognizer.Accounts.generate_and_cache_new_two_factor_settings(user, :email)
 
-      valid_code = RecognizerWeb.Authentication.generate_token("email", 0, seed)
+      counter = System.system_time(:second)
+      conn = put_session(conn, :two_factor_issue_time, counter)
+
+      valid_code = RecognizerWeb.Authentication.generate_token("email", counter, seed)
       conn = put(conn, "/api/settings/two-factor", %{"verification" => valid_code})
 
       assert json_response(conn, 200)

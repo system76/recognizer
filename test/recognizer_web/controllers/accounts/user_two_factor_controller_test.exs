@@ -3,6 +3,9 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
 
   import Recognizer.AccountFactory
 
+  # alias RecognizerWeb.Authentication
+  alias Recognizer.Accounts
+  alias Recognizer.Notifications.Account
   alias RecognizerWeb.Authentication
 
   setup %{conn: conn} do
@@ -36,12 +39,19 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
 
   describe "POST /two-factor" do
     test "redirects to user settings for successful security codes", %{conn: conn, user: user} do
-      token = Authentication.generate_token("app", 0, user)
+      current_time = System.system_time(:second)
+      conn = put_session(conn, :two_factor_issue_time, current_time)
+      conn = put_session(conn, :two_factor_user_id, user.id)
+      %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(user)
+
+      token = Authentication.generate_token(two_factor_method, current_time, user)
       conn = post(conn, Routes.user_two_factor_path(conn, :create), %{"user" => %{"two_factor_code" => token}})
       assert redirected_to(conn) == "/settings"
     end
 
     test "emits error message with invalid security code", %{conn: conn} do
+      conn = put_session(conn, :two_factor_issue_time, System.system_time(:second) - 60)
+
       conn =
         post(conn, Routes.user_two_factor_path(conn, :create), %{
           "user" => %{"two_factor_code" => "INVALID"}
@@ -52,17 +62,17 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
     end
   end
 
-  describe "POST /two-factor/resend" do
+  describe "GET /two-factor/resend" do
     test "redirects with flash message", %{conn: conn} do
-      conn = post(conn, Routes.user_two_factor_path(conn, :resend))
+      conn = get(conn, Routes.user_two_factor_path(conn, :resend))
 
       assert redirected_to(conn) == "/two-factor"
-      assert Flash.get(conn.assigns.flash, :info) =~ "resent"
+      assert Flash.get(conn.assigns.flash, :info) =~ "Two factor code has been reset"
     end
 
     test "rate limited", %{conn: conn} do
-      Enum.each(0..20, fn _ -> post(conn, Routes.user_two_factor_path(conn, :resend)) end)
-      conn = post(conn, Routes.user_two_factor_path(conn, :resend))
+      Enum.each(0..20, fn _ -> get(conn, Routes.user_two_factor_path(conn, :resend)) end)
+      conn = get(conn, Routes.user_two_factor_path(conn, :resend))
 
       assert response(conn, 429)
     end
@@ -70,13 +80,13 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
     test "rate limited only by user id", %{conn: conn} do
       Enum.each(0..20, fn _ ->
         c = new_user_conn()
-        post(c, Routes.user_two_factor_path(c, :resend))
+        get(c, Routes.user_two_factor_path(c, :resend))
       end)
 
-      conn = post(conn, Routes.user_two_factor_path(conn, :resend))
+      conn = get(conn, Routes.user_two_factor_path(conn, :resend))
 
       assert redirected_to(conn) == "/two-factor"
-      assert Flash.get(conn.assigns.flash, :info) =~ "resent"
+      assert Flash.get(conn.assigns.flash, :info) =~ "Two factor code has been reset"
     end
   end
 end

@@ -17,7 +17,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       conn = get(conn, Routes.user_settings_path(conn, :edit))
       response = html_response(conn, 200)
       assert response =~ "Update Profile</h2>"
-      assert response =~ "Text Message"
+      assert response =~ "Authenticator App"
     end
 
     test "redirects if user is not logged in" do
@@ -124,20 +124,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       assert response =~ "must not contain special characters"
     end
 
-    test "update two-factor redirects for text method without phone number", %{conn: conn, user: user} do
-      stub(HTTPoisonMock, :put, fn _, _, _ -> ok_bigcommerce_response() end)
-      Accounts.update_user(user, %{phone_number: nil})
-
-      conn =
-        put(conn, Routes.user_settings_path(conn, :update), %{
-          "action" => "update_two_factor",
-          "user" => %{"notification_preference" => %{"two_factor" => "text"}}
-        })
-
-      assert redirected_to(conn) =~ "/settings"
-      assert Flash.get(conn.assigns.flash, :error) =~ "Phone number required"
-    end
-
     test "update two-factor allows app setup without a phone number", %{conn: conn, user: user} do
       stub(HTTPoisonMock, :put, fn _, _, _ -> ok_bigcommerce_response() end)
       Accounts.update_user(user, %{phone_number: nil})
@@ -145,7 +131,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       conn =
         put(conn, Routes.user_settings_path(conn, :edit), %{
           "action" => "update_two_factor",
-          "user" => %{"notification_preference" => %{"two_factor" => "app"}}
+          "user" => %{"notification_preference" => %{"two_factor" => :app}}
         })
 
       assert redirected_to(conn) =~ "/settings/two-factor/review"
@@ -155,7 +141,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
 
   describe "GET /users/settings/two-factor/review (backup codes)" do
     test "gets review page after 2fa setup", %{conn: conn, user: user} do
-      Accounts.generate_and_cache_new_two_factor_settings(user, "app")
+      Accounts.generate_and_cache_new_two_factor_settings(user, :app)
       conn = get(conn, Routes.user_settings_path(conn, :review))
       assert html_response(conn, 200) =~ "copy your recovery codes"
     end
@@ -169,7 +155,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
 
   describe "GET /users/settings/two-factor (init)" do
     test "/two-factor page is rendered for with settings for app, doesn't rate limit", %{conn: conn, user: user} do
-      Accounts.generate_and_cache_new_two_factor_settings(user, "app")
+      Accounts.generate_and_cache_new_two_factor_settings(user, :app)
       conn = get(conn, Routes.user_settings_path(conn, :two_factor_init))
       assert html_response(conn, 200) =~ "Configure App"
       result2 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
@@ -180,7 +166,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
     end
 
     test "/two-factor loads for email, limits retries", %{conn: conn, user: user} do
-      Accounts.generate_and_cache_new_two_factor_settings(user, "email")
+      Accounts.generate_and_cache_new_two_factor_settings(user, :email)
       result1 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
       assert html_response(result1, 200) =~ "Enter the provided 6-digit code"
       result2 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
@@ -193,9 +179,9 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
 
   describe "POST /users/settings/two-factor (confirm)" do
     test "confirm saves and clears cache", %{conn: conn, user: user} do
-      settings = Accounts.generate_and_cache_new_two_factor_settings(user, "app")
+      settings = Accounts.generate_and_cache_new_two_factor_settings(user, :app)
 
-      token = Authentication.generate_token("app", 0, settings)
+      token = Authentication.generate_token(:app, 0, settings)
       params = %{"two_factor_code" => token}
 
       conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
@@ -214,8 +200,8 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
     end
 
     test "confirm redirects without cached settings", %{conn: conn, user: user} do
-      settings = Accounts.generate_and_cache_new_two_factor_settings(user, "app")
-      token = Authentication.generate_token("app", 0, settings)
+      settings = Accounts.generate_and_cache_new_two_factor_settings(user, :app)
+      token = Authentication.generate_token(:app, 0, settings)
       Accounts.clear_two_factor_settings(user)
       params = %{"two_factor_code" => token}
       conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)

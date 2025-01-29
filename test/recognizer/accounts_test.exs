@@ -163,7 +163,7 @@ defmodule Recognizer.AccountsTest do
         user =
         :user
         |> build()
-        |> add_two_factor(:text)
+        |> add_two_factor(:email)
         |> add_organization_policy(two_factor_app_required: true)
         |> insert()
 
