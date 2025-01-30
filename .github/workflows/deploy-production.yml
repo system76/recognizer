@@ -64,7 +64,7 @@ jobs:
           image: ${{ steps.publish.outputs.image }}
 
       - name: Deploy
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.template.outputs.task-definition }}
           service: production-system76-recognizer

@@ -44,7 +44,7 @@ jobs:
           mix local.hex --force
 
       - name: Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         id: cache
         with:
           key: elixir-${{ hashFiles('Dockerfile', 'mix.lock') }}-${{ github.ref }}-test
@@ -114,7 +114,7 @@ jobs:
           mix local.hex --force
 
       - name: Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         id: cache
         with:
           key: elixir-${{ hashFiles('Dockerfile', 'mix.lock') }}-${{ github.ref }}-credo
