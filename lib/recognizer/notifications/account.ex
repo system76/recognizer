@@ -68,6 +68,7 @@ defmodule Recognizer.Notifications.Account do
     |> send_message()
   end
 
+  def two_factor_method(:app), do: :TWO_FACTOR_METHOD_APP
   def two_factor_method(:text), do: :TWO_FACTOR_METHOD_SMS
   def two_factor_method(:voice), do: :TWO_FACTOR_METHOD_VOICE
   def two_factor_method(:email), do: :TWO_FACTOR_METHOD_EMAIL
