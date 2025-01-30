@@ -332,7 +332,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     # method_atom = String.to_existing_atom(method)
 
     token =
-      if method == :app || method == "app" do
+      if method in [:app, "app"] do
         Authentication.generate_token_app(two_factor_seed)
       else
         Authentication.generate_token_external(two_factor_seed, issue_time)
