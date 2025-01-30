@@ -53,10 +53,8 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   """
   def two_factor_init(conn, _params) do
     user = Authentication.fetch_current_user(conn)
-    # %{two_factor_seed: seed, notification_preference: %{two_factor: method} } = user
-
-    {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}}} =
-      Accounts.get_new_two_factor_settings(user)
+    current_user = Accounts.get_new_two_factor_settings(user)
+    {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}}} = current_user
 
     method_atom = normalize_to_atom(method)
 
@@ -67,6 +65,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       )
     else
       current_time = System.system_time(:second)
+
       # conn = put_session(conn, :two_factor_issue_time, current_time)
 
       conn =
@@ -369,10 +368,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     if method in ["app", :app] do
       conn
     else
-      {:ok, %{two_factor_seed: two_factor_seed}} = Accounts.get_new_two_factor_settings(current_user)
-
       token = Authentication.generate_token(method, issue_time, current_user)
-
       conn
       |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
     end
