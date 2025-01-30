@@ -411,7 +411,7 @@ defmodule Recognizer.Accounts do
     two_factor_enabled? = user.two_factor_enabled
     two_factor_method = user.notification_preference.two_factor
 
-    if not two_factor_enabled? or two_factor_method !== :app do
+    if not two_factor_enabled? or two_factor_method not in [:app, "app"] do
       {:two_factor, user}
     else
       false
@@ -636,7 +636,7 @@ defmodule Recognizer.Accounts do
       notification_preference: %{two_factor: preference}
     } = attrs
 
-    if preference != "app" do
+    if preference not in [:app, "app"] do
       {:ok, two_factor_issue_time}
     else
       {:ok, nil}
