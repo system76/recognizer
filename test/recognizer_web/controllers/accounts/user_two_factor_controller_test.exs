@@ -102,7 +102,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
       conn = post(conn, Routes.user_two_factor_path(conn, :create), params)
 
       assert redirected_to(conn) =~ "/two-factor"
-      assert Flash.get(conn.assigns.flash, :error) =~ "Two factor code is expired"
+      assert Flash.get(conn.assigns.flash, :error) =~ "Two-factor code has expired. A new code has been sent. Please check your email for the newest two-factor code and try again."
     end
 
     test "confirm saves and clears cache", %{conn: conn, user: user} do

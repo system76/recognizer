@@ -83,7 +83,10 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
       |> maybe_send_two_factor_notification(current_user, two_factor_method)
 
       conn
-      |> put_flash(:error, "Two factor code is expired, Check new Two factor code and please try again")
+      |> put_flash(
+        :error,
+        "Two-factor code has expired. A new code has been sent. Please check your email for the newest two-factor code and try again."
+      )
       |> redirect(to: Routes.user_two_factor_path(conn, :new))
     else
       if Authentication.valid_token?(two_factor_method, two_factor_code, two_factor_issue_time, current_user) do

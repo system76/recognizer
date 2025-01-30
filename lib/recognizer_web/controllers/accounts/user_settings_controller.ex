@@ -44,8 +44,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     conn
     |> put_flash(:info, "Two factor code has been resent")
     |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
-
-    # |> redirect(external: Application.get_env(:recognizer, :redirect_url))
   end
 
   @doc """
@@ -139,7 +137,10 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       conn
       |> put_session(:two_factor_issue_time, current_time)
       |> send_two_factor_notification(user, method_atom)
-      |> put_flash(:error, "Two factor code is expired, Check new Two factor code and please try again")
+      |> put_flash(
+        :error,
+        "Two-factor code has expired. A new code has been sent. Please check your email for the newest two-factor code and try again."
+      )
       |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
     else
       if is_nil(updated_user) do

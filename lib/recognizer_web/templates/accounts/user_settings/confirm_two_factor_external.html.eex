@@ -8,7 +8,7 @@
     <%= form_for @conn, Routes.user_settings_path(@conn, :two_factor_confirm), fn f -> %>
     <div class="field">
         <div class="control">
-            <%= text_input f, :two_factor_code, inputmode: "numeric", pattern: "[0-9]*", autocomplete: "one-time-code", class: "is-medium #{input_classes(f, :two_factor_code)}" %>
+            <%= text_input f, :two_factor_code, inputmode: "numeric", pattern: "[0-9]*", autocomplete: "one-time-code", required: true, class: "is-medium #{input_classes(f, :two_factor_code)}" %>
         </div>
 
         <%= error_tag f, :two_factor_code %>

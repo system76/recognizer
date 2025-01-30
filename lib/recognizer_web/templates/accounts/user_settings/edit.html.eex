@@ -173,7 +173,7 @@
         <% :email -> %>
           <p>
             Two factor authentication is enabled for your account. You will
-            receive a <strong>Email</strong> every time you try to log in.
+            receive an <strong>Email</strong> every time you try to log in.
           </p>
         <% _ -> %>
           <p>

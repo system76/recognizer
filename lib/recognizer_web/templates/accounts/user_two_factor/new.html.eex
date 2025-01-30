@@ -5,7 +5,7 @@
     <%= case @two_factor_method do %>
       <% :email -> %>
         <p>
-          We have sent a email to your registered email address.
+          An email with your security code was sent to your registered email address.
         </p>
       <% _ -> %>
         <p>
@@ -27,6 +27,7 @@
           autofocus: true,
           class: "is-medium #{input_classes(f, :two_factor_code)}",
           inputmode: "numeric",
+          required: true,
           pattern: "[0-9]*"
         %>
       </div>
