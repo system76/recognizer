@@ -36,8 +36,9 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorController do
   def update(conn, params) do
     user = conn.assigns.user
     two_factor_code = Map.get(params, "two_factor_code", "")
+    counter = get_session(conn, :two_factor_issue_time)
 
-    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, user) do
+    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, counter, user) do
       {:ok, updated_user} ->
         Authentication.log_in_user(conn, updated_user, params)
 

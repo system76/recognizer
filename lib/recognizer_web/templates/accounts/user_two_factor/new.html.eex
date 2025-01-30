@@ -3,13 +3,9 @@
 
   <div class="my-4">
     <%= case @two_factor_method do %>
-      <% :text -> %>
+      <% :email -> %>
         <p>
-          We have sent a text message to your registered phone number.
-        </p>
-      <% :voice -> %>
-        <p>
-          You will receive an automated phone call with your security code.
+          An email with your security code was sent to your registered email address.
         </p>
       <% _ -> %>
         <p>
@@ -31,8 +27,8 @@
           autofocus: true,
           class: "is-medium #{input_classes(f, :two_factor_code)}",
           inputmode: "numeric",
-          pattern: "[0-9]*",
-          required: true
+          required: true,
+          pattern: "[0-9]*"
         %>
       </div>
 
@@ -52,9 +48,11 @@
     <%= link "Use Recovery Code Instead", to: Routes.user_recovery_code_path(@conn, :new) %>
   </p>
 
-  <%= if @two_factor_method != :app do %>
-    <p class="content">
-      <%= link "Resend Two Factor Code", to: Routes.user_two_factor_path(@conn, :resend), method: :create %>
-    </p>
-  <% end %>
+<%= if @two_factor_method != :app do %>
+  <p class="content">
+    <%= link "Resend Two Factor Code", to: Routes.user_two_factor_path(@conn, :resend) %>
+  </p>
+<% end %>
+
+
 </div>

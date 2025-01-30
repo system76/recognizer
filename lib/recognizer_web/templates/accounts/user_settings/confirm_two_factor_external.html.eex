@@ -19,12 +19,10 @@
         <a href="/settings" class="button">Cancel</a>
     </div>
 
-    <div class="content">
-        <p>If you did not receive a verification code, or it has expired:</p>
-        <div class="buttons is-right">
-            <%= link "Send another", to: Routes.user_settings_path(@conn, :two_factor_init), class: "button is-warning is-right"%>
-        </div>
-    </div>
+
+    <p class="content">
+    <%= link "Resend Two Factor Code", to: Routes.user_settings_path(@conn, :resend) %>
+    </p>
 
     <% end %>
 </div>

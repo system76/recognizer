@@ -626,23 +626,21 @@ defmodule Recognizer.Accounts do
   Sends a new notification message to the user to verify their _new_ two factor
   settings.
   """
-  def send_new_two_factor_notification(user) do
+  def check_two_factor_notification_time(user) do
     {:ok, attrs} = get_new_two_factor_settings(user)
-    send_new_two_factor_notification(user, attrs)
+    check_two_factor_notification_time(attrs, 100)
   end
 
-  def send_new_two_factor_notification(user, attrs) do
+  def check_two_factor_notification_time(attrs, two_factor_issue_time) do
     %{
-      notification_preference: %{two_factor: preference},
-      two_factor_seed: seed
+      notification_preference: %{two_factor: preference}
     } = attrs
 
     if preference != "app" do
-      token = Authentication.generate_token(seed)
-      Notification.deliver_two_factor_token(user, token, String.to_existing_atom(preference))
+      {:ok, two_factor_issue_time}
+    else
+      {:ok, nil}
     end
-
-    :ok
   end
 
   @doc """
@@ -660,15 +658,17 @@ defmodule Recognizer.Accounts do
   @doc """
   Confirms the user's two factor settings and persists them to the database from our cache
   """
-  def confirm_and_save_two_factor_settings(code, user) do
-    with {:ok, %{two_factor_seed: seed} = attrs} <- get_new_two_factor_settings(user),
-         true <- Authentication.valid_token?(code, seed) do
+
+  def confirm_and_save_two_factor_settings(code, counter, user) do
+    with {:ok, %{notification_preference: %{two_factor: preference}, two_factor_seed: seed} = attrs} <-
+           get_new_two_factor_settings(user),
+         true <- Authentication.valid_token?(preference, code, counter, seed) do
       user
       |> Repo.preload([:notification_preference, :recovery_codes])
       |> User.two_factor_changeset(attrs)
       |> Repo.update()
     else
-      _ -> :error
+      _ -> {:error, nil}
     end
   end
 

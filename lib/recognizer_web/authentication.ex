@@ -180,15 +180,42 @@ defmodule RecognizerWeb.Authentication do
   @doc """
   Generate a Time Based One Time Password
   """
-  def generate_token(%{two_factor_seed: two_factor_seed}), do: generate_token(two_factor_seed)
-  def generate_token(two_factor_seed), do: :pot.totp(two_factor_seed, addwindow: 1)
+  def generate_token(preference, counter, %{two_factor_seed: two_factor_seed}),
+    do: generate_token(preference, counter, two_factor_seed)
+
+  def generate_token(preference, counter, two_factor_seed) do
+    if preference == :app || preference == "app" do
+      generate_token_app(two_factor_seed)
+    else
+      generate_token_external(two_factor_seed, counter)
+    end
+  end
+
+  def generate_token_app(two_factor_seed), do: :pot.totp(two_factor_seed, interval: 30)
+
+  def generate_token_external(two_factor_seed, counter), do: :pot.hotp(two_factor_seed, counter)
 
   @doc """
   Validate a user provided token is valid
   """
-  def valid_token?(token, %{two_factor_seed: two_factor_seed}), do: valid_token?(token, two_factor_seed)
-  def valid_token?(_token, nil), do: false
-  def valid_token?(token, two_factor_seed), do: :pot.valid_totp(token, two_factor_seed, window: 1, addwindow: 1)
+
+  def valid_token?(preference, token, counter, %{two_factor_seed: two_factor_seed}),
+    do: valid_token?(preference, token, counter, two_factor_seed)
+
+  def valid_token?(preference, token, counter, two_factor_seed) do
+    if preference == :app || preference == "app" do
+      valid_token_app?(token, two_factor_seed)
+    else
+      valid_token_external?(token, two_factor_seed, counter)
+    end
+  end
+
+  def valid_token_app?(token, two_factor_seed), do: :pot.valid_totp(token, two_factor_seed, interval: 30)
+
+  def valid_token_external?(token, two_factor_seed, counter) do
+    # :pot.valid_hotp(token, two_factor_seed, last: counter)
+    token == :pot.hotp(two_factor_seed, counter)
+  end
 
   defp config(key) do
     Application.get_env(:recognizer, __MODULE__)[key]

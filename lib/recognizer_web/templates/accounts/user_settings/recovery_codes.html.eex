@@ -3,7 +3,7 @@
 
     <div>
         <p class="py-4">
-            Recovery codes are used to access your account if you have lost access to your device.
+            Copy your recovery codes and save them in safe location before continuing two-factor authentication setup.<br/>
         </p>
 
         <p class="py-4">
@@ -15,13 +15,33 @@
     </div>
 
     <div>
-        <pre><code><%= @recovery_block %></code></pre>
+        <%
+          base_recovery_block =
+            @recovery_block
+            |> String.split("\n")
+            |> Enum.with_index(1)
+            |> Enum.map(fn {line, index} ->
+              "Code #{String.pad_leading(Integer.to_string(index), 2, "0")}: #{line}"
+            end)
+            |> Enum.join("\n")
+
+          formatted_recovery_block =
+            base_recovery_block <>
+            "\n\nOne time use recovery codes.\nUse one code per recovery attempt."
+        %>
+
+        <pre><code><%= formatted_recovery_block %></code></pre>
     </div>
 
     <div class="buttons is-right mt-5">
         <div class="control">
-            <%= link "Copy and Continue", to: Routes.user_settings_path(@conn, :two_factor_init), class: "button is-secondary", id: "copy-text", data: [recovery_block: @recovery_block] %>
+            <%=
+            link "Copy and Continue",
+                to: Routes.user_settings_path(@conn, :two_factor_init),
+                class: "button is-secondary",
+                id: "copy-text",
+                data: [recovery_block: formatted_recovery_block]
+            %>
         </div>
     </div>
-
 </div>

@@ -109,7 +109,7 @@ defmodule RecognizerWeb.Router do
 
     get "/two-factor", UserTwoFactorController, :new
     post "/two-factor", UserTwoFactorController, :create
-    post "/two-factor/resend", UserTwoFactorController, :resend
+    get "/two-factor/resend", UserTwoFactorController, :resend
 
     get "/recovery-code", UserRecoveryCodeController, :new
     post "/recovery-code", UserRecoveryCodeController, :create
@@ -140,5 +140,6 @@ defmodule RecognizerWeb.Router do
     get "/settings/two-factor/review", UserSettingsController, :review
     get "/settings/two-factor", UserSettingsController, :two_factor_init
     post "/settings/two-factor", UserSettingsController, :two_factor_confirm
+    get "/setting/two-factor/resend", UserSettingsController, :resend
   end
 end

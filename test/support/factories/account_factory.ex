@@ -13,7 +13,7 @@ defmodule Recognizer.AccountFactory do
 
   def notification_preference_factory do
     %Accounts.NotificationPreference{
-      two_factor: :text
+      two_factor: :email
     }
   end
 

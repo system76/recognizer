@@ -170,15 +170,10 @@
       <%= hidden_input f, :two_factor_enabled, value: "0" %>
 
       <%= case two_factor_method(@two_factor_changeset) do %>
-        <% :text -> %>
+        <% :email -> %>
           <p>
             Two factor authentication is enabled for your account. You will
-            receive a <strong>text message</strong> every time you try to log in.
-          </p>
-        <% :voice -> %>
-          <p>
-            Two factor authentication is enabled for your account. You will
-            receive a <strong>phone call</strong> every time you try to log in.
+            receive an <strong>Email</strong> every time you try to log in.
           </p>
         <% _ -> %>
           <p>
@@ -214,7 +209,7 @@
               Authenticator App
             <% end %>
 
-            <%= if @allow_phone_methods do %>
+            <%= if @allow_phone_methods && false do %>
 
               <%= label class: "label" do %>
                 <%= radio_button n, :two_factor, "text" %>
@@ -225,12 +220,18 @@
                 <%= radio_button n, :two_factor, "voice" %>
                 Phone Call
               <% end %>
+
             <% end %>
+            <%= label class: "label" do %>
+              <%= radio_button n, :two_factor, "email" %>
+              Email
+            <% end %>
+
           </div>
         </div>
       <% end %>
 
-      <%= if @allow_phone_methods do %>
+      <%= if @allow_phone_methods && false do %>
         <p class="is-size-7">
           Message and data rates may apply for text message and phone call
           methods.
