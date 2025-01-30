@@ -36,7 +36,9 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     current_user = Authentication.fetch_current_user(conn)
     current_time = System.system_time(:second)
 
-    conn = put_session(conn, :two_factor_issue_time, current_time)
+    conn
+    |> put_session(conn, :two_factor_sent, true)
+    |> put_session(conn, :two_factor_issue_time, current_time)
 
     conn
     |> send_two_factor_notification(current_user)
@@ -327,18 +329,15 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   defp deliver_and_update_token(conn, current_user, method, issue_time) do
     # %{two_factor_seed: two_factor_seed} = current_user
 
-    {:ok, %{two_factor_seed: two_factor_seed}} = Accounts.get_new_two_factor_settings(current_user)
+    if method in ["app", :app] do
+      conn
+    else
+      {:ok, %{two_factor_seed: two_factor_seed}} = Accounts.get_new_two_factor_settings(current_user)
 
-    # method_atom = String.to_existing_atom(method)
-
-    token =
-      if method in [:app, "app"] do
-        Authentication.generate_token_app(two_factor_seed)
-      else
-        Authentication.generate_token_external(two_factor_seed, issue_time)
-      end
-
-    conn
-    |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
+      token = Authentication.generate_token_external(two_factor_seed, issue_time)
+      conn
+      |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
+    end
   end
+
 end
