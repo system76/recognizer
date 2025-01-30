@@ -181,6 +181,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       |> put_flash(:error, "Two factor code is invalid")
       |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
     else
+      # invalid code
       if Authentication.valid_token?(method_atom, two_factor_code, two_factor_issue_time, updated_user) do
         Accounts.clear_two_factor_settings(updated_user)
 
@@ -189,6 +190,10 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
         |> put_session(:two_factor_issue_time, nil)
         |> put_flash(:info, "Two factor code verified")
         |> redirect(to: Routes.user_settings_path(conn, :edit))
+      else
+        conn
+        |> put_flash(:error, "Two factor code is invalid")
+        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
       end
     end
   end
