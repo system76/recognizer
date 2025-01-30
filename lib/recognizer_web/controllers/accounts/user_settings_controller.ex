@@ -129,6 +129,16 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
           method_atom,
           two_factor_code
         )
+
+      {:ok, nil} ->
+        conn
+        |> put_flash(:error, "Two factor code is invalid")
+        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
+
+      {:error, reason} ->
+        conn
+        |> put_flash(:error, "Error: #{inspect(reason)}")
+        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
     end
   end
 
