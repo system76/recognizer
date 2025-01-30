@@ -48,7 +48,7 @@
     <%= link "Use Recovery Code Instead", to: Routes.user_recovery_code_path(@conn, :new) %>
   </p>
 
-<%= if @two_factor_method != :app do %>
+<%= if @two_factor_method not in [:app, "app"] do %>
   <p class="content">
     <%= link "Resend Two Factor Code", to: Routes.user_two_factor_path(@conn, :resend) %>
   </p>
