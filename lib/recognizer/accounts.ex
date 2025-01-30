@@ -636,10 +636,10 @@ defmodule Recognizer.Accounts do
       notification_preference: %{two_factor: preference}
     } = attrs
 
-    if preference not in [:app, "app"] do
-      {:ok, two_factor_issue_time}
-    else
+    if preference in [:app, "app"] do
       {:ok, nil}
+    else
+      {:ok, two_factor_issue_time}
     end
   end
 
