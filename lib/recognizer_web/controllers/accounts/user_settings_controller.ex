@@ -124,7 +124,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       {:ok, updated_user} ->
         process_confirm_result(
           conn,
-          user,
           updated_user,
           current_time,
           two_factor_issue_time,
@@ -144,7 +143,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
   defp process_confirm_result(
          conn,
-         user,
          updated_user,
          current_time,
          two_factor_issue_time,
@@ -154,7 +152,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     if current_time - two_factor_issue_time > 900 do
       conn
       |> put_session(:two_factor_issue_time, current_time)
-      |> send_two_factor_notification(user, method_atom)
+      |> send_two_factor_notification(updated_user, method_atom)
       |> put_flash(
         :error,
         "Two-factor code has expired. A new code has been sent. Please check your email for the newest two-factor code and try again."
