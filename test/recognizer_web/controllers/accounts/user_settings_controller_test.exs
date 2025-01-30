@@ -183,7 +183,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
 
       token = Authentication.generate_token(:app, 0, settings)
       params = %{"two_factor_code" => token}
-
       conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
 
       assert redirected_to(conn) =~ "/settings"

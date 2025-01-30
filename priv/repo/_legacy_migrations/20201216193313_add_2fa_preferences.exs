@@ -9,7 +9,7 @@ defmodule Recognizer.Repo.Migrations.Add2faPreferences do
 
     create table(:notification_preferences) do
       add :user_id, references(:users, type: :"int(11) unsigned")
-      add :two_factor, :string, default: "text"
+      add :two_factor, :string, default: "email"
 
       timestamps()
     end

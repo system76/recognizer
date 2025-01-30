@@ -122,7 +122,15 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
     case Accounts.confirm_and_save_two_factor_settings(two_factor_code, two_factor_issue_time, user) do
       {:ok, updated_user} ->
-        process_confirm_result(conn, user, updated_user, current_time, two_factor_issue_time, method_atom)
+        process_confirm_result(
+          conn,
+          user,
+          updated_user,
+          current_time,
+          two_factor_issue_time,
+          method_atom,
+          two_factor_code
+        )
     end
   end
 
@@ -134,7 +142,15 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
-  defp process_confirm_result(conn, user, updated_user, current_time, two_factor_issue_time, method_atom) do
+  defp process_confirm_result(
+         conn,
+         user,
+         updated_user,
+         current_time,
+         two_factor_issue_time,
+         method_atom,
+         two_factor_code
+       ) do
     if current_time - two_factor_issue_time > 900 do
       conn
       |> put_session(:two_factor_issue_time, current_time)
@@ -145,12 +161,30 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       )
       |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
     else
-      if is_nil(updated_user) do
-        conn
-        |> put_flash(:error, "Two factor code is invalid")
-        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
-      else
-        Accounts.clear_two_factor_settings(user)
+      process_confirm_result_conditions(
+        conn,
+        updated_user,
+        two_factor_issue_time,
+        two_factor_code,
+        method_atom
+      )
+    end
+  end
+
+  defp process_confirm_result_conditions(
+         conn,
+         updated_user,
+         two_factor_issue_time,
+         two_factor_code,
+         method_atom
+       ) do
+    if is_nil(updated_user) do
+      conn
+      |> put_flash(:error, "Two factor code is invalid")
+      |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
+    else
+      if Authentication.valid_token?(method_atom, two_factor_code, two_factor_issue_time, updated_user) do
+        Accounts.clear_two_factor_settings(updated_user)
 
         conn
         |> put_session(:two_factor_sent, false)
