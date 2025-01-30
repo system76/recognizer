@@ -167,6 +167,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
 
     test "/two-factor loads for email, limits retries", %{conn: conn, user: user} do
       Accounts.generate_and_cache_new_two_factor_settings(user, :email)
+      conn = put_session(conn, :two_factor_sent, true)
       result1 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
       assert html_response(result1, 200) =~ "Enter the provided 6-digit code"
       result2 = get(conn, Routes.user_settings_path(conn, :two_factor_init))
