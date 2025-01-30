@@ -308,7 +308,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   end
 
   defp send_two_factor_notification(conn, current_user, method) do
-    if method == "app" do
+    if method in ["app", :app] do
       conn
     else
       two_factor_issue_time = get_session(conn, :two_factor_issue_time)
