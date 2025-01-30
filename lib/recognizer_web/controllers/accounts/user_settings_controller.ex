@@ -335,9 +335,9 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       {:ok, %{two_factor_seed: two_factor_seed}} = Accounts.get_new_two_factor_settings(current_user)
 
       token = Authentication.generate_token_external(two_factor_seed, issue_time)
+
       conn
       |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
     end
   end
-
 end
