@@ -45,7 +45,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
     conn
     |> put_flash(:info, "Two factor code has been resent")
-    |> render("confirm_two_factor_external.html")
+    |> redirect(to: Routes.user_settings_path(conn, :two_factor_init))
   end
 
   @doc """
@@ -369,6 +369,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
       conn
     else
       token = Authentication.generate_token(method, issue_time, current_user)
+
       conn
       |> tap(fn _conn -> Account.deliver_two_factor_token(current_user, token, method) end)
     end
