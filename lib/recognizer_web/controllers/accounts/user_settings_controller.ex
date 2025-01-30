@@ -45,7 +45,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
     conn
     |> put_flash(:info, "Two factor code has been resent")
-    |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
+    |> render("confirm_two_factor_external.html")
   end
 
   @doc """
@@ -60,7 +60,12 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
 
     method_atom = normalize_to_atom(method)
 
-    if method_atom == :text || method_atom == :voice || method_atom == :email do
+    if method in [:app, "app"] do
+      render(conn, "confirm_two_factor.html",
+        barcode: Authentication.generate_totp_barcode(user, seed),
+        totp_app_url: Authentication.get_totp_app_url(user, seed)
+      )
+    else
       current_time = System.system_time(:second)
       # conn = put_session(conn, :two_factor_issue_time, current_time)
 
@@ -82,11 +87,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
         end
 
       render(conn, "confirm_two_factor_external.html")
-    else
-      render(conn, "confirm_two_factor.html",
-        barcode: Authentication.generate_totp_barcode(user, seed),
-        totp_app_url: Authentication.get_totp_app_url(user, seed)
-      )
     end
   end
 
