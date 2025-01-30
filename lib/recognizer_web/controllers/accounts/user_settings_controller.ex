@@ -37,8 +37,8 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     current_time = System.system_time(:second)
 
     conn
-    |> put_session(conn, :two_factor_sent, true)
-    |> put_session(conn, :two_factor_issue_time, current_time)
+    |> put_session(:two_factor_sent, true)
+    |> put_session(:two_factor_issue_time, current_time)
 
     conn
     |> send_two_factor_notification(current_user)
