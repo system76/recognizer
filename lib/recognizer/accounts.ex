@@ -655,6 +655,7 @@ defmodule Recognizer.Accounts do
     end
   end
 
+  @spec confirm_and_save_two_factor_settings(any(), any(), atom() | %{:id => any(), optional(any()) => any()}) :: any()
   @doc """
   Confirms the user's two factor settings and persists them to the database from our cache
   """
