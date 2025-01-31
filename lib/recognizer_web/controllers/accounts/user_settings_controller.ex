@@ -33,15 +33,8 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   end
 
   def resend(conn, _params) do
-    current_user = Authentication.fetch_current_user(conn)
-    current_time = System.system_time(:second)
-
     conn
-    |> put_session(:two_factor_sent, true)
-    |> put_session(:two_factor_issue_time, current_time)
-
-    conn
-    |> send_two_factor_notification(current_user)
+    |> put_session(:two_factor_sent, false)
 
     conn
     |> put_flash(:info, "Two factor code has been resent")
@@ -95,13 +88,14 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   """
   def two_factor_confirm(conn, params) do
     user = Authentication.fetch_current_user(conn)
+    # IO.inspect(user, label: "user from two_factor_confirm")
 
     two_factor_code = Map.get(params, "two_factor_code", "")
 
     # case Accounts.confirm_and_save_two_factor_settings(two_factor_code, two_factor_issue_time, user) do # Accounts.get_new_two_factor_settings(user) do
     case Accounts.get_new_two_factor_settings(user) do
-      {:ok, %{notification_preference: %{two_factor: method}} = _settings} ->
-        handle_two_factor_settings(conn, user, two_factor_code, method)
+      {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}} = _settings} ->
+        handle_two_factor_settings(conn, user, two_factor_code, method, seed)
 
       {:ok, nil} ->
         IO.inspect("checkpoint 1-1")
@@ -127,14 +121,14 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
-  defp handle_two_factor_settings(conn, user, two_factor_code, method) do
+  defp handle_two_factor_settings(conn, user, two_factor_code, method, seed) do
     current_time = System.system_time(:second)
     conn = ensure_two_factor_issue_time(conn, current_time)
 
     two_factor_issue_time = get_session(conn, :two_factor_issue_time)
     method_atom = normalize_to_atom(method)
 
-    if Authentication.valid_token?(method_atom, two_factor_code, two_factor_issue_time, user) do
+    if Authentication.valid_token?(method_atom, two_factor_code, two_factor_issue_time, seed) do
       if current_time - two_factor_issue_time > 900 do
         conn
         |> put_session(:two_factor_issue_time, current_time)
@@ -331,6 +325,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     if method in ["app", :app] do
       conn
     else
+      IO.inspect(current_user.two_factor_seed, label: "two_factor_seed")
       token = Authentication.generate_token(method, issue_time, current_user)
 
       conn
