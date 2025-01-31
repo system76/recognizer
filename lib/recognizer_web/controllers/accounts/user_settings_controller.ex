@@ -33,14 +33,30 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   end
 
   def resend(conn, _params) do
-    conn =
-      conn
-      |> put_session(:two_factor_sent, false)
-      |> put_session(:two_factor_issue_time, System.system_time(:second))
+    user = Authentication.fetch_current_user(conn)
+    current_user = Accounts.get_new_two_factor_settings(user)
 
-    conn
-    |> put_flash(:info, "Two factor code has been resent")
-    |> redirect(to: Routes.user_settings_path(conn, :two_factor_init))
+    case current_user do
+      {:error, _} ->
+        conn
+        |> put_flash(:error, "Two factor setup expired or not yet initiated")
+        |> redirect(to: Routes.user_settings_path(conn, :edit))
+
+      {:ok, nil} ->
+        conn
+        |> put_flash(:error, "Two factor setup expired or not yet initiated")
+        |> redirect(to: Routes.user_settings_path(conn, :edit))
+
+      {:ok, _setting_user} ->
+        conn =
+          conn
+          |> put_session(:two_factor_sent, false)
+          |> put_session(:two_factor_issue_time, System.system_time(:second))
+
+        conn
+        |> put_flash(:info, "Two factor code has been resent")
+        |> redirect(to: Routes.user_settings_path(conn, :two_factor_init))
+    end
   end
 
   @doc """
@@ -72,34 +88,15 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
             totp_app_url: Authentication.get_totp_app_url(user, seed)
           )
         else
-          conn = two_factor_init_email(conn, setting_user, user, method_atom)
+          current_time = System.system_time(:second)
 
-          IO.inspect(get_session(conn, :two_factor_sent, label: "two_factor_sent"))
+          conn = ensure_two_factor_issue_time(conn, current_time)
+          conn = two_factor_init_two_factor_sent(conn, setting_user, user, method_atom)
 
           conn
           |> render("confirm_two_factor_external.html")
         end
     end
-  end
-
-  def two_factor_init_email(conn, setting_user, user, method_atom) do
-    conn =
-      if get_session(conn, :two_factor_issue_time) == nil do
-        put_session(conn, :two_factor_issue_time, System.system_time(:second))
-      else
-        conn
-      end
-
-    two_factor_sent = get_session(conn, :two_factor_sent)
-
-    conn =
-      if two_factor_sent do
-        conn
-      else
-        conn
-        |> send_two_factor_notification(setting_user, user, method_atom)
-        |> put_session(:two_factor_sent, true)
-      end
   end
 
   @doc """
@@ -147,6 +144,22 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     else
       conn
     end
+  end
+
+  def two_factor_init_two_factor_sent(conn, setting_user, user, method_atom) do
+    two_factor_sent = get_session(conn, :two_factor_sent)
+
+    conn_session =
+      if two_factor_sent do
+        conn
+      else
+        conn
+        |> send_two_factor_notification(setting_user, user, method_atom)
+
+        put_session(conn, :two_factor_sent, true)
+      end
+
+    conn_session
   end
 
   defp handle_two_factor_settings(conn, user, two_factor_code, method) do
