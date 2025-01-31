@@ -659,7 +659,6 @@ defmodule Recognizer.Accounts do
   @doc """
   Confirms the user's two factor settings and persists them to the database from our cache
   """
-
   def confirm_and_save_two_factor_settings(code, counter, user) do
     with {:ok, %{notification_preference: %{two_factor: preference}, two_factor_seed: seed} = attrs} <-
            get_new_two_factor_settings(user),
@@ -672,6 +671,21 @@ defmodule Recognizer.Accounts do
       _ -> {:error, nil}
     end
   end
+
+  def confirm_and_save_two_factor_settings(code, counter, user, method) do
+    with {:ok, %{notification_preference: %{two_factor: preference}, two_factor_seed: seed} = attrs} <-
+           get_new_two_factor_settings(user),
+         true <- Authentication.valid_token?(method, code, counter, seed) do
+      user
+      |> Repo.preload([:notification_preference, :recovery_codes])
+      |> User.two_factor_changeset(attrs)
+      |> Repo.update()
+    else
+      _ -> {:error, nil}
+    end
+  end
+
+
 
   @doc """
   Deletes cached settings.
