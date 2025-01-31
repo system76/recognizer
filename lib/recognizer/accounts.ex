@@ -685,8 +685,6 @@ defmodule Recognizer.Accounts do
     end
   end
 
-
-
   @doc """
   Deletes cached settings.
   """

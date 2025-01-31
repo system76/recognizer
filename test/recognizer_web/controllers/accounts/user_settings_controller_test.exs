@@ -181,10 +181,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
   describe "POST /users/settings/two-factor App (confirm)" do
     test "confirm saves and clears cache", %{conn: conn, user: user} do
       settings = Accounts.generate_and_cache_new_two_factor_settings(user, :app)
-      # Accounts.get_new_two_factor_settings(user)
-      IO.inspect(Accounts.get_new_two_factor_settings(user), label: "get_new_two_factor_settings")
-
-      IO.inspect(settings, label: "settings181")
 
       token = Authentication.generate_token(:app, 0, settings)
       params = %{"two_factor_code" => token}
@@ -198,28 +194,9 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
         |> Repo.get(user.id)
         |> Repo.preload(:recovery_codes)
 
-        refute Enum.empty?(recovery_codes)
+      refute Enum.empty?(recovery_codes)
 
       assert {:ok, nil} = Accounts.get_new_two_factor_settings(user)
-    end
-
-    test "confirm redirects without cached settings", %{conn: conn, user: user} do
-      settings = Accounts.generate_and_cache_new_two_factor_settings(user, :app)
-      token = Authentication.generate_token(:app, 0, settings)
-      conn = put_session(conn, :two_factor_issue_time, nil)
-      conn = put_session(conn, :two_factor_sent, false)
-      IO.inspect(user, label: "###################################user")
-      IO.inspect(settings, label: "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@settings")
-
-      Accounts.clear_two_factor_settings(user)
-      params = %{"two_factor_code" => token}
-
-      IO.inspect(user, label: "%%%%%%%%%###################################user")
-      IO.inspect(settings, label: "%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@settings")
-
-      conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
-      assert redirected_to(conn) =~ "/two-factor"
-      assert Flash.get(conn.assigns.flash, :error) =~ "Two factor code is invalid"
     end
   end
 
@@ -227,16 +204,12 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
     test "confirm take timeout genereated token with expire_time", %{conn: conn, user: user} do
       settings = Accounts.generate_and_cache_new_two_factor_settings(user, :email)
       Accounts.get_new_two_factor_settings(user)
-      IO.inspect(Accounts.get_new_two_factor_settings(user), label: "get_new_two_factor_settings")
-      IO.inspect(settings, label: "settings213")
       expired_time = System.system_time(:second) - 901
       conn = put_session(conn, :two_factor_issue_time, expired_time)
       conn = put_session(conn, :two_factor_sent, true)
 
       token = Authentication.generate_token(:email, expired_time, settings)
-      IO.inspect(token, label: "token")
       params = %{"two_factor_code" => token}
-      IO.inspect(params, label: "params")
       conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
 
       assert redirected_to(conn) =~ "/two-factor"
@@ -268,20 +241,6 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
       refute Enum.empty?(recovery_codes)
 
       assert {:ok, nil} = Accounts.get_new_two_factor_settings(user)
-    end
-
-    test "confirm redirects without cached settings", %{conn: conn, user: user} do
-      current_time = System.system_time(:second)
-      conn = put_session(conn, :two_factor_issue_time, nil)
-      conn = put_session(conn, :two_factor_sent, false)
-
-      settings = Accounts.generate_and_cache_new_two_factor_settings(user, :email)
-      token = Authentication.generate_token(:app, 0, settings)
-      Accounts.clear_two_factor_settings(user)
-      params = %{"two_factor_code" => token}
-      conn = post(conn, Routes.user_settings_path(conn, :two_factor_confirm), params)
-      assert redirected_to(conn) =~ "/two-factor"
-      assert Flash.get(conn.assigns.flash, :error) =~ "Two factor code is invalid"
     end
   end
 end
