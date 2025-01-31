@@ -411,7 +411,7 @@ defmodule Recognizer.Accounts do
     two_factor_enabled? = user.two_factor_enabled
     two_factor_method = user.notification_preference.two_factor
 
-    if not two_factor_enabled? or two_factor_method !== :app do
+    if not two_factor_enabled? or two_factor_method not in [:app, "app"] do
       {:two_factor, user}
     else
       false
@@ -636,10 +636,10 @@ defmodule Recognizer.Accounts do
       notification_preference: %{two_factor: preference}
     } = attrs
 
-    if preference != "app" do
-      {:ok, two_factor_issue_time}
-    else
+    if preference in [:app, "app"] do
       {:ok, nil}
+    else
+      {:ok, two_factor_issue_time}
     end
   end
 
@@ -655,14 +655,27 @@ defmodule Recognizer.Accounts do
     end
   end
 
+  @spec confirm_and_save_two_factor_settings(any(), any(), atom() | %{:id => any(), optional(any()) => any()}) :: any()
   @doc """
   Confirms the user's two factor settings and persists them to the database from our cache
   """
-
   def confirm_and_save_two_factor_settings(code, counter, user) do
     with {:ok, %{notification_preference: %{two_factor: preference}, two_factor_seed: seed} = attrs} <-
            get_new_two_factor_settings(user),
          true <- Authentication.valid_token?(preference, code, counter, seed) do
+      user
+      |> Repo.preload([:notification_preference, :recovery_codes])
+      |> User.two_factor_changeset(attrs)
+      |> Repo.update()
+    else
+      _ -> {:error, nil}
+    end
+  end
+
+  def confirm_and_save_two_factor_settings(code, counter, user, method) do
+    with {:ok, %{two_factor_seed: seed} = attrs} <-
+           get_new_two_factor_settings(user),
+         true <- Authentication.valid_token?(method, code, counter, seed) do
       user
       |> Repo.preload([:notification_preference, :recovery_codes])
       |> User.two_factor_changeset(attrs)

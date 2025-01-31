@@ -74,7 +74,7 @@ defmodule Recognizer.AccountFactory do
     |> merge_attributes(attrs)
   end
 
-  def add_two_factor(user, type \\ :text) do
+  def add_two_factor(user, type \\ :email) do
     seed = Recognizer.Accounts.generate_new_two_factor_seed()
 
     %{

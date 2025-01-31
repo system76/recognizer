@@ -184,7 +184,7 @@ defmodule RecognizerWeb.Authentication do
     do: generate_token(preference, counter, two_factor_seed)
 
   def generate_token(preference, counter, two_factor_seed) do
-    if preference == :app || preference == "app" do
+    if preference in [:app, "app"] do
       generate_token_app(two_factor_seed)
     else
       generate_token_external(two_factor_seed, counter)
@@ -203,7 +203,7 @@ defmodule RecognizerWeb.Authentication do
     do: valid_token?(preference, token, counter, two_factor_seed)
 
   def valid_token?(preference, token, counter, two_factor_seed) do
-    if preference == :app || preference == "app" do
+    if preference in [:app, "app"] do
       valid_token_app?(token, two_factor_seed)
     else
       valid_token_external?(token, two_factor_seed, counter)
@@ -213,7 +213,6 @@ defmodule RecognizerWeb.Authentication do
   def valid_token_app?(token, two_factor_seed), do: :pot.valid_totp(token, two_factor_seed, interval: 30)
 
   def valid_token_external?(token, two_factor_seed, counter) do
-    # :pot.valid_hotp(token, two_factor_seed, last: counter)
     token == :pot.hotp(two_factor_seed, counter)
   end
 
