@@ -49,37 +49,57 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   def two_factor_init(conn, _params) do
     user = Authentication.fetch_current_user(conn)
     current_user = Accounts.get_new_two_factor_settings(user)
-    {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}} = setting_user} = current_user
 
-    method_atom = normalize_to_atom(method)
+    case current_user do
+      {:error, _} ->
+        conn
+        |> put_flash(:error, "Two factor setup expired or not yet initiated")
+        |> redirect(to: Routes.user_settings_path(conn, :edit))
 
-    if method in [:app, "app"] do
-      render(conn, "confirm_two_factor.html",
-        barcode: Authentication.generate_totp_barcode(user, seed),
-        totp_app_url: Authentication.get_totp_app_url(user, seed)
-      )
-    else
-      conn =
-        if get_session(conn, :two_factor_issue_time) == nil do
-          put_session(conn, :two_factor_issue_time, System.system_time(:second))
+      {:ok, nil} ->
+        conn
+        |> put_flash(:error, "Two factor setup expired or not yet initiated")
+        |> redirect(to: Routes.user_settings_path(conn, :edit))
+
+      {:ok, setting_user} ->
+        %{two_factor_seed: seed, notification_preference: %{two_factor: method}} = setting_user
+
+        method_atom = normalize_to_atom(method)
+
+        if method in [:app, "app"] do
+          render(conn, "confirm_two_factor.html",
+            barcode: Authentication.generate_totp_barcode(user, seed),
+            totp_app_url: Authentication.get_totp_app_url(user, seed)
+          )
         else
+          conn = two_factor_init_email(conn, setting_user, user, method_atom)
+
+          IO.inspect(get_session(conn, :two_factor_sent, label: "two_factor_sent"))
+
           conn
+          |> render("confirm_two_factor_external.html")
         end
-
-      two_factor_sent = get_session(conn, :two_factor_sent)
-
-      conn =
-        if two_factor_sent do
-          conn
-        else
-          conn = put_session(conn, :two_factor_sent, true)
-
-          conn
-          |> send_two_factor_notification(setting_user, user, method_atom)
-        end
-
-      render(conn, "confirm_two_factor_external.html")
     end
+  end
+
+  def two_factor_init_email(conn, setting_user, user, method_atom) do
+    conn =
+      if get_session(conn, :two_factor_issue_time) == nil do
+        put_session(conn, :two_factor_issue_time, System.system_time(:second))
+      else
+        conn
+      end
+
+    two_factor_sent = get_session(conn, :two_factor_sent)
+
+    conn =
+      if two_factor_sent do
+        conn
+      else
+        conn
+        |> send_two_factor_notification(setting_user, user, method_atom)
+        |> put_session(:two_factor_sent, true)
+      end
   end
 
   @doc """
