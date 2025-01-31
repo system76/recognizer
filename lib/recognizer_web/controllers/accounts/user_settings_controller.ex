@@ -53,8 +53,9 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   """
   def two_factor_init(conn, _params) do
     user = Authentication.fetch_current_user(conn)
-    current_user = Accounts.get_new_two_factor_settings(user)
-    {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}}} = current_user
+
+    {:ok, %{two_factor_seed: seed, notification_preference: %{two_factor: method}}} =
+      Accounts.get_new_two_factor_settings(user)
 
     method_atom = normalize_to_atom(method)
 
@@ -94,48 +95,24 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
   """
   def two_factor_confirm(conn, params) do
     user = Authentication.fetch_current_user(conn)
+
     two_factor_code = Map.get(params, "two_factor_code", "")
 
+    # case Accounts.confirm_and_save_two_factor_settings(two_factor_code, two_factor_issue_time, user) do # Accounts.get_new_two_factor_settings(user) do
     case Accounts.get_new_two_factor_settings(user) do
       {:ok, %{notification_preference: %{two_factor: method}} = _settings} ->
         handle_two_factor_settings(conn, user, two_factor_code, method)
 
       {:ok, nil} ->
+        IO.inspect("checkpoint 1-1")
+
         conn
         |> put_flash(:error, "Two factor code is invalid")
         |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
 
       {:error, reason} ->
-        conn
-        |> put_flash(:error, "Error: #{inspect(reason)}")
-        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
-    end
-  end
+        IO.inspect("checkpoint 1-2")
 
-  defp handle_two_factor_settings(conn, user, two_factor_code, method) do
-    current_time = System.system_time(:second)
-    conn = ensure_two_factor_issue_time(conn, current_time)
-
-    two_factor_issue_time = get_session(conn, :two_factor_issue_time)
-    method_atom = normalize_to_atom(method)
-
-    case Accounts.confirm_and_save_two_factor_settings(two_factor_code, two_factor_issue_time, user) do
-      {:ok, updated_user} ->
-        process_confirm_result(
-          conn,
-          updated_user,
-          current_time,
-          two_factor_issue_time,
-          method_atom,
-          two_factor_code
-        )
-
-      {:ok, nil} ->
-        conn
-        |> put_flash(:error, "Two factor code is invalid")
-        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
-
-      {:error, reason} ->
         conn
         |> put_flash(:error, "Error: #{inspect(reason)}")
         |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
@@ -150,60 +127,36 @@ defmodule RecognizerWeb.Accounts.UserSettingsController do
     end
   end
 
-  defp process_confirm_result(
-         conn,
-         updated_user,
-         current_time,
-         two_factor_issue_time,
-         method_atom,
-         two_factor_code
-       ) do
-    if current_time - two_factor_issue_time > 900 do
-      conn
-      |> put_session(:two_factor_issue_time, current_time)
-      |> send_two_factor_notification(updated_user, method_atom)
-      |> put_flash(
-        :error,
-        "Two-factor code has expired. A new code has been sent. Please check your email for the newest two-factor code and try again."
-      )
-      |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
-    else
-      process_confirm_result_conditions(
-        conn,
-        updated_user,
-        two_factor_issue_time,
-        two_factor_code,
-        method_atom
-      )
-    end
-  end
+  defp handle_two_factor_settings(conn, user, two_factor_code, method) do
+    current_time = System.system_time(:second)
+    conn = ensure_two_factor_issue_time(conn, current_time)
 
-  defp process_confirm_result_conditions(
-         conn,
-         updated_user,
-         two_factor_issue_time,
-         two_factor_code,
-         method_atom
-       ) do
-    if is_nil(updated_user) do
-      conn
-      |> put_flash(:error, "Two factor code is invalid")
-      |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
-    else
-      # invalid code
-      if Authentication.valid_token?(method_atom, two_factor_code, two_factor_issue_time, updated_user) do
-        Accounts.clear_two_factor_settings(updated_user)
+    two_factor_issue_time = get_session(conn, :two_factor_issue_time)
+    method_atom = normalize_to_atom(method)
+
+    if Authentication.valid_token?(method_atom, two_factor_code, two_factor_issue_time, user) do
+      if current_time - two_factor_issue_time > 900 do
+        conn
+        |> put_session(:two_factor_issue_time, current_time)
+        |> send_two_factor_notification(user, method_atom)
+        |> put_flash(
+          :error,
+          "Two-factor code has expired. A new code has been sent. Please check your email for the newest two-factor code and try again."
+        )
+        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
+      else
+        Accounts.clear_two_factor_settings(user)
 
         conn
         |> put_session(:two_factor_sent, false)
         |> put_session(:two_factor_issue_time, nil)
         |> put_flash(:info, "Two factor code verified")
         |> redirect(to: Routes.user_settings_path(conn, :edit))
-      else
-        conn
-        |> put_flash(:error, "Two factor code is invalid")
-        |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
       end
+    else
+      conn
+      |> put_flash(:error, "Two factor code is invalid")
+      |> redirect(to: Routes.user_settings_path(conn, :two_factor_confirm))
     end
   end
 
