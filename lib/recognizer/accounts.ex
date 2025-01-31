@@ -673,7 +673,7 @@ defmodule Recognizer.Accounts do
   end
 
   def confirm_and_save_two_factor_settings(code, counter, user, method) do
-    with {:ok, %{notification_preference: %{two_factor: preference}, two_factor_seed: seed} = attrs} <-
+    with {:ok, %{two_factor_seed: seed} = attrs} <-
            get_new_two_factor_settings(user),
          true <- Authentication.valid_token?(method, code, counter, seed) do
       user
