@@ -622,50 +622,6 @@ defmodule Recognizer.Accounts do
     attrs
   end
 
-
-
-  def maybe_generate_and_cache_two_factor_settings(user, preference) do
-    # 1) Redis에서 현재 two_factor_settings를 가져온다
-    case Redix.command(:redix, ["GET", "two_factor_settings:#{user.id}"]) do
-      # 캐시가 전혀 없는 경우 → 새로 생성
-      {:ok, nil} ->
-        generate_and_cache_new_two_factor_settings(user, preference)
-
-      {:ok, settings_json} ->
-        current_settings = Jason.decode!(settings_json)
-
-        # Map 형태에 따라 "two_factor_seed" 혹은 :two_factor_seed 키를 확인
-        seed =
-          current_settings["two_factor_seed"] ||
-            current_settings[:two_factor_seed]
-
-        if seed do
-          # 2) 이미 seed가 있으므로, preference나 recovery_codes만 업데이트
-          updated_settings =
-            current_settings
-            |> Map.put("notification_preference", %{"two_factor" => preference})
-            |> Map.put("two_factor_enabled", true)
-            |> Map.put("recovery_codes", generate_new_recovery_codes(user))
-
-          :ok =
-            Redix.noreply_command(:redix, [
-              "SET",
-              "two_factor_settings:#{user.id}",
-              Jason.encode!(updated_settings),
-              "EX",
-              config(:cache_expiry)
-            ])
-
-          updated_settings
-        else
-          # 3) seed가 없으면 새로 생성
-          generate_and_cache_new_two_factor_settings(user, preference)
-        end
-    end
-    {:ok, attrs} = get_new_two_factor_settings(user)
-    check_two_factor_notification_time(attrs, 100)
-  end
-
   @doc """
   Sends a new notification message to the user to verify their _new_ two factor
   settings.
