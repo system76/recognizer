@@ -127,7 +127,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorControllerTest do
       conn = put_session(conn, :two_factor_sent, true)
 
       settings = Accounts.generate_and_cache_new_two_factor_settings(user, :email)
-      token = Authentication.generate_token(:app, 0, settings)
+      token = Authentication.generate_token(:email, current_time, settings)
       Accounts.clear_two_factor_settings(user)
       params = %{"user" => %{"two_factor_code" => token}}
       conn = post(conn, Routes.user_two_factor_path(conn, :create), params)
