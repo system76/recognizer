@@ -40,7 +40,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     case current_user do
       {:error, _} ->
         conn.redirect(to: Routes.user_session_path(conn, :new))
-      {:error, _} ->
+      {:ok, nil} ->
         conn.redirect(to: Routes.user_session_path(conn, :new))
       {:ok, current_user} ->
         %{notification_preference: %{two_factor: two_factor_method}} = current_user
