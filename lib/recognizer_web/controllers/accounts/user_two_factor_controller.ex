@@ -37,6 +37,7 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     current_user = Accounts.get_user!(current_user_id)
     current_time = System.system_time(:second)
     current_user = Accounts.load_notification_preferences(current_user)
+
     case current_user do
       %{notification_preference: %{two_factor: two_factor_method}} ->
         conn =
@@ -63,9 +64,9 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
 
         conn
         |> render("new.html", two_factor_method: two_factor_method)
+
       _ ->
         conn.redirect(to: Routes.user_session_path(conn, :new))
-
     end
   end
 
