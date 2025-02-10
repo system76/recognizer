@@ -58,7 +58,7 @@ RUN set -xe; \
 # -----------------------------------------------
 # 4) Build final release image
 # -----------------------------------------------
-FROM debian:11.6-slim as release
+FROM debian:12-slim as release
 
 ARG APP_NAME=recognizer
 
