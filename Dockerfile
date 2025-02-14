@@ -1,7 +1,7 @@
 # -----------------------------------------------
 # 1) Build Elixir
 # -----------------------------------------------
-FROM elixir:1.17.3 as build-elixir
+FROM elixir:1.15 as build-elixir
 
 # ARG is available during the build and not in the final container
 # https://vsupalov.com/docker-arg-vs-env/
