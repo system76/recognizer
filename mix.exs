@@ -33,7 +33,7 @@ defmodule Recognizer.MixProject do
   defp deps do
     [
       {:argon2_elixir, "~> 2.0"},
-      {:bottle, github: "system76/bottle", ref: "1a49e7bc7d8f7bf556c5780b70e9eb60a06a8ca7"},
+      {:bottle, github: "system76/bottle", ref: "4654c83d58c0323f9ad40a8e3cdab8fe2c0110e6"},
       {:cors_plug, "~> 2.0"},
       {:cowboy, "~> 2.8", override: true},
       {:cowlib, "~> 2.9.1", override: true},

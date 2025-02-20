@@ -97,4 +97,8 @@ config :spandex, :decorators, tracer: Recognizer.Tracer
 
 config :recognizer, Recognizer.Accounts, cache_expiry: 60 * 15
 
+config :recognizer, RecognizerWeb.Gettext,
+  default_locale: "en",
+  locales: ~w(en fr de es)
+
 import_config "#{Mix.env()}.exs"

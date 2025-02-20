@@ -1,7 +1,7 @@
 # -----------------------------------------------
 # 1) Build Elixir
 # -----------------------------------------------
-FROM elixir:1.13.3-slim as build-elixir
+FROM elixir:1.15 as build-elixir
 
 # ARG is available during the build and not in the final container
 # https://vsupalov.com/docker-arg-vs-env/
@@ -58,7 +58,7 @@ RUN set -xe; \
 # -----------------------------------------------
 # 4) Build final release image
 # -----------------------------------------------
-FROM debian:11.6-slim as release
+FROM debian:12-slim as release
 
 ARG APP_NAME=recognizer
 
