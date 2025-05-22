@@ -182,7 +182,7 @@ defmodule Recognizer.Accounts do
     |> insert_user_and_notification_preferences()
     |> maybe_create_big_commerce_customer()
     |> maybe_generate_verification_code(verify_account_url_fun)
-    |> maybe_send_newsletter(attrs)
+    |> maybe_send_newsletter_after_registration(attrs)
   end
 
   defp do_register_user(attrs, opts) do
@@ -192,7 +192,7 @@ defmodule Recognizer.Accounts do
     |> maybe_create_big_commerce_customer()
     |> maybe_mark_user_verified()
     |> maybe_notify_new_user()
-    |> maybe_send_newsletter(attrs)
+    |> maybe_send_newsletter_after_registration(attrs)
   end
 
   @doc """
@@ -239,13 +239,17 @@ defmodule Recognizer.Accounts do
     error
   end
 
-  defp maybe_send_newsletter({:ok, _user} = response, %{"newsletter" => "true"} = attrs) do
-    Recognizer.Hal.update_newsletter(attrs)
-    response
+  defp maybe_send_newsletter_after_registration({:ok, user} = previous_response, %{"newsletter" => "true"}) do
+    Recognizer.Hal.update_newsletter(user)
+    previous_response
   end
 
-  defp maybe_send_newsletter(response, _attrs) do
-    response
+  defp maybe_send_newsletter_after_registration(previous_response, %{"newsletter" => false}) do
+    previous_response
+  end
+
+  defp maybe_send_newsletter_after_registration(previous_response, _attrs) do
+    previous_response
   end
 
   @doc """

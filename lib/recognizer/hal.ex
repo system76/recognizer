@@ -2,54 +2,191 @@ defmodule Recognizer.Hal do
   @moduledoc """
   A simple API client for the Hal API
   """
+  require Logger
+
+  def update_newsletter(nil) do
+    Logger.error("update_newsletter/1 called with nil user")
+    {:error, :nil_user_argument}
+  end
 
   def update_newsletter(user) do
-    req =
-      "/accounts/newsletter/interests"
-      |> build_url()
-      |> HTTPoison.get!(authorization_headers())
+    with {:ok, validated_user} <- validate_user_data(user),
+         {:ok, interests_url} <- build_url("/accounts/newsletter/interests"),
+         {:ok, interests_response_body} <- fetch_data(interests_url, "newsletter interests", Map.get(validated_user, :email)),
+         {:ok, decoded_interests} <-
+           decode_json(interests_response_body, "newsletter interests", Map.get(validated_user, :email)),
+         groups <- calculate_interest_groups(decoded_interests, validated_user),
+         {:ok, status_url} <- build_url("/accounts/newsletter?email_address=#{Map.get(validated_user, :email)}"),
+         {:ok, status_response_body} <- fetch_data(status_url, "newsletter status", Map.get(validated_user, :email)),
+         {:ok, decoded_status} <- decode_json(status_response_body, "newsletter status", Map.get(validated_user, :email)),
+         :update_allowed <- check_and_log_newsletter_status(decoded_status, Map.get(validated_user, :email)) do
+      # Proceed to update the newsletter
+      perform_newsletter_update(validated_user, groups)
+    else
+      # Handle any error from the with statement
+      {:error, reason} ->
+        Logger.error("Newsletter update failed for #{Map.get(user, :email, "unknown user")}: #{inspect(reason)}")
+        # Or return the specific error reason
+        :error
 
-    interests = Jason.decode!(req.body)["interests"]
+      :update_not_allowed ->
+        # Logged in check_and_log_newsletter_status, so just return :ok or a specific atom
+        :ok_not_updated
 
-    groups =
-      Enum.reduce(interests, %{}, fn item, acc ->
-        Map.put(acc, item["id"], String.to_existing_atom(user["newsletter"]))
-      end)
-
-    req =
-      "/accounts/newsletter?email_address=#{user["email"]}"
-      |> build_url()
-      |> HTTPoison.get!(authorization_headers())
-
-    status = Jason.decode!(req.body)["status"]
-
-    # only update if not already pending, or subscribed
-    # note: this means you cannot unsubscribe from recognizer settings
-    unless Enum.member?(["pending", "subscribed"], status) do
-      body =
-        %{
-          "email_address" => user["email"],
-          "status" => "pending",
-          "interests" => groups,
-          "merge_fields" => %{
-            "FNAME" => user["first_name"],
-            "LNAME" => user["last_name"]
-          }
-        }
-        |> Jason.encode!()
-
-      "/accounts/newsletter"
-      |> build_url()
-      |> HTTPoison.post!(body, [{"content-type", "application/json"}] ++ authorization_headers())
+      _other_error ->
+        # Catch-all for unexpected failures in `with`
+        Logger.error("Unexpected error during newsletter update for #{Map.get(user, :email, "unknown user")}")
+        :error
     end
+  end
+
+  # Validate user data
+  defp validate_user_data(user) do
+    if is_map(user) && !is_nil(Map.get(user, :email)) && !is_nil(Map.get(user, :newsletter)) do
+      {:ok, user}
+    else
+      Logger.error("update_newsletter/1 called with invalid user data (missing :email or :newsletter field): #{inspect(user)}")
+      {:error, :invalid_user_data}
+    end
+  end
+
+  # Fetch data from HAL API
+  defp fetch_data(url, context_msg, email_for_log \\ "unknown user") do
+    case HTTPoison.get(url, authorization_headers()) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        {:ok, body}
+
+      {:ok, %HTTPoison.Response{status_code: status_code, body: error_body}} ->
+        Logger.error(
+          "Failed to fetch #{context_msg} for #{email_for_log}. Status: #{status_code}, Body: #{inspect(error_body)}"
+        )
+
+        {:error, {:http_error, status_code, context_msg}}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        Logger.error("HTTP error fetching #{context_msg} for #{email_for_log}: #{inspect(reason)}")
+        {:error, {:http_client_error, reason, context_msg}}
+    end
+  end
+
+  # Decode JSON response
+  defp decode_json(json_string, context_msg, email_for_log \\ "unknown user") do
+    case Jason.decode(json_string) do
+      {:ok, decoded_json} ->
+        {:ok, decoded_json}
+
+      {:error, Jason_decode_error} ->
+        Logger.error(
+          "Failed to decode #{context_msg} JSON for #{email_for_log}. Error: #{inspect(Jason_decode_error)}, Body: #{inspect(json_string)}"
+        )
+
+        {:error, {:json_decode_error, context_msg}}
+    end
+  end
+
+  # Calculate interest groups
+  defp calculate_interest_groups(decoded_interests_response, user) do
+    raw_interests = Map.get(decoded_interests_response, "interests")
+    interests = if is_list(raw_interests), do: raw_interests, else: []
+    newsletter_status_value = Map.get(user, :newsletter)
+
+    Enum.reduce(interests, %{}, fn item, acc ->
+      atom_value = newsletter_status_value
+
+      Map.put(acc, item["id"], atom_value)
+    end)
+  end
+
+  # Check newsletter status and decide if update is allowed
+  defp check_and_log_newsletter_status(decoded_status_response, email) do
+    status = Map.get(decoded_status_response, "status")
+
+    if status && Enum.member?(["pending", "subscribed"], status) do
+      Logger.info("Newsletter status for #{email} is '#{status}', no update will be performed.")
+      :update_not_allowed
+    else
+      # If status is nil, it might mean the user is not in the system yet, so allow update.
+      # Or if status is something else, also allow update.
+      Logger.info("Newsletter status for #{email} is '#{status || "nil"}', proceeding with update attempt.")
+      # Explicitly return :update_allowed for clarity in `with`
+      :update_allowed
+    end
+  end
+
+  # Perform the actual newsletter update via POST
+  defp perform_newsletter_update(user, groups) do
+    with {:ok, email_address} <- validate_email_present(user),
+         payload <- build_payload(email_address, user, groups),
+         {:ok, post_url} <- build_url("/accounts/newsletter") do
+      case HTTPoison.post(post_url, payload, [{"content-type", "application/json"}] ++ authorization_headers()) do
+        {:ok, %HTTPoison.Response{status_code: 200}} ->
+          Logger.info("Newsletter updated successfully for #{email_address}")
+          :ok
+
+        {:ok, %HTTPoison.Response{status_code: status_code, body: error_body}} ->
+          Logger.error(
+            "Failed to update newsletter for #{email_address}. Status: #{status_code}, Body: #{inspect(error_body)}"
+          )
+          {:error, {:http_post_error, status_code}}
+
+        {:error, %HTTPoison.Error{reason: reason}} ->
+          Logger.error("HTTP error while posting newsletter update for #{email_address}: #{inspect(reason)}")
+          {:error, {:http_client_post_error, reason}}
+      end
+    else
+      # This else block will catch errors from validate_email_present or build_url
+      {:error, reason} ->
+        # Log if the reason is :missing_email_for_newsletter_update, otherwise it might be logged by build_url
+        if reason == :missing_email_for_newsletter_update do
+          Logger.error("Cannot perform newsletter update for user without email: #{inspect(user)}")
+        end
+        {:error, reason} # Propagate the error
+    end
+  end
+
+  defp validate_email_present(user) do
+    case Map.get(user, :email) do
+      nil -> {:error, :missing_email_for_newsletter_update}
+      email -> {:ok, email}
+    end
+  end
+
+  defp build_payload(email_address, user, groups) do
+    first_name = Map.get(user, :first_name, "")
+    last_name = Map.get(user, :last_name, "")
+
+    %{
+      "email_address" => email_address,
+      "status" => "pending",
+      "interests" => groups,
+      "merge_fields" => %{
+        "FNAME" => first_name,
+        "LNAME" => last_name
+      }
+    }
+    |> Jason.encode!() # Assuming this encoding will not fail with validated data
   end
 
   defp build_url(path) do
     base_url = Application.get_env(:recognizer, :hal_url)
-    Path.join([base_url, path])
+
+    if base_url do
+      {:ok, Path.join([base_url, path])}
+    else
+      Logger.error("HAL service base_url is not configured.")
+      {:error, :hal_base_url_not_configured}
+    end
   end
 
   defp authorization_headers() do
-    [{"authorization", "Recognizer #{Application.get_env(:recognizer, :hal_token)}"}]
+    token = Application.get_env(:recognizer, :hal_token)
+
+    if token do
+      [{"authorization", "Recognizer #{token}"}]
+    else
+      Logger.error("HAL service authorization token is not configured.")
+      # Or consider {:error, :hal_token_not_configured} if headers are mandatory
+      []
+    end
   end
 end
