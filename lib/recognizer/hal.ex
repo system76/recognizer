@@ -56,7 +56,7 @@ defmodule Recognizer.Hal do
   end
 
   # Fetch data from HAL API
-  defp fetch_data(url, context_msg, email_for_log \\ "unknown user") do
+  defp fetch_data(url, context_msg, email_for_log) do
     case HTTPoison.get(url, authorization_headers()) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, body}
@@ -75,7 +75,7 @@ defmodule Recognizer.Hal do
   end
 
   # Decode JSON response
-  defp decode_json(json_string, context_msg, email_for_log \\ "unknown user") do
+  defp decode_json(json_string, context_msg, email_for_log) do
     case Jason.decode(json_string) do
       {:ok, decoded_json} ->
         {:ok, decoded_json}
