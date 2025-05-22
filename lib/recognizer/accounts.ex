@@ -704,13 +704,16 @@ defmodule Recognizer.Accounts do
   end
 
   def resend_verification_code(user, verify_account_url_fun) do
-    case Repo.get_by(VerificationCode, user_id: user.id) do
-      nil ->
-        maybe_generate_verification_code({:ok, user}, verify_account_url_fun)
+    delete_verification_codes_for_user(user)
 
-      verification ->
-        Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(verification.code))
-    end
+    {:ok, verification} =
+      %VerificationCode{}
+      |> VerificationCode.changeset(%{code: VerificationCode.generate_code(), user_id: user.id})
+      |> Repo.insert()
+
+    Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(verification.code))
+
+    {:ok, user}
   end
 
   def verify_user(code) do
