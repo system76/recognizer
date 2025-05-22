@@ -12,13 +12,15 @@ defmodule Recognizer.Hal do
   def update_newsletter(user) do
     with {:ok, validated_user} <- validate_user_data(user),
          {:ok, interests_url} <- build_url("/accounts/newsletter/interests"),
-         {:ok, interests_response_body} <- fetch_data(interests_url, "newsletter interests", Map.get(validated_user, :email)),
+         {:ok, interests_response_body} <-
+           fetch_data(interests_url, "newsletter interests", Map.get(validated_user, :email)),
          {:ok, decoded_interests} <-
            decode_json(interests_response_body, "newsletter interests", Map.get(validated_user, :email)),
          groups <- calculate_interest_groups(decoded_interests, validated_user),
          {:ok, status_url} <- build_url("/accounts/newsletter?email_address=#{Map.get(validated_user, :email)}"),
          {:ok, status_response_body} <- fetch_data(status_url, "newsletter status", Map.get(validated_user, :email)),
-         {:ok, decoded_status} <- decode_json(status_response_body, "newsletter status", Map.get(validated_user, :email)),
+         {:ok, decoded_status} <-
+           decode_json(status_response_body, "newsletter status", Map.get(validated_user, :email)),
          :update_allowed <- check_and_log_newsletter_status(decoded_status, Map.get(validated_user, :email)) do
       # Proceed to update the newsletter
       perform_newsletter_update(validated_user, groups)
@@ -45,7 +47,10 @@ defmodule Recognizer.Hal do
     if is_map(user) && !is_nil(Map.get(user, :email)) && !is_nil(Map.get(user, :newsletter)) do
       {:ok, user}
     else
-      Logger.error("update_newsletter/1 called with invalid user data (missing :email or :newsletter field): #{inspect(user)}")
+      Logger.error(
+        "update_newsletter/1 called with invalid user data (missing :email or :newsletter field): #{inspect(user)}"
+      )
+
       {:error, :invalid_user_data}
     end
   end
@@ -127,6 +132,7 @@ defmodule Recognizer.Hal do
           Logger.error(
             "Failed to update newsletter for #{email_address}. Status: #{status_code}, Body: #{inspect(error_body)}"
           )
+
           {:error, {:http_post_error, status_code}}
 
         {:error, %HTTPoison.Error{reason: reason}} ->
@@ -140,7 +146,9 @@ defmodule Recognizer.Hal do
         if reason == :missing_email_for_newsletter_update do
           Logger.error("Cannot perform newsletter update for user without email: #{inspect(user)}")
         end
-        {:error, reason} # Propagate the error
+
+        # Propagate the error
+        {:error, reason}
     end
   end
 
@@ -164,7 +172,8 @@ defmodule Recognizer.Hal do
         "LNAME" => last_name
       }
     }
-    |> Jason.encode!() # Assuming this encoding will not fail with validated data
+    # Assuming this encoding will not fail with validated data
+    |> Jason.encode!()
   end
 
   defp build_url(path) do
