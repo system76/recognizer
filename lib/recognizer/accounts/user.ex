@@ -30,7 +30,7 @@ defmodule Recognizer.Accounts.User do
     field :type, Recognizer.UserType, default: :individual
     field :company_name, :string
 
-    field :newsletter, :boolean, default: true
+    field :newsletter, :boolean, default: false
 
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, source: :password
@@ -92,7 +92,7 @@ defmodule Recognizer.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:first_name, :last_name, :email, :phone_number, :type, :company_name, :password])
+    |> cast(attrs, [:first_name, :last_name, :email, :phone_number, :type, :company_name, :password, :newsletter])
     |> validate_required([:first_name, :last_name, :type])
     |> validate_names()
     |> validate_email()

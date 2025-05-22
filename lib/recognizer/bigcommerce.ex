@@ -33,8 +33,15 @@ defmodule Recognizer.BigCommerce do
 
       {:ok, [customer_id]} ->
         Logger.info("found existing customer for account create:  #{inspect(email)}")
-        Repo.insert(%Customer{user_id: id, bc_id: customer_id})
-        {:ok, user}
+
+        case Repo.insert(%Customer{user_id: id, bc_id: customer_id}) do
+          {:ok, _customer_db_entry} ->
+            {:ok, user}
+
+          {:error, changeset} ->
+            Logger.error("error inserting customer into local DB: #{inspect(changeset)}")
+            {:error, changeset}
+        end
 
       e ->
         Logger.error("error while getting or creating customer: #{inspect(e)}")
