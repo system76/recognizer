@@ -240,6 +240,7 @@ defmodule Recognizer.Accounts do
   end
 
   defp maybe_send_newsletter_after_registration({:ok, user} = previous_response, %{"newsletter" => "true"}) do
+    # Process asynchronously to avoid blocking the account creation if newsletter registration fails
     Task.start(fn ->
       try do
         require Logger
@@ -252,7 +253,6 @@ defmodule Recognizer.Accounts do
           Logger.error(Exception.format_stacktrace(__STACKTRACE__))
       end
     end)
-
     previous_response
   end
 
