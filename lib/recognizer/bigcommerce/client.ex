@@ -5,7 +5,6 @@ defmodule Recognizer.BigCommerce.Client do
 
   require Logger
 
-  alias Recognizer.Accounts.BCCustomerUser
   alias Recognizer.Accounts.User
 
   alias HTTPoison.Response
