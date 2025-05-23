@@ -13,12 +13,13 @@ defmodule Recognizer.Hal do
     with {:ok, validated_user} <- validate_user_data(user),
          {:ok, interests_url} <- build_url("/accounts/newsletter/interests"),
          {:ok, interests_response_body} <-
-           fetch_data(interests_url, "newsletter interests", Map.get(validated_user, :email)),
+           fetch_data_with_retry(interests_url, "newsletter interests", Map.get(validated_user, :email)),
          {:ok, decoded_interests} <-
            decode_json(interests_response_body, "newsletter interests", Map.get(validated_user, :email)),
          groups <- calculate_interest_groups(decoded_interests, validated_user),
          {:ok, status_url} <- build_url("/accounts/newsletter?email_address=#{Map.get(validated_user, :email)}"),
-         {:ok, status_response_body} <- fetch_data(status_url, "newsletter status", Map.get(validated_user, :email)),
+         {:ok, status_response_body} <-
+           fetch_data_with_retry(status_url, "newsletter status", Map.get(validated_user, :email)),
          {:ok, decoded_status} <-
            decode_json(status_response_body, "newsletter status", Map.get(validated_user, :email)),
          :update_allowed <- check_and_log_newsletter_status(decoded_status, Map.get(validated_user, :email)) do
@@ -28,8 +29,8 @@ defmodule Recognizer.Hal do
       # Handle any error from the with statement
       {:error, reason} ->
         Logger.error("Newsletter update failed for #{Map.get(user, :email, "unknown user")}: #{inspect(reason)}")
-        # Or return the specific error reason
-        :error
+        # Return the specific error reason
+        {:error, reason}
 
       :update_not_allowed ->
         # Logged in check_and_log_newsletter_status, so just return :ok or a specific atom
@@ -38,7 +39,7 @@ defmodule Recognizer.Hal do
       _other_error ->
         # Catch-all for unexpected failures in `with`
         Logger.error("Unexpected error during newsletter update for #{Map.get(user, :email, "unknown user")}")
-        :error
+        {:error, :unexpected_error}
     end
   end
 
@@ -52,6 +53,22 @@ defmodule Recognizer.Hal do
       )
 
       {:error, :invalid_user_data}
+    end
+  end
+
+  # 재시도 메커니즘을 가진 데이터 가져오기 함수
+  defp fetch_data_with_retry(url, context_msg, email_for_log, retry_count \\ 3, retry_delay \\ 1000) do
+    case fetch_data(url, context_msg, email_for_log) do
+      {:ok, body} ->
+        {:ok, body}
+
+      {:error, reason} when retry_count > 0 ->
+        Logger.warn("Retrying fetch for #{context_msg}, attempts left: #{retry_count - 1}")
+        Process.sleep(retry_delay)
+        fetch_data_with_retry(url, context_msg, email_for_log, retry_count - 1, retry_delay * 2)
+
+      error ->
+        error
     end
   end
 
@@ -123,22 +140,7 @@ defmodule Recognizer.Hal do
     with {:ok, email_address} <- validate_email_present(user),
          payload <- build_payload(email_address, user, groups),
          {:ok, post_url} <- build_url("/accounts/newsletter") do
-      case HTTPoison.post(post_url, payload, [{"content-type", "application/json"}] ++ authorization_headers()) do
-        {:ok, %HTTPoison.Response{status_code: 200}} ->
-          Logger.info("Newsletter updated successfully for #{email_address}")
-          :ok
-
-        {:ok, %HTTPoison.Response{status_code: status_code, body: error_body}} ->
-          Logger.error(
-            "Failed to update newsletter for #{email_address}. Status: #{status_code}, Body: #{inspect(error_body)}"
-          )
-
-          {:error, {:http_post_error, status_code}}
-
-        {:error, %HTTPoison.Error{reason: reason}} ->
-          Logger.error("HTTP error while posting newsletter update for #{email_address}: #{inspect(reason)}")
-          {:error, {:http_client_post_error, reason}}
-      end
+      post_newsletter_with_retry(post_url, payload, email_address, 3)
     else
       # This else block will catch errors from validate_email_present or build_url
       {:error, reason} ->
@@ -149,6 +151,37 @@ defmodule Recognizer.Hal do
 
         # Propagate the error
         {:error, reason}
+    end
+  end
+
+  # 재시도 메커니즘을 가진 뉴스레터 POST 함수
+  defp post_newsletter_with_retry(post_url, payload, email_address, retry_count, retry_delay \\ 1000) do
+    case HTTPoison.post(post_url, payload, [{"content-type", "application/json"}] ++ authorization_headers()) do
+      {:ok, %HTTPoison.Response{status_code: 200}} ->
+        Logger.info("Newsletter updated successfully for #{email_address}")
+        :ok
+
+      {:ok, %HTTPoison.Response{status_code: status_code, body: error_body}}
+      when retry_count > 0 and status_code >= 500 ->
+        Logger.warn("Newsletter update failed with status #{status_code}, retrying. Attempts left: #{retry_count - 1}")
+        Process.sleep(retry_delay)
+        post_newsletter_with_retry(post_url, payload, email_address, retry_count - 1, retry_delay * 2)
+
+      {:ok, %HTTPoison.Response{status_code: status_code, body: error_body}} ->
+        Logger.error(
+          "Failed to update newsletter for #{email_address}. Status: #{status_code}, Body: #{inspect(error_body)}"
+        )
+
+        {:error, {:http_post_error, status_code}}
+
+      {:error, %HTTPoison.Error{reason: reason}} when retry_count > 0 ->
+        Logger.warn("HTTP error while posting newsletter update, retrying. Attempts left: #{retry_count - 1}")
+        Process.sleep(retry_delay)
+        post_newsletter_with_retry(post_url, payload, email_address, retry_count - 1, retry_delay * 2)
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        Logger.error("HTTP error while posting newsletter update for #{email_address}: #{inspect(reason)}")
+        {:error, {:http_client_post_error, reason}}
     end
   end
 

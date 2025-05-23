@@ -240,7 +240,19 @@ defmodule Recognizer.Accounts do
   end
 
   defp maybe_send_newsletter_after_registration({:ok, user} = previous_response, %{"newsletter" => "true"}) do
-    Recognizer.Hal.update_newsletter(user)
+    Task.start(fn ->
+      try do
+        require Logger
+        result = Recognizer.Hal.update_newsletter(user)
+        Logger.info("Newsletter registration completed for user #{user.id}: #{inspect(result)}")
+      catch
+        kind, reason ->
+          require Logger
+          Logger.error("Newsletter registration failed for user #{user.id}: #{inspect(kind)}, #{inspect(reason)}")
+          Logger.error(Exception.format_stacktrace(__STACKTRACE__))
+      end
+    end)
+
     previous_response
   end
 

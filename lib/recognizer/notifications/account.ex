@@ -104,8 +104,17 @@ defmodule Recognizer.Notifications.Account do
 
     @decorate span(service: :bullhorn, type: :function)
     defp send_message(resource) do
-      Bottle.publish(resource, source: "recognizer", request_id: Bottle.RequestId.write(:http))
-      {:ok, resource}
+      request_id = "recognizer-#{:os.system_time(:millisecond)}-#{System.unique_integer([:positive])}"
+
+      try do
+        Bottle.publish(resource, source: "recognizer", request_id: request_id)
+        {:ok, resource}
+      rescue
+        e ->
+          require Logger
+          Logger.error("Failed to publish message to bullhorn: #{inspect(e)}")
+          {:ok, resource}
+      end
     end
   else
     defp send_message(resource) do
