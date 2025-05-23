@@ -62,7 +62,7 @@ defmodule Recognizer.Hal do
       {:ok, body} ->
         {:ok, body}
 
-      {:error, reason} when retry_count > 0 ->
+      {:error, _reason} when retry_count > 0 ->
         Logger.warn("Retrying fetch for #{context_msg}, attempts left: #{retry_count - 1}")
         Process.sleep(retry_delay)
         fetch_data_with_retry(url, context_msg, email_for_log, retry_count - 1, retry_delay * 2)
@@ -161,7 +161,7 @@ defmodule Recognizer.Hal do
         Logger.info("Newsletter updated successfully for #{email_address}")
         :ok
 
-      {:ok, %HTTPoison.Response{status_code: status_code, body: error_body}}
+      {:ok, %HTTPoison.Response{status_code: status_code, body: _error_body}}
       when retry_count > 0 and status_code >= 500 ->
         Logger.warn("Newsletter update failed with status #{status_code}, retrying. Attempts left: #{retry_count - 1}")
         Process.sleep(retry_delay)
@@ -174,7 +174,7 @@ defmodule Recognizer.Hal do
 
         {:error, {:http_post_error, status_code}}
 
-      {:error, %HTTPoison.Error{reason: reason}} when retry_count > 0 ->
+      {:error, %HTTPoison.Error{reason: _reason}} when retry_count > 0 ->
         Logger.warn("HTTP error while posting newsletter update, retrying. Attempts left: #{retry_count - 1}")
         Process.sleep(retry_delay)
         post_newsletter_with_retry(post_url, payload, email_address, retry_count - 1, retry_delay * 2)
