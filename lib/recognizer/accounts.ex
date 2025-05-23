@@ -316,7 +316,15 @@ defmodule Recognizer.Accounts do
   # Handle BigCommerce customer update
   defp handle_big_commerce_update(user) do
     if BigCommerce.enabled?() do
-      Recognizer.BigCommerce.update_customer(user)
+      # Preload bigcommerce_user to check if user has BigCommerce ID
+      user_with_bc = Repo.preload(user, :bigcommerce_user)
+
+      if user_with_bc.bigcommerce_user && user_with_bc.bigcommerce_user.bc_id do
+        Recognizer.BigCommerce.update_customer(user_with_bc)
+      else
+        # User doesn't have BigCommerce ID, skip update
+        {:ok, :bc_skipped_no_id}
+      end
     else
       {:ok, :bc_disabled}
     end
