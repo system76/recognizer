@@ -18,7 +18,8 @@ defmodule Recognizer.Hal do
            decode_json(interests_response_body, "newsletter interests", Map.get(validated_user, :email)),
          groups <- calculate_interest_groups(decoded_interests, validated_user),
          {:ok, status_url} <- build_url("/accounts/newsletter?email_address=#{Map.get(validated_user, :email)}"),
-         {:ok, status_response_body} <- fetch_data_with_retry(status_url, "newsletter status", Map.get(validated_user, :email)),
+         {:ok, status_response_body} <-
+           fetch_data_with_retry(status_url, "newsletter status", Map.get(validated_user, :email)),
          {:ok, decoded_status} <-
            decode_json(status_response_body, "newsletter status", Map.get(validated_user, :email)),
          :update_allowed <- check_and_log_newsletter_status(decoded_status, Map.get(validated_user, :email)) do
@@ -160,7 +161,8 @@ defmodule Recognizer.Hal do
         Logger.info("Newsletter updated successfully for #{email_address}")
         :ok
 
-      {:ok, %HTTPoison.Response{status_code: status_code, body: error_body}} when retry_count > 0 and status_code >= 500 ->
+      {:ok, %HTTPoison.Response{status_code: status_code, body: error_body}}
+      when retry_count > 0 and status_code >= 500 ->
         Logger.warn("Newsletter update failed with status #{status_code}, retrying. Attempts left: #{retry_count - 1}")
         Process.sleep(retry_delay)
         post_newsletter_with_retry(post_url, payload, email_address, retry_count - 1, retry_delay * 2)

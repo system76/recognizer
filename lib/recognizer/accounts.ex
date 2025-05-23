@@ -253,6 +253,7 @@ defmodule Recognizer.Accounts do
           Logger.error(Exception.format_stacktrace(__STACKTRACE__))
       end
     end)
+
     previous_response
   end
 
