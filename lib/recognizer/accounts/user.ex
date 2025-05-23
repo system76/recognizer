@@ -30,7 +30,7 @@ defmodule Recognizer.Accounts.User do
     field :type, Recognizer.UserType, default: :individual
     field :company_name, :string
 
-    field :newsletter, :boolean, default: false
+    field :newsletter, :boolean, default: true
 
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, source: :password
