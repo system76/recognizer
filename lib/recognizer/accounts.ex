@@ -181,6 +181,7 @@ defmodule Recognizer.Accounts do
     |> User.registration_changeset(attrs)
     |> insert_user_and_notification_preferences()
     |> maybe_create_big_commerce_customer()
+    |> maybe_notify_new_user()
     |> maybe_generate_verification_code(verify_account_url_fun)
     |> maybe_send_newsletter_after_registration(attrs)
   end
@@ -294,14 +295,61 @@ defmodule Recognizer.Accounts do
 
   """
   def update_user(user, attrs) do
-    if Map.has_key?(attrs, "newsletter"), do: Recognizer.Hal.update_newsletter(attrs)
-    changeset = User.changeset(user, attrs)
+    original_changeset = User.changeset(user, attrs)
 
-    with {:ok, updated_user} <- Repo.update(changeset),
-         {:ok, _} <- maybe_update_big_commerce_customer(updated_user) do
-      Notification.deliver_user_updated_message(updated_user)
+    with {:ok, updated_user_in_db} <- Repo.update(original_changeset) do
+      bc_update_result =
+        if BigCommerce.enabled?() do
+          Recognizer.BigCommerce.update_customer(updated_user_in_db)
+        else
+          {:ok, :bc_disabled}
+        end
 
-      {:ok, updated_user}
+      hal_update_result =
+        if Map.has_key?(attrs, "newsletter") do
+          Recognizer.Hal.update_newsletter(updated_user_in_db)
+        else
+          {:ok, :hal_skipped}
+        end
+
+      cond do
+        (bc_update_result == {:ok, :bc_disabled} || elem(bc_update_result, 0) == :ok) &&
+            (hal_update_result == {:ok, :hal_skipped} || elem(hal_update_result, 0) == :ok) ->
+          Notification.deliver_user_updated_message(updated_user_in_db)
+          {:ok, updated_user_in_db}
+
+        elem(bc_update_result, 0) == :error ->
+          final_changeset = changeset_with_bc_error(original_changeset, elem(bc_update_result, 1), updated_user_in_db)
+
+          Logger.error(
+            "User settings updated in DB, but BigCommerce update failed: #{inspect(elem(bc_update_result, 1))}"
+          )
+
+          {:error, final_changeset}
+
+        elem(hal_update_result, 0) == :error ->
+          Logger.error(
+            "User settings updated in DB/BC, but Hal (newsletter) update failed: #{inspect(elem(hal_update_result, 1))}"
+          )
+
+          Notification.deliver_user_updated_message(updated_user_in_db)
+          {:ok, updated_user_in_db}
+
+        true ->
+          Logger.error(
+            "Unhandled combination of BC/Hal results: #{inspect(bc_update_result)}, #{inspect(hal_update_result)}"
+          )
+
+          {:error,
+           Ecto.Changeset.add_error(
+             original_changeset,
+             :base,
+             "An unexpected error occurred during external service updates."
+           )}
+      end
+    else
+      {:error, failed_db_changeset} ->
+        {:error, failed_db_changeset}
     end
   end
 
@@ -309,8 +357,30 @@ defmodule Recognizer.Accounts do
     if BigCommerce.enabled?() do
       Recognizer.BigCommerce.update_customer(user)
     else
-      {:ok, user}
+      {:ok, :bc_disabled}
     end
+  end
+
+  defp changeset_with_bc_error(original_changeset, bc_error_reason, user_data_for_changeset) do
+    error_message =
+      case bc_error_reason do
+        {:api_error, _status, %{"errors" => errors}} when is_map(errors) ->
+          first_error_key = errors |> Map.keys() |> List.first()
+          specific_error_msg = errors[first_error_key]
+          "BigCommerce update failed: #{specific_error_msg}"
+
+        {:api_error, _status, %{"title" => title}} ->
+          "BigCommerce update failed: #{title}"
+
+        {:missing_bc_id_for_update} ->
+          "BigCommerce user ID not found. Cannot update profile on BigCommerce."
+
+        _ ->
+          "BigCommerce update failed. Please contact support. (Details: #{inspect(bc_error_reason)})"
+      end
+
+    Ecto.Changeset.put_change(original_changeset, :id, user_data_for_changeset.id)
+    |> Ecto.Changeset.add_error(:base, error_message)
   end
 
   @doc """
