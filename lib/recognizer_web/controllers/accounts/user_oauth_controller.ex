@@ -120,9 +120,11 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
       [first_name] ->
         # Only one word, use it as first name and provide default last name
         [first_name, "User"]
+
       [first_name, last_name] ->
         # Two or more words, split into first and rest as last name
         [first_name, last_name]
+
       [] ->
         # Empty string case
         ["Unknown", "User"]
