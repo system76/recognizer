@@ -8,12 +8,15 @@ services:
       - "6379:6379"
 
   mysql:
-    image: mysql:5.7.24
+    image: mysql:5.7
     environment:
-      - MYSQL_DATABASE=recognizer_test
+      - MYSQL_DATABASE=recognizer_dev
       - MYSQL_ROOT_PASSWORD=recognizer
     command:
       - --character-set-server=utf8
       - --collation-server=utf8_general_ci
+#      - --innodb_force_recovery=4  # 1~6 중 선택 (4는 일반적인 복구 시도용)
     ports:
       - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
