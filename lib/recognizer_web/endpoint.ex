@@ -6,7 +6,7 @@ defmodule RecognizerWeb.Endpoint do
     key: "_recognizer_key",
     signing_salt: "juvsYHmf",
     same_site: "Lax",
-    secure: true
+    secure: Application.compile_env(:recognizer, :secure_cookies, true)
   ]
 
   plug RecognizerWeb.HealthcheckPlug

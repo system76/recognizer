@@ -2,7 +2,9 @@ import Config
 
 config :recognizer,
   hal_url: "https://api-v2.genesis76.com",
-  hal_token: "token"
+  hal_token: "token",
+  secure_cookies: false,
+  secure: false
 
 config :recognizer, Recognizer.Repo,
   username: "root",
