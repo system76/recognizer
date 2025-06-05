@@ -221,7 +221,9 @@ defmodule Recognizer.Accounts do
   defp maybe_create_big_commerce_customer({:ok, user}) do
     if BigCommerce.enabled?() do
       case BigCommerce.get_or_create_customer(user) do
-        {:ok, user} -> {:ok, user}
+        {:ok, user} ->
+          {:ok, user}
+
         {:error, error} ->
           # Log the error but continue with account creation
           Logger.error("BigCommerce customer creation failed but continuing account process: #{inspect(error)}")
@@ -783,6 +785,7 @@ defmodule Recognizer.Accounts do
         {:ok, _} ->
           Logger.info("Successfully sent verification email to user #{user.id}")
           {:ok, user}
+
         error ->
           Logger.error("Failed to send verification email but continuing: #{inspect(error)}")
           {:ok, user}
