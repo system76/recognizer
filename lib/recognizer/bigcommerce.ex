@@ -27,30 +27,49 @@ defmodule Recognizer.BigCommerce do
   end
 
   def get_or_create_customer(%{email: email, id: id} = user) do
+    Logger.info("Starting BigCommerce get_or_create_customer for user #{id} with email #{email}")
+
     case Client.get_customers(emails: [email]) do
       {:ok, []} ->
-        create_customer(user)
+        Logger.info("No existing BigCommerce customer found for email #{email}, creating new customer")
+        result = create_customer(user)
+        Logger.info("BigCommerce customer creation result: #{inspect(result)}")
+        result
 
       {:ok, [customer_id]} ->
-        Logger.info("found existing customer for account create:  #{inspect(email)}")
+        Logger.info("Found existing BigCommerce customer #{customer_id} for email #{email}")
 
         case Repo.insert(%Customer{user_id: id, bc_id: customer_id}) do
           {:ok, _customer_db_entry} ->
+            Logger.info("Successfully linked BigCommerce customer #{customer_id} to user #{id}")
             {:ok, user}
 
           {:error, changeset} ->
-            Logger.error("error inserting customer into local DB: #{inspect(changeset)}")
-            {:error, changeset}
+            Logger.error("Error inserting BigCommerce customer into local DB: #{inspect(changeset)}")
+            # Return success anyway since the BigCommerce customer exists
+            # This helps with the case where a user tries to create an account twice
+            Logger.info("Returning success despite DB error since BigCommerce customer exists")
+            {:ok, user}
         end
 
+      {:error, e} ->
+        Logger.error("Error while getting BigCommerce customer: #{inspect(e)}")
+        # Don't fail account creation due to BigCommerce API errors
+        # This ensures verification emails are still sent
+        Logger.info("Continuing account creation process despite BigCommerce error")
+        {:ok, user}
+
       e ->
-        Logger.error("error while getting or creating customer: #{inspect(e)}")
-        {:error, e}
+        Logger.error("Unexpected error while getting or creating BigCommerce customer: #{inspect(e)}")
+        # Don't fail account creation due to BigCommerce errors
+        # This ensures verification emails are still sent
+        Logger.info("Continuing account creation process despite unexpected BigCommerce error")
+        {:ok, user}
     end
   end
 
   def get_or_create_customer(e) do
-    Logger.error("unexpected customer #{e}")
+    Logger.error("unexpected customer #{inspect(e)}")
     {:error, "unexpected customer"}
   end
 

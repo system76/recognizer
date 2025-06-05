@@ -108,7 +108,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
     end
 
     @tag :capture_log
-    test "renders an error page for a bigcommerce failure", %{conn: conn} do
+    test "handles bigcommerce failure gracefully and continues account creation", %{conn: conn} do
       expect(HTTPoisonMock, :get, 1, fn _, _, _ -> empty_bigcommerce_response() end)
       expect(HTTPoisonMock, :post, 1, fn _, _, _ -> bad_bigcommerce_response() end)
 
@@ -117,10 +117,13 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
           "user" => params_for(:user)
         })
 
-      assert Repo.all(User) == []
+      # User is created even though BigCommerce fails
+      assert [%User{}] = Repo.all(User)
       refute Recognizer.Guardian.Plug.current_resource(conn)
-      response = html_response(conn, 500)
-      assert response =~ "Something has gone horribly wrong"
+      # User is redirected to verification page
+      assert redirected_to(conn) =~ "/prompt/verification"
+      # But no BigCommerce user is created
+      refute Repo.get_by(BCCustomerUser, user_id: Repo.one(User).id)
     end
 
     test "rate limits account creation", %{conn: conn} do

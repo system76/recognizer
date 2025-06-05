@@ -218,15 +218,21 @@ defmodule Recognizer.Accounts do
     end
   end
 
-  def maybe_create_big_commerce_customer({:ok, user}) do
+  defp maybe_create_big_commerce_customer({:ok, user}) do
     if BigCommerce.enabled?() do
-      BigCommerce.get_or_create_customer(user)
+      case BigCommerce.get_or_create_customer(user) do
+        {:ok, user} -> {:ok, user}
+        {:error, error} ->
+          # Log the error but continue with account creation
+          Logger.error("BigCommerce customer creation failed but continuing account process: #{inspect(error)}")
+          {:ok, user}
+      end
     else
       {:ok, user}
     end
   end
 
-  def maybe_create_big_commerce_customer(error) do
+  defp maybe_create_big_commerce_customer(error) do
     error
   end
 
@@ -762,14 +768,32 @@ defmodule Recognizer.Accounts do
   end
 
   defp maybe_generate_verification_code({:ok, user}, verify_account_url_fun) do
-    {:ok, verification} =
-      %VerificationCode{}
-      |> VerificationCode.changeset(%{code: VerificationCode.generate_code(), user_id: user.id})
-      |> Repo.insert()
+    try do
+      Logger.info("Generating verification code for user #{user.id}")
 
-    Notification.deliver_account_verification_instructions(user, verify_account_url_fun.(verification.code))
+      {:ok, verification} =
+        %VerificationCode{}
+        |> VerificationCode.changeset(%{code: VerificationCode.generate_code(), user_id: user.id})
+        |> Repo.insert()
 
-    {:ok, user}
+      Logger.info("Sending verification email to user #{user.id}")
+      verification_url = verify_account_url_fun.(verification.code)
+
+      case Notification.deliver_account_verification_instructions(user, verification_url) do
+        {:ok, _} ->
+          Logger.info("Successfully sent verification email to user #{user.id}")
+          {:ok, user}
+        error ->
+          Logger.error("Failed to send verification email but continuing: #{inspect(error)}")
+          {:ok, user}
+      end
+    rescue
+      e ->
+        Logger.error("Error in verification code generation process but continuing: #{inspect(e)}")
+        Logger.error(Exception.format_stacktrace(__STACKTRACE__))
+        # Still return success to complete account creation
+        {:ok, user}
+    end
   end
 
   defp maybe_generate_verification_code(error, _verify_account_url_fun) do
