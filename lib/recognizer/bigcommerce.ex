@@ -86,43 +86,80 @@ defmodule Recognizer.BigCommerce do
 
   def home_redirect_uri(), do: config(:store_home_uri)
 
-  def login_redirect_uri(user), do: home_redirect_uri() <> config(:login_path) <> generate_login_jwt(user)
+  def login_redirect_uri(user) do
+    case generate_login_jwt(user) do
+      {:error, _reason} ->
+        # BigCommerce 연결이 없는 경우 기본 홈 URI로 리디렉션
+        home_redirect_uri()
 
-  def checkout_redirect_uri(user), do: home_redirect_uri() <> config(:login_path) <> generate_checkout_login_jwt(user)
+      token ->
+        home_redirect_uri() <> config(:login_path) <> token
+    end
+  end
+
+  def checkout_redirect_uri(user) do
+    case generate_checkout_login_jwt(user) do
+      {:error, _reason} ->
+        # BigCommerce 연결이 없는 경우 기본 홈 URI로 리디렉션
+        home_redirect_uri()
+
+      token ->
+        home_redirect_uri() <> config(:login_path) <> token
+    end
+  end
 
   def logout_redirect_uri(), do: home_redirect_uri() <> config(:logout_path)
 
   defp generate_checkout_login_jwt(user) do
-    {:ok, token, _claims} =
-      user
-      |> Recognizer.Repo.preload(:bigcommerce_user)
-      |> jwt_claims()
-      |> Map.put("redirect_to", "/checkout")
-      |> Token.generate_and_sign(jwt_signer())
+    user = Recognizer.Repo.preload(user, :bigcommerce_user)
 
-    token
+    case jwt_claims(user) do
+      {:error, reason} ->
+        {:error, reason}
+
+      claims ->
+        case claims
+             |> Map.put("redirect_to", "/checkout")
+             |> Token.generate_and_sign(jwt_signer()) do
+          {:ok, token, _claims} -> token
+          {:error, reason} -> {:error, reason}
+        end
+    end
   end
 
   defp generate_login_jwt(user) do
-    {:ok, token, _claims} =
-      user
-      |> Recognizer.Repo.preload(:bigcommerce_user)
-      |> jwt_claims()
-      |> Map.put("redirect_to", "/")
-      |> Token.generate_and_sign(jwt_signer())
+    user = Recognizer.Repo.preload(user, :bigcommerce_user)
 
-    token
+    case jwt_claims(user) do
+      {:error, reason} ->
+        {:error, reason}
+
+      claims ->
+        case claims
+             |> Map.put("redirect_to", "/")
+             |> Token.generate_and_sign(jwt_signer()) do
+          {:ok, token, _claims} -> token
+          {:error, reason} -> {:error, reason}
+        end
+    end
   end
 
   defp jwt_claims(user) do
-    %{
-      "aud" => "BigCommerce",
-      "iss" => config(:client_id),
-      "jti" => Ecto.UUID.generate(),
-      "operation" => "customer_login",
-      "store_hash" => config(:store_hash),
-      "customer_id" => user.bigcommerce_user.bc_id
-    }
+    case user.bigcommerce_user do
+      nil ->
+        # BigCommerce user가 연결되지 않은 경우 에러를 반환
+        {:error, "BigCommerce user not found"}
+
+      bc_user ->
+        %{
+          "aud" => "BigCommerce",
+          "iss" => config(:client_id),
+          "jti" => Ecto.UUID.generate(),
+          "operation" => "customer_login",
+          "store_hash" => config(:store_hash),
+          "customer_id" => bc_user.bc_id
+        }
+    end
   end
 
   defp jwt_signer() do

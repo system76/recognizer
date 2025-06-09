@@ -14,7 +14,7 @@ defmodule RecognizerWeb.Endpoint do
   plug Plug.Static,
     at: "/",
     from: :recognizer,
-    gzip: Application.get_env(:recognizer, __MODULE__)[:gzip],
+    gzip: Application.compile_env(:recognizer, __MODULE__)[:gzip],
     only: ~w(styles fonts images scripts favicon.ico robots.txt)
 
   # Code reloading can be explicitly enabled under the

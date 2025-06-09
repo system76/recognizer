@@ -130,4 +130,14 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
         ["Unknown", "User"]
     end
   end
+
+  @doc """
+  The `request/2` function handles the initial OAuth request to redirect users to the provider.
+  This is called when users click on OAuth provider buttons.
+  """
+  def request(conn, %{"provider" => _provider}) do
+    # The Ueberauth plug will handle the actual redirect to the OAuth provider
+    # This action is typically just a passthrough that lets Ueberauth do its work
+    conn
+  end
 end
