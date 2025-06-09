@@ -11,7 +11,7 @@ defmodule Recognizer.Accounts.VerificationCodeCleanupTask do
   alias Recognizer.Repo
 
   @interval_in_milliseconds :timer.minutes(17)
-  @expiration_time_in_seconds 8 * 60 * 60
+  @expiration_time_in_seconds 15 * 60
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
