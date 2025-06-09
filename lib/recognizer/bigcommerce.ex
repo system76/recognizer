@@ -87,6 +87,8 @@ defmodule Recognizer.BigCommerce do
   def home_redirect_uri(), do: config(:store_home_uri)
 
   def login_redirect_uri(user) do
+    user = ensure_bigcommerce_user(user)
+
     case generate_login_jwt(user) do
       {:error, _reason} ->
         # BigCommerce 연결이 없는 경우 기본 홈 URI로 리디렉션
@@ -98,6 +100,8 @@ defmodule Recognizer.BigCommerce do
   end
 
   def checkout_redirect_uri(user) do
+    user = ensure_bigcommerce_user(user)
+
     case generate_checkout_login_jwt(user) do
       {:error, _reason} ->
         # BigCommerce 연결이 없는 경우 기본 홈 URI로 리디렉션
@@ -145,20 +149,17 @@ defmodule Recognizer.BigCommerce do
   end
 
   defp jwt_claims(user) do
-    case user.bigcommerce_user do
-      nil ->
-        # BigCommerce user가 연결되지 않은 경우 에러를 반환
-        {:error, "BigCommerce user not found"}
-
-      bc_user ->
-        %{
-          "aud" => "BigCommerce",
-          "iss" => config(:client_id),
-          "jti" => Ecto.UUID.generate(),
-          "operation" => "customer_login",
-          "store_hash" => config(:store_hash),
-          "customer_id" => bc_user.bc_id
-        }
+    if user.bigcommerce_user do
+      %{
+        "aud" => "BigCommerce",
+        "iss" => config(:client_id),
+        "jti" => Ecto.UUID.generate(),
+        "operation" => "customer_login",
+        "store_hash" => config(:store_hash),
+        "customer_id" => user.bigcommerce_user.bc_id
+      }
+    else
+      {:error, "BigCommerce user not found"}
     end
   end
 
@@ -168,5 +169,25 @@ defmodule Recognizer.BigCommerce do
 
   defp config(key) do
     Application.get_env(:recognizer, __MODULE__)[key]
+  end
+
+  # BigCommerce 사용자가 없으면 생성하고, 있으면 그대로 반환
+  defp ensure_bigcommerce_user(user) do
+    user = Recognizer.Repo.preload(user, :bigcommerce_user)
+
+    if user.bigcommerce_user do
+      user
+    else
+      # BigCommerce 계정이 없으면 생성 시도
+      case get_or_create_customer(user) do
+        {:ok, _user} ->
+          # 다시 preload해서 최신 상태로 가져오기
+          Recognizer.Repo.preload(user, :bigcommerce_user, force: true)
+
+        {:error, _reason} ->
+          # 생성 실패 시 원본 사용자 반환 (bigcommerce_user는 nil)
+          user
+      end
+    end
   end
 end
