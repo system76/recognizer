@@ -121,7 +121,7 @@
     <div class="field mt-5">
       <div class="control">
         <%= label class: "label" do %>
-          <%= checkbox f, :newsletter %>
+          <%= checkbox f, :newsletter, checked: true %>
           Subscribe to our newsletter
         <% end %>
       </div>
