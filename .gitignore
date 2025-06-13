@@ -42,3 +42,5 @@ npm-debug.log
 
 # local environment
 .env*
+
+mysql_data/

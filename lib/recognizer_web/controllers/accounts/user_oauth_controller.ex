@@ -93,7 +93,11 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
   end
 
   defp provider_params(%{provider: :google, info: info}) do
-    Map.take(info, [:email, :first_name, :last_name])
+    %{
+      email: info.email,
+      first_name: info.first_name || "Unknown",
+      last_name: info.last_name || "User"
+    }
   end
 
   # Github doesn't return `first_name` and `last_name` like other providers,
@@ -109,11 +113,31 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
     }
   end
 
-  defp split_name(nil), do: ["", ""]
+  defp split_name(nil), do: ["Unknown", "User"]
 
-  defp split_name(name) do
-    with [first_name] <- String.split(name, " ", parts: 2) do
-      [first_name, ""]
+  defp split_name(name) when is_binary(name) do
+    case String.split(name, " ", parts: 2) do
+      [first_name] ->
+        # Only one word, use it as first name and provide default last name
+        [first_name, "User"]
+
+      [first_name, last_name] ->
+        # Two or more words, split into first and rest as last name
+        [first_name, last_name]
+
+      [] ->
+        # Empty string case
+        ["Unknown", "User"]
     end
+  end
+
+  @doc """
+  The `request/2` function handles the initial OAuth request to redirect users to the provider.
+  This is called when users click on OAuth provider buttons.
+  """
+  def request(conn, %{"provider" => _provider}) do
+    # The Ueberauth plug will handle the actual redirect to the OAuth provider
+    # This action is typically just a passthrough that lets Ueberauth do its work
+    conn
   end
 end

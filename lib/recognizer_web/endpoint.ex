@@ -6,7 +6,7 @@ defmodule RecognizerWeb.Endpoint do
     key: "_recognizer_key",
     signing_salt: "juvsYHmf",
     same_site: "Lax",
-    secure: true
+    secure: Application.compile_env(:recognizer, :secure_cookies, true)
   ]
 
   plug RecognizerWeb.HealthcheckPlug
@@ -14,7 +14,7 @@ defmodule RecognizerWeb.Endpoint do
   plug Plug.Static,
     at: "/",
     from: :recognizer,
-    gzip: Application.get_env(:recognizer, __MODULE__)[:gzip],
+    gzip: Application.compile_env(:recognizer, __MODULE__)[:gzip],
     only: ~w(styles fonts images scripts favicon.ico robots.txt)
 
   # Code reloading can be explicitly enabled under the
