@@ -45,12 +45,17 @@ defmodule RecognizerWeb.Api.UserSettingsControllerTest do
 
     test "don't allow special characters in the first name", %{conn: conn} do
       conn = put(conn, "/api/settings", %{"action" => "update", "user" => %{"first_name" => "http://example.com"}})
-      assert %{"errors" => %{"first_name" => ["Please enter a valid name using letters, spaces, and basic punctuation"]}} = json_response(conn, 400)
+
+      assert %{
+               "errors" => %{"first_name" => ["Please enter a valid name using letters, spaces, and basic punctuation"]}
+             } = json_response(conn, 400)
     end
 
     test "don't allow special characters in the last name", %{conn: conn} do
       conn = put(conn, "/api/settings", %{"action" => "update", "user" => %{"last_name" => "http://example.com"}})
-      assert %{"errors" => %{"last_name" => ["Please enter a valid name using letters, spaces, and basic punctuation"]}} = json_response(conn, 400)
+
+      assert %{"errors" => %{"last_name" => ["Please enter a valid name using letters, spaces, and basic punctuation"]}} =
+               json_response(conn, 400)
     end
 
     test "PUT /api/settings with `update_password` action", %{conn: conn, user: user} do
