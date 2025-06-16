@@ -133,11 +133,13 @@ defmodule Recognizer.Accounts.User do
 
   defp validate_names(changeset) do
     changeset
-    |> validate_format(:first_name, ~r/^[A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]{1,100}$/,
-      message: "Please enter a valid name using letters, spaces, and basic punctuation like apostrophes (’), periods (.) and hyphens (-)"
+    |> validate_format(:first_name, ~r/^[A-Za-zÀ-ÖØ-öø-ÿ0-9'.\- ]{1,80}$/,
+      message:
+        "Please enter a valid name using letters, spaces, and basic punctuation"
     )
-    |> validate_format(:last_name, ~r/^[A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]{1,100}$/,
-      message: "Please enter a valid name using letters, spaces, and basic punctuation like apostrophes (’), periods (.) and hyphens (-)"
+    |> validate_format(:last_name, ~r/^[A-Za-zÀ-ÖØ-öø-ÿ0-9'.\- ]{1,80}$/,
+      message:
+        "Please enter a valid name using letters, spaces, and basic punctuation"
     )
     |> validate_length(:first_name, max: 80)
     |> validate_length(:last_name, max: 80)
@@ -166,7 +168,7 @@ defmodule Recognizer.Accounts.User do
       |> validate_format(:password, ~r/[0-9]/, message: "must contain a number")
       |> validate_format(:password, ~r/[A-Z]/, message: "must contain an UPPERCASE letter")
       |> validate_format(:password, ~r/[a-z]/, message: "must contain a lowercase letter")
-      |> validate_format(:password, ~r/[ \!\$\*\+\[\{\]\}\\\|\.\/\?,!@#%^&-=,.<>'";:]/,
+      |> validate_format(:password, ~r/[ !$*+\[\]{}\\|.\/?@#%^&=<>'";:-]/,
         message: "must contain a symbol or space"
       )
       |> validate_new_password(opts)

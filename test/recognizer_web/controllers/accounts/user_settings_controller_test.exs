@@ -109,7 +109,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
 
       response = html_response(conn, 200)
       assert response =~ "Update Profile</h2>"
-      assert response =~ "must not contain special characters"
+      assert response =~ "Please enter a valid name using letters, spaces, and basic punctuation"
     end
 
     test "does not update last name on invalid data", %{conn: conn} do
@@ -121,7 +121,7 @@ defmodule RecognizerWeb.Accounts.UserSettingsControllerTest do
 
       response = html_response(conn, 200)
       assert response =~ "Update Profile</h2>"
-      assert response =~ "must not contain special characters"
+      assert response =~ "Please enter a valid name using letters, spaces, and basic punctuation"
     end
 
     test "update two-factor allows app setup without a phone number", %{conn: conn, user: user} do
