@@ -133,10 +133,10 @@ defmodule Recognizer.Accounts.User do
 
   defp validate_names(changeset) do
     changeset
-    |> validate_format(:first_name, ~r/^[A-Za-zÀ-ÖØ-öø-ÿ0-9'.\- ]{1,80}$/,
+    |> validate_format(:first_name, ~r/^[[:alpha:][:digit:]'.\- ]{1,80}$/,
       message: "Please enter a valid name using letters, spaces, and basic punctuation"
     )
-    |> validate_format(:last_name, ~r/^[A-Za-zÀ-ÖØ-öø-ÿ0-9'.\- ]{1,80}$/,
+    |> validate_format(:last_name, ~r/^[[:alpha:][:digit:]'.\- ]{1,80}$/,
       message: "Please enter a valid name using letters, spaces, and basic punctuation"
     )
     |> validate_length(:first_name, max: 80)
