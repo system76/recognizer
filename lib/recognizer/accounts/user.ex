@@ -133,8 +133,12 @@ defmodule Recognizer.Accounts.User do
 
   defp validate_names(changeset) do
     changeset
-    |> validate_format(:first_name, ~r/^[\w\s\d\,\'\-\_\.]+$/u, message: "must not contain special characters")
-    |> validate_format(:last_name, ~r/^[\w\s\d\,\'\-\_\.]+$/u, message: "must not contain special characters")
+    |> validate_format(:first_name, ~r/^[A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]{1,100}$/,
+      message: "Please enter a valid name using letters, spaces, and basic punctuation like apostrophes (’), periods (.) and hyphens (-)"
+    )
+    |> validate_format(:last_name, ~r/^[A-Za-zÀ-ÖØ-öø-ÿ'’.\- ]{1,100}$/,
+      message: "Please enter a valid name using letters, spaces, and basic punctuation like apostrophes (’), periods (.) and hyphens (-)"
+    )
     |> validate_length(:first_name, max: 80)
     |> validate_length(:last_name, max: 80)
   end
