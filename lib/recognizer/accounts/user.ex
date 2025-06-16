@@ -166,7 +166,7 @@ defmodule Recognizer.Accounts.User do
       |> validate_format(:password, ~r/[0-9]/, message: "must contain a number")
       |> validate_format(:password, ~r/[A-Z]/, message: "must contain an UPPERCASE letter")
       |> validate_format(:password, ~r/[a-z]/, message: "must contain a lowercase letter")
-      |> validate_format(:password, ~r/[ !$*+\[\]{}\\|.\/?@#%^&=<>'";:-]/, message: "must contain a symbol or space")
+      |> validate_format(:password, ~r/[ \!\$\*\+\[\{\]\}\\\|\.\/\?,!@#%^&-=,.<>'";:]/, message: "must contain a symbol or space")
       |> validate_new_password(opts)
       |> maybe_hash_password(opts)
     end
