@@ -46,7 +46,7 @@ defmodule Recognizer.MixProject do
       {:ex_aws_sqs, "~> 3.2"},
       {:ex_aws, "~> 2.0"},
       {:ex_oauth2_provider, "~> 0.5.6"},
-      {:gettext, "~> 0.11"},
+      {:gettext, "~> 0.18"},
       {:guardian, "~> 2.0"},
       {:guardian_db, "~> 2.1"},
       {:hammer, "~> 6.0"},
