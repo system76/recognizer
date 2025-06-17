@@ -104,7 +104,7 @@ defmodule RecognizerWeb.Accounts.UserRegistrationControllerTest do
       assert response =~ "Create Account</h2>"
       assert response =~ "must have the @ sign, no spaces and a top level domain"
       assert response =~ "must contain a number"
-      assert response =~ "must not contain special characters"
+      assert response =~ "Please enter a valid name using letters, spaces, and basic punctuation"
     end
 
     @tag :capture_log
