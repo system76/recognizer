@@ -39,7 +39,6 @@ jobs:
             --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
             --build-arg VCS_REF=$IMAGE_TAG \
             --build-arg VERSION=$IMAGE_TAG \
-            --build-arg DOMAIN=account.genesis76.com \
             --tag $ECR_REPOSITORY:$IMAGE_TAG \
             .
 
@@ -66,8 +65,45 @@ jobs:
 
       - name: Deploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        timeout-minutes: 15
         with:
           task-definition: ${{ steps.template.outputs.task-definition }}
           service: staging-genesis76-recognizer
           cluster: genesis76-us-east-2
-          wait-for-service-stability: true
+          wait-for-service-stability: false
+
+      - name: Check ECS Service Status
+        run: |
+          echo "Checking ECS service status..."
+          aws ecs describe-services \
+            --cluster genesis76-us-east-2 \
+            --services staging-genesis76-recognizer \
+            --query 'services[0].{Status:status,RunningCount:runningCount,PendingCount:pendingCount,DesiredCount:desiredCount}'
+          
+          echo "Getting recent ECS events..."
+          aws ecs describe-services \
+            --cluster genesis76-us-east-2 \
+            --services staging-genesis76-recognizer \
+            --query 'services[0].events[:10]'
+          
+          echo "Getting task details..."
+          TASK_ARN=$(aws ecs list-tasks \
+            --cluster genesis76-us-east-2 \
+            --service-name staging-genesis76-recognizer \
+            --query 'taskArns[0]' --output text)
+          
+          if [ "$TASK_ARN" != "None" ]; then
+            echo "Task ARN: $TASK_ARN"
+            aws ecs describe-tasks \
+              --cluster genesis76-us-east-2 \
+              --tasks $TASK_ARN \
+              --query 'tasks[0].{LastStatus:lastStatus,HealthStatus:healthStatus,CreatedAt:createdAt,StoppedReason:stoppedReason}'
+            
+            echo "Getting container details..."
+            aws ecs describe-tasks \
+              --cluster genesis76-us-east-2 \
+              --tasks $TASK_ARN \
+              --query 'tasks[0].containers[?name==`app`].{Name:name,LastStatus:lastStatus,ExitCode:exitCode,Reason:reason}'
+          else
+            echo "No tasks found"
+          fi
