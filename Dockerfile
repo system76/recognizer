@@ -65,6 +65,7 @@ RUN set -xe; \
 FROM debian:12-slim as release
 
 ARG APP_NAME=recognizer
+ARG DOMAIN
 
 # These are fed in from the build script
 ARG VCS_REF
@@ -103,7 +104,8 @@ ENV \
     MIX_APP="recognizer" \
     MIX_ENV="prod" \
     SHELL="/bin/bash" \
-    LANG=C.UTF-8
+    LANG=C.UTF-8 \
+    DOMAIN="${DOMAIN}"
 
 # Drop down to our unprivileged `recognizer` user
 USER recognizer
