@@ -7,7 +7,6 @@ config :recognizer,
   redis_host: "localhost"
 
 config :recognizer, RecognizerWeb.Endpoint,
-  url: [host: "localhost"],
   secret_key_base: "vbOPS+hzz+UAQRtWxIdqiKrcOuWpbLTfocvgvRVDR9P4JRfxtmWZa45H25iKKYoI",
   render_errors: [
     view: RecognizerWeb.ErrorView,
