@@ -31,7 +31,7 @@ RUN set -xe; \
 # -----------------------------------------------
 # 2) Build assets (relies on Elixir dependencies)
 # -----------------------------------------------
-FROM node:14.18-alpine as build-node
+FROM node:16.20-alpine as build-node
 
 COPY --from=build-elixir /usr/local/src/recognizer /usr/local/src/recognizer
 WORKDIR /usr/local/src/recognizer/assets
@@ -47,6 +47,10 @@ FROM build-elixir as build-release
 
 ARG APP_NAME=recognizer
 ARG MIX_ENV=prod
+ARG DOMAIN
+
+# Set DOMAIN environment variable for production build
+ENV DOMAIN=${DOMAIN}
 
 COPY --from=build-node /usr/local/src/recognizer /usr/local/src/recognizer
 WORKDIR /usr/local/src/recognizer
