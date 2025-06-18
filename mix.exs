@@ -10,8 +10,7 @@ defmodule Recognizer.MixProject do
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps(),
-      releases: releases()
+      deps: deps()
     ]
   end
 
@@ -97,13 +96,4 @@ defmodule Recognizer.MixProject do
     ]
   end
 
-  defp releases do
-    [
-      recognizer: [
-        validate_compile_env: false,
-        include_executables_for: [:unix],
-        applications: [runtime_tools: :permanent]
-      ]
-    ]
-  end
 end
