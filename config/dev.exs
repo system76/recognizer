@@ -16,6 +16,7 @@ config :recognizer, Recognizer.Repo,
 
 config :recognizer, RecognizerWeb.Endpoint,
   http: [port: 4000],
+  secret_key_base: "vbOPS+hzz+UAQRtWxIdqiKrcOuWpbLTfocvgvRVDR9P4JRfxtmWZa45H25iKKYoI",
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
