@@ -39,7 +39,6 @@ jobs:
             --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
             --build-arg VCS_REF=$IMAGE_TAG \
             --build-arg VERSION=$IMAGE_TAG \
-            --build-arg DOMAIN=account.system76.com \
             --tag $ECR_REPOSITORY:$IMAGE_TAG \
             .
 
@@ -66,8 +65,50 @@ jobs:
 
       - name: Deploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        timeout-minutes: 15
         with:
           task-definition: ${{ steps.template.outputs.task-definition }}
           service: production-system76-recognizer
           cluster: system76-us-east-2
-          wait-for-service-stability: true
+          wait-for-service-stability: false
+
+      - name: Check ECS Service Status
+        run: |
+          echo "Checking ECS service status..."
+          aws ecs describe-services \
+            --cluster system76-us-east-2 \
+            --services production-system76-recognizer \
+            --query 'services[0].{Status:status,RunningCount:runningCount,PendingCount:pendingCount,DesiredCount:desiredCount}'
+          
+          echo "Getting recent ECS events..."
+          aws ecs describe-services \
+            --cluster system76-us-east-2 \
+            --services production-system76-recognizer \
+            --query 'services[0].events[:10]'
+          
+          echo "Getting task details..."
+          if aws ecs list-tasks --cluster system76-us-east-2 --service-name production-system76-recognizer --query 'taskArns[0]' --output text 2>/dev/null; then
+            TASK_ARN=$(aws ecs list-tasks \
+              --cluster system76-us-east-2 \
+              --service-name production-system76-recognizer \
+              --query 'taskArns[0]' --output text)
+            
+            if [ "$TASK_ARN" != "None" ] && [ "$TASK_ARN" != "" ]; then
+              echo "Task ARN: $TASK_ARN"
+              aws ecs describe-tasks \
+                --cluster system76-us-east-2 \
+                --tasks $TASK_ARN \
+                --query 'tasks[0].{LastStatus:lastStatus,HealthStatus:healthStatus,CreatedAt:createdAt,StoppedReason:stoppedReason}' 2>/dev/null || echo "Could not get task details"
+              
+              echo "Getting container details..."
+              aws ecs describe-tasks \
+                --cluster system76-us-east-2 \
+                --tasks $TASK_ARN \
+                --query 'tasks[0].containers[?name==`app`].{Name:name,LastStatus:lastStatus,ExitCode:exitCode,Reason:reason}' 2>/dev/null || echo "Could not get container details"
+            else
+              echo "No tasks found"
+            fi
+          else
+            echo "Permission denied for ListTasks - checking CloudWatch Logs instead"
+            echo "Check logs at: https://console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/%2Fecs%2Fproduction-system76-recognizer"
+          fi
