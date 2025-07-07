@@ -76,7 +76,7 @@ defmodule Recognizer.BigCommerce do
   end
 
   defp handle_customer_creation_error(user, e) do
-    Logger.error("BigCommerce customer creation failed: #{inspect(e)}")
+    Logger.error("BigCommerce customer creation failed for user #{user.id}: #{inspect(e)}")
     {:error, e}
   end
 
