@@ -48,6 +48,9 @@ defmodule Recognizer.BigCommerce.Client do
       {:ok, %Response{body: response, status_code: 200}} ->
         {:ok, response}
 
+      {:ok, %Response{status_code: 422, body: body}} ->
+        handle_422_error(body, "create")
+
       {:ok, %Response{status_code: 429, headers: headers}} ->
         sleep_for_rate_limit(headers)
         post_customer(customer_json)
@@ -65,6 +68,9 @@ defmodule Recognizer.BigCommerce.Client do
       {:ok, %Response{body: response, status_code: 200}} ->
         {:ok, response}
 
+      {:ok, %Response{status_code: 422, body: body}} ->
+        handle_422_error(body, "update")
+
       {:ok, %Response{status_code: 429, headers: headers}} ->
         sleep_for_rate_limit(headers)
         put_customer(customer_json)
@@ -74,6 +80,36 @@ defmodule Recognizer.BigCommerce.Client do
 
       e ->
         {:error, e}
+    end
+  end
+
+  # Precisely analyze 422 errors to determine if it's email duplication
+  defp handle_422_error(body, operation) do
+    case Jason.decode(body) do
+      {:ok, %{"errors" => %{".customer_update" => error}}} when is_binary(error) ->
+        if String.contains?(String.downcase(error), "email") and
+             String.contains?(String.downcase(error), "already in use") do
+          Logger.info("BigCommerce customer #{operation}: email already exists, treating as success - #{error}")
+          {:ok, :email_already_exists}
+        else
+          Logger.error("BigCommerce customer #{operation} failed with validation error: #{error}")
+          {:error, {:validation_error, error}}
+        end
+
+      {:ok, %{"errors" => errors}} ->
+        Logger.error("BigCommerce customer #{operation} failed with errors: #{inspect(errors)}")
+        {:error, {:validation_errors, errors}}
+
+      {:ok, decoded} ->
+        Logger.error("BigCommerce customer #{operation} failed with unexpected 422 response: #{inspect(decoded)}")
+        {:error, {:unexpected_422, decoded}}
+
+      {:error, json_error} ->
+        Logger.error(
+          "BigCommerce customer #{operation} failed with unparseable 422 response: #{body}, JSON error: #{inspect(json_error)}"
+        )
+
+        {:error, {:unparseable_422, body}}
     end
   end
 
@@ -125,10 +161,17 @@ defmodule Recognizer.BigCommerce.Client do
   end
 
   defp get_id(response) do
-    case Jason.decode(response) do
-      {:ok, %{"data" => [%{"id" => id}]}} -> {:ok, id}
-      {:error, e} -> {:error, e}
-      e -> {:error, e}
+    case response do
+      :email_already_exists ->
+        # If email already exists, return special response for upper level handling
+        {:ok, :email_already_exists}
+
+      _ ->
+        case Jason.decode(response) do
+          {:ok, %{"data" => [%{"id" => id}]}} -> {:ok, id}
+          {:error, e} -> {:error, e}
+          e -> {:error, e}
+        end
     end
   end
 
