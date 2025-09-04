@@ -175,6 +175,13 @@ defmodule Recognizer.BigCommerce.Client do
     end
   end
 
+  defp put_if_present(map, _key, nil), do: map
+  defp put_if_present(map, _key, ""), do: map
+  defp put_if_present(map, key, value), do: Map.put(map, key, value)
+
+  defp put_if_not_nil(map, _key, nil), do: map
+  defp put_if_not_nil(map, key, value), do: Map.put(map, key, value)
+
   defp user_as_customer_params(%User{
          email: email,
          first_name: first_name,
@@ -183,41 +190,43 @@ defmodule Recognizer.BigCommerce.Client do
          phone_number: phone_number,
          bigcommerce_user: %BCCustomerUser{bc_id: bc_id}
        }) do
-    {:ok,
-     [
-       %{
-         "id" => bc_id,
-         "email" => email,
-         "first_name" => first_name,
-         "last_name" => last_name,
-         "company" => company,
-         "phone" => phone_number
-       }
-     ]}
+    base =
+      %{
+        "id" => bc_id,
+        "email" => email,
+        "first_name" => first_name,
+        "last_name" => last_name,
+        "company" => company
+      }
+      |> put_if_not_nil("phone", phone_number)
+
+    {:ok, [base]}
   end
 
   defp user_as_customer_params(%User{
          email: email,
          first_name: first_name,
          last_name: last_name,
-         company_name: company
+         company_name: company,
+         phone_number: phone_number
        }) do
-    {:ok,
-     [
-       %{
-         "email" => email,
-         "first_name" => first_name,
-         "last_name" => last_name,
-         "company" => company
-       }
-     ]}
+    base =
+      %{
+        "email" => email,
+        "first_name" => first_name,
+        "last_name" => last_name,
+        "company" => company
+      }
+      |> put_if_not_nil("phone", phone_number)
+
+    {:ok, [base]}
   end
 
   defp user_as_customer_params(_user) do
     {:error, :invalid_user}
   end
 
-  defp default_headers() do
+  defp default_headers do
     [
       {"Content-Type", "application/json"},
       {"Accept", "application/json"},
@@ -226,7 +235,7 @@ defmodule Recognizer.BigCommerce.Client do
     ]
   end
 
-  defp customers_uri() do
+  defp customers_uri do
     uri("/v3/customers")
   end
 
@@ -234,7 +243,7 @@ defmodule Recognizer.BigCommerce.Client do
     "https://api.bigcommerce.com/stores/#{config(:store_hash)}#{path}"
   end
 
-  defp http_client() do
+  defp http_client do
     config(:http_client)
   end
 
@@ -242,7 +251,7 @@ defmodule Recognizer.BigCommerce.Client do
     Application.get_env(:recognizer, Recognizer.BigCommerce)[key]
   end
 
-  defp sleep_for_rate_limit(headers) do
+  defp sleep_for_rate_limit(headers) when is_list(headers) do
     retry_ms =
       case List.keyfind(headers, "x-rate-limit-time-reset-ms", 0) do
         nil -> @default_retry_ms
@@ -251,5 +260,10 @@ defmodule Recognizer.BigCommerce.Client do
 
     Logger.warn("Rate limited, sleeping for ms: #{inspect(retry_ms)}")
     Process.sleep(retry_ms)
+  end
+
+  defp sleep_for_rate_limit(ms) when is_integer(ms) do
+    Logger.warn("Service unavailable, sleeping for ms: #{inspect(ms)}")
+    Process.sleep(ms)
   end
 end

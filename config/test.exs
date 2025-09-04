@@ -20,7 +20,7 @@ config :recognizer, RecognizerWeb.Endpoint,
   http: [port: 4002],
   server: false
 
-config :logger, level: :warn
+config :logger, backends: [], level: :warn
 
 config :hammer,
   backend:
