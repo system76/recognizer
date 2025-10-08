@@ -85,10 +85,10 @@ defmodule RecognizerWeb.Authentication do
   def login_redirect(conn, user) do
     cond do
       get_session(conn, :bc_checkout) ->
-        [external: BigCommerce.checkout_redirect_uri(user)]
+        safe_bigcommerce_redirect(conn, user, :checkout)
 
       get_session(conn, :bc) ->
-        [external: BigCommerce.login_redirect_uri(user)]
+        safe_bigcommerce_redirect(conn, user, :login)
 
       get_session(conn, :user_return_to) ->
         [to: get_session(conn, :user_return_to)]
@@ -98,6 +98,37 @@ defmodule RecognizerWeb.Authentication do
 
       true ->
         [to: Routes.user_settings_path(conn, :edit)]
+    end
+  end
+
+  defp safe_bigcommerce_redirect(conn, user, type) do
+    require Logger
+
+    redirect_uri =
+      case type do
+        :checkout -> BigCommerce.checkout_redirect_uri(user)
+        :login -> BigCommerce.login_redirect_uri(user)
+      end
+
+    # Check if BigCommerce redirect is valid (not just home_redirect_uri)
+    home_uri = BigCommerce.home_redirect_uri()
+
+    if redirect_uri == home_uri do
+      # BigCommerce redirect failed, fallback to normal login
+      Logger.warn("BigCommerce redirect failed for user #{user.id}, falling back to normal login")
+
+      cond do
+        get_session(conn, :user_return_to) ->
+          [to: get_session(conn, :user_return_to)]
+
+        Application.get_env(:recognizer, :redirect_url) ->
+          [external: Application.get_env(:recognizer, :redirect_url)]
+
+        true ->
+          [to: Routes.user_settings_path(conn, :edit)]
+      end
+    else
+      [external: redirect_uri]
     end
   end
 
