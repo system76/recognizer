@@ -44,16 +44,24 @@ defmodule Recognizer.Hal do
   end
 
   # Validate user data
-  defp validate_user_data(user) do
-    if is_map(user) && !is_nil(Map.get(user, :email)) && !is_nil(Map.get(user, :newsletter)) do
-      {:ok, user}
-    else
-      Logger.error(
-        "update_newsletter/1 called with invalid user data (missing :email or :newsletter field): #{inspect(user)}"
-      )
+  defp validate_user_data(%{email: nil} = user) do
+    Logger.error("update_newsletter/1 called with user missing email: #{inspect(user)}")
+    {:error, :missing_email}
+  end
 
-      {:error, :invalid_user_data}
-    end
+  defp validate_user_data(%{} = user) do
+    newsletter =
+      case Map.get(user, :newsletter) do
+        nil -> false
+        v -> v
+      end
+
+    {:ok, Map.put(user, :newsletter, newsletter)}
+  end
+
+  defp validate_user_data(user) do
+    Logger.error("update_newsletter/1 called with non-map user data: #{inspect(user)}")
+    {:error, :invalid_user_data}
   end
 
   # Fetch data with retry mechanism
@@ -112,10 +120,22 @@ defmodule Recognizer.Hal do
     interests = if is_list(raw_interests), do: raw_interests, else: []
     newsletter_status_value = Map.get(user, :newsletter)
 
-    Enum.reduce(interests, %{}, fn item, acc ->
-      atom_value = newsletter_status_value
+    # Convert boolean to HAL API expected format
+    # HAL API expects boolean values for interest groups subscription status
+    status =
+      case newsletter_status_value do
+        # User wants to subscribe
+        true -> true
+        # User doesn't want to subscribe
+        false -> false
+        # Default to unsubscribed if nil
+        nil -> false
+      end
 
-      Map.put(acc, item["id"], atom_value)
+    Logger.debug("Setting newsletter interests for user #{Map.get(user, :email)}: all interests set to #{status}")
+
+    Enum.reduce(interests, %{}, fn item, acc ->
+      Map.put(acc, item["id"], status)
     end)
   end
 
