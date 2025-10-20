@@ -123,14 +123,16 @@ defmodule RecognizerWeb.Authentication do
   defp sync_bigcommerce_customer(user) do
     require Logger
 
-    Logger.info("Attempting BigCommerce sync for user #{user.id} (#{user.email}) during login")
+    Logger.warn("[BigCommerce Sync] Attempting auto-sync for user #{user.id} (#{user.email}) during login")
 
     case BigCommerce.get_or_create_customer(user) do
       {:ok, _user} ->
-        Logger.info("Successfully synced BigCommerce customer for user #{user.id} during login")
+        Logger.warn("[BigCommerce Sync] ✓ Successfully synced user #{user.id} (#{user.email}) - BC account linked")
 
       {:error, reason} ->
-        Logger.warn("Failed to sync BigCommerce customer for user #{user.id} during login: #{inspect(reason)}")
+        Logger.error(
+          "[BigCommerce Sync] ✗ FAILED to sync user #{user.id} (#{user.email}) - Reason: #{inspect(reason)} - USER MAY NOT BE ABLE TO PLACE ORDERS"
+        )
     end
   end
 

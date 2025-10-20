@@ -28,7 +28,9 @@ defmodule Recognizer.BigCommerce do
   end
 
   defp handle_email_already_exists(user) do
-    Logger.info("BigCommerce customer email already exists for user #{user.id}, attempting to link existing customer")
+    Logger.warn(
+      "[BigCommerce Sync] Email already exists in BC for user #{user.id} (#{user.email}), attempting to link existing customer"
+    )
 
     case Client.get_customers(emails: [user.email]) do
       {:ok, [customer_id | _]} ->
@@ -45,79 +47,111 @@ defmodule Recognizer.BigCommerce do
   defp link_existing_customer(user, customer_id) do
     case Repo.insert(%Customer{user_id: user.id, bc_id: customer_id}) do
       {:ok, _} ->
-        Logger.info("Successfully linked existing BigCommerce customer #{customer_id} to user #{user.id}")
+        Logger.warn(
+          "[BigCommerce Sync] ✓ Successfully linked existing BC customer #{customer_id} to user #{user.id} (#{user.email})"
+        )
+
         {:ok, user}
 
       {:error, changeset} ->
-        Logger.error("Failed to link BigCommerce customer to user: #{inspect(changeset)}")
+        Logger.error(
+          "[BigCommerce Sync] ✗ FAILED to link BC customer #{customer_id} to user #{user.id} (#{user.email}) - " <>
+            "Changeset errors: #{inspect(changeset.errors)}"
+        )
+
         {:error, {:bigcommerce_link_failed, changeset}}
     end
   end
 
   defp handle_customer_not_found_error(user) do
-    Logger.error("BigCommerce reported email exists but customer not found via API for user #{user.id}")
+    Logger.error(
+      "[BigCommerce Sync] ✗ CRITICAL: BC reported email exists but customer NOT FOUND via API " <>
+        "for user #{user.id} (#{user.email}) - Possible BC API inconsistency"
+    )
+
     {:error, {:bigcommerce_customer_not_found, "Email exists but customer not found"}}
   end
 
   defp handle_get_customers_error(user, e) do
-    Logger.error("Failed to get existing BigCommerce customer for user #{user.id}: #{inspect(e)}")
+    Logger.error(
+      "[BigCommerce Sync] ✗ BC API ERROR while fetching customer for user #{user.id} (#{user.email}) - " <>
+        "Error: #{inspect(e)}"
+    )
+
     {:error, {:bigcommerce_api_error, e}}
   end
 
   defp handle_new_customer_created(user, bc_id) do
     case Repo.insert(%Customer{user_id: user.id, bc_id: bc_id}) do
       {:ok, _} ->
+        Logger.warn("[BigCommerce Sync] ✓ Created NEW BC customer #{bc_id} for user #{user.id} (#{user.email})")
+
         {:ok, user}
 
       {:error, changeset} ->
-        Logger.error("Failed to save BigCommerce customer ID to database: #{inspect(changeset)}")
+        Logger.error(
+          "[BigCommerce Sync] ✗ CRITICAL: BC customer #{bc_id} created but DB LINK FAILED " <>
+            "for user #{user.id} (#{user.email}) - Changeset: #{inspect(changeset.errors)}"
+        )
+
         {:error, {:bigcommerce_link_failed, changeset}}
     end
   end
 
   defp handle_customer_creation_error(user, e) do
-    Logger.error("BigCommerce customer creation failed for user #{user.id}: #{inspect(e)}")
+    Logger.error(
+      "[BigCommerce Sync] ✗ BC customer creation FAILED for user #{user.id} (#{user.email}) - " <>
+        "Error: #{inspect(e)}"
+    )
+
     {:error, e}
   end
 
   def get_or_create_customer(%{email: email, id: id} = user) do
-    Logger.info("Starting BigCommerce get_or_create_customer for user #{id} with email #{email}")
+    Logger.info("[BigCommerce Sync] Starting sync for user #{id} (#{email})")
 
     case Client.get_customers(emails: [email]) do
       {:ok, []} ->
-        Logger.info("No existing BigCommerce customer found for email #{email}, creating new customer")
+        Logger.info("[BigCommerce Sync] No existing BC customer found for #{email}, creating new...")
         result = create_customer(user)
-        Logger.info("BigCommerce customer creation result: #{inspect(result)}")
+        Logger.info("[BigCommerce Sync] Creation result: #{inspect(result)}")
         result
 
       {:ok, [customer_id]} ->
-        Logger.info("Found existing BigCommerce customer #{customer_id} for email #{email}")
+        Logger.info("[BigCommerce Sync] Found existing BC customer #{customer_id} for #{email}")
 
         case Repo.insert(%Customer{user_id: id, bc_id: customer_id}) do
           {:ok, _customer_db_entry} ->
-            Logger.info("Successfully linked BigCommerce customer #{customer_id} to user #{id}")
+            Logger.warn("[BigCommerce Sync] ✓ Linked BC customer #{customer_id} to user #{id} (#{email})")
+
             {:ok, user}
 
           {:error, changeset} ->
-            Logger.error("Error inserting BigCommerce customer into local DB: #{inspect(changeset)}")
+            Logger.error(
+              "[BigCommerce Sync] ✗ DB INSERT FAILED for user #{id} (#{email}) - " <>
+                "Changeset: #{inspect(changeset.errors)}"
+            )
+
             # Apply strict approach: fail account creation when DB linking fails
             {:error, {:bigcommerce_link_failed, changeset}}
         end
 
       {:error, e} ->
-        Logger.error("Error while getting BigCommerce customer: #{inspect(e)}")
+        Logger.error("[BigCommerce Sync] ✗ BC API ERROR for user #{id} (#{email}) - Error: #{inspect(e)}")
+
         # Apply strict approach: fail account creation for BigCommerce API errors
         {:error, e}
 
       e ->
-        Logger.error("Unexpected error while getting or creating BigCommerce customer: #{inspect(e)}")
+        Logger.error("[BigCommerce Sync] ✗ UNEXPECTED ERROR for user #{id} (#{email}) - Error: #{inspect(e)}")
+
         # Apply strict approach: fail account creation for unexpected errors
         {:error, "Unexpected BigCommerce error"}
     end
   end
 
   def get_or_create_customer(e) do
-    Logger.error("unexpected customer #{inspect(e)}")
+    Logger.error("[BigCommerce Sync] ✗ INVALID INPUT: #{inspect(e)}")
     {:error, "unexpected customer"}
   end
 
