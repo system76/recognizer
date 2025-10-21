@@ -31,7 +31,10 @@ defmodule RecognizerWeb.Authentication do
         |> put_session(:prompt_user_id, user.id)
         |> redirect(to: Routes.prompt_two_factor_path(conn, :new))
 
-      {:ok, _user} ->
+      {:ok, user} ->
+        # Attempt to sync BigCommerce in background if not already synced
+        ensure_bigcommerce_user_async(user)
+
         redirect_opts = login_redirect(conn, user)
 
         conn
@@ -77,6 +80,60 @@ defmodule RecognizerWeb.Authentication do
   """
   def fetch_current_user(conn) do
     Guardian.Plug.current_resource(conn)
+  end
+
+  @doc """
+  Sets up two-factor authentication session for a user.
+  This is used across multiple controllers to maintain consistency.
+  """
+  def put_two_factor_session(conn, user) do
+    conn
+    |> put_session(:two_factor_user_id, user.id)
+    |> put_session(:two_factor_sent, false)
+    |> put_session(:two_factor_issue_time, System.system_time(:second))
+  end
+
+  @doc """
+  Ensures BigCommerce user synchronization in the background.
+  This does not block the login flow if sync fails.
+  """
+  if Mix.env() == :test do
+    def ensure_bigcommerce_user_async(_user), do: :noop
+  else
+    def ensure_bigcommerce_user_async(user) do
+      unless should_sync_on_login?(), do: :noop
+
+      user = Recognizer.Repo.preload(user, :bigcommerce_user)
+
+      if is_nil(user.bigcommerce_user) do
+        Task.start(fn -> sync_bigcommerce_customer(user) end)
+      end
+    end
+  end
+
+  defp should_sync_on_login? do
+    BigCommerce.enabled?() and auto_sync_enabled?()
+  end
+
+  defp auto_sync_enabled? do
+    Application.get_env(:recognizer, Recognizer.BigCommerce)
+    |> Keyword.get(:auto_sync_on_login?, true)
+  end
+
+  defp sync_bigcommerce_customer(user) do
+    require Logger
+
+    Logger.warn("[BigCommerce Sync] Attempting auto-sync for user #{user.id} (#{user.email}) during login")
+
+    case BigCommerce.get_or_create_customer(user) do
+      {:ok, _user} ->
+        Logger.warn("[BigCommerce Sync] ✓ Successfully synced user #{user.id} (#{user.email}) - BC account linked")
+
+      {:error, reason} ->
+        Logger.error(
+          "[BigCommerce Sync] ✗ FAILED to sync user #{user.id} (#{user.email}) - Reason: #{inspect(reason)} - USER MAY NOT BE ABLE TO PLACE ORDERS"
+        )
+    end
   end
 
   @doc """

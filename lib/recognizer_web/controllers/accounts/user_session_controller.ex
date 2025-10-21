@@ -17,9 +17,7 @@ defmodule RecognizerWeb.Accounts.UserSessionController do
 
       {:two_factor, user} ->
         conn
-        |> put_session(:two_factor_user_id, user.id)
-        |> put_session(:two_factor_sent, false)
-        |> put_session(:two_factor_issue_time, System.system_time(:second))
+        |> Authentication.put_two_factor_session(user)
         |> redirect(to: Routes.user_two_factor_path(conn, :new))
 
       {:oauth, _user} ->
