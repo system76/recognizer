@@ -25,4 +25,14 @@ defmodule RecognizerWeb.OauthProvider.TokenController do
       "error_description" => "The token endpoint only supports POST"
     })
   end
+
+  # Handle non-existent OAuth endpoints
+  def not_found(conn, _params) do
+    conn
+    |> put_status(:not_found)
+    |> json(%{
+      "error" => "invalid_request",
+      "error_description" => "The requested OAuth endpoint does not exist"
+    })
+  end
 end

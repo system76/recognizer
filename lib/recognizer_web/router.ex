@@ -70,6 +70,7 @@ defmodule RecognizerWeb.Router do
 
     post "/oauth/token", TokenController, :create
     match :*, "/oauth/token", TokenController, :method_not_allowed
+    match :*, "/oauth/*path", TokenController, :not_found
   end
 
   scope "/api", RecognizerWeb.Accounts.Api, as: :api do
