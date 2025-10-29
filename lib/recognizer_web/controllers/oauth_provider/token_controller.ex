@@ -3,6 +3,32 @@ defmodule RecognizerWeb.OauthProvider.TokenController do
 
   alias ExOauth2Provider.Token
 
+  @one_minute 60_000
+
+  # Rate limit: 30 requests per minute per IP for token endpoint
+  plug Hammer.Plug,
+       [
+         rate_limit: {"oauth:token", @one_minute, 30},
+         by: {:conn, &__MODULE__.get_remote_ip/1}
+       ]
+       when action in [:create]
+
+  # Rate limit: 10 requests per minute per IP for invalid endpoints
+  plug Hammer.Plug,
+       [
+         rate_limit: {"oauth:invalid", @one_minute, 10},
+         by: {:conn, &__MODULE__.get_remote_ip/1}
+       ]
+       when action in [:not_found, :method_not_allowed]
+
+  def get_remote_ip(conn) do
+    # Get real IP from X-Forwarded-For or remote IP
+    case Plug.Conn.get_req_header(conn, "x-forwarded-for") do
+      [ip | _] -> ip |> String.split(",") |> List.first() |> String.trim()
+      [] -> conn.remote_ip |> :inet.ntoa() |> to_string()
+    end
+  end
+
   def create(conn, params) do
     case Token.grant(params, otp_app: :recognizer) do
       {:ok, access_token} ->

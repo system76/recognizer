@@ -65,11 +65,23 @@ defmodule RecognizerWeb.Router do
     get "/logout", Accounts.UserSessionController, :delete
   end
 
+  # OAuth authorization flow (browser-based) - must come BEFORE catch-all
+  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
+    pipe_through [:browser, :bc, :auth, :user]
+
+    get "/oauth/authorize", AuthorizeController, :new
+    get "/oauth/authorize/:code", AuthorizeController, :show
+    post "/oauth/authorize", AuthorizeController, :create
+    delete "/oauth/authorize", AuthorizeController, :delete
+  end
+
+  # OAuth token endpoint and catch-all for invalid OAuth paths
   scope "/", RecognizerWeb.OauthProvider, as: :oauth do
     pipe_through [:api]
 
     post "/oauth/token", TokenController, :create
     match :*, "/oauth/token", TokenController, :method_not_allowed
+    # Catch-all for any other /oauth/* paths (security: prevents endpoint scanning)
     match :*, "/oauth/*path", TokenController, :not_found
   end
 
@@ -83,15 +95,6 @@ defmodule RecognizerWeb.Router do
     put "/settings/two-factor", UserSettingsTwoFactorController, :update
     post "/settings/two-factor/send", UserSettingsTwoFactorController, :send
     post "/create-account", UserRegistrationController, :create
-  end
-
-  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
-    pipe_through [:browser, :bc, :auth, :user]
-
-    get "/oauth/authorize", AuthorizeController, :new
-    get "/oauth/authorize/:code", AuthorizeController, :show
-    post "/oauth/authorize", AuthorizeController, :create
-    delete "/oauth/authorize", AuthorizeController, :delete
   end
 
   scope "/", RecognizerWeb.Accounts do
