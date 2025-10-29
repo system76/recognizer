@@ -5,11 +5,12 @@ defmodule RecognizerWeb.OauthProvider.TokenController do
 
   @one_minute 60_000
 
-  # Rate limit: 30 requests per minute per IP for token endpoint
+  # Rate limit: 100 requests per minute per IP+client combination for token endpoint
+  # This ensures different OAuth applications don't share the same rate limit bucket
   plug Hammer.Plug,
        [
-         rate_limit: {"oauth:token", @one_minute, 30},
-         by: {:conn, &__MODULE__.get_remote_ip/1}
+         rate_limit: {"oauth:token", @one_minute, 100},
+         by: {:conn, &__MODULE__.get_rate_limit_key/1}
        ]
        when action in [:create]
 
@@ -27,6 +28,18 @@ defmodule RecognizerWeb.OauthProvider.TokenController do
       [ip | _] -> ip |> String.split(",") |> List.first() |> String.trim()
       [] -> conn.remote_ip |> :inet.ntoa() |> to_string()
     end
+  end
+
+  def get_rate_limit_key(conn) do
+    ip = get_remote_ip(conn)
+    client_id = get_client_id_from_params(conn)
+    "#{ip}:#{client_id}"
+  end
+
+  defp get_client_id_from_params(conn) do
+    # OAuth token requests include client_id in params
+    # This allows different OAuth applications to have separate rate limit buckets
+    conn.params["client_id"] || "unknown"
   end
 
   def create(conn, params) do
