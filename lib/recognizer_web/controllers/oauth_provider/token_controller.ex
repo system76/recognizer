@@ -5,10 +5,11 @@ defmodule RecognizerWeb.OauthProvider.TokenController do
 
   @one_minute 60_000
 
-  # Rate limit: 30 requests per minute per IP for token endpoint
+  # Rate limit: 100 requests per minute per IP for token endpoint
+  # Higher limit to accommodate legitimate OAuth clients serving multiple users
   plug Hammer.Plug,
        [
-         rate_limit: {"oauth:token", @one_minute, 30},
+         rate_limit: {"oauth:token", @one_minute, 100},
          by: {:conn, &__MODULE__.get_remote_ip/1}
        ]
        when action in [:create]

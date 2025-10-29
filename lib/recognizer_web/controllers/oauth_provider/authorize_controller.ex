@@ -6,9 +6,10 @@ defmodule RecognizerWeb.OauthProvider.AuthorizeController do
 
   @one_minute 60_000
 
-  # Rate limit: 20 requests per minute per IP for OAuth authorization flow
+  # Rate limit: 50 requests per minute per IP for OAuth authorization flow
+  # Higher limit to accommodate legitimate OAuth clients serving multiple users
   plug Hammer.Plug,
-    rate_limit: {"oauth:authorize", @one_minute, 20},
+    rate_limit: {"oauth:authorize", @one_minute, 50},
     by: {:conn, &RecognizerWeb.OauthProvider.TokenController.get_remote_ip/1}
 
   def show(conn, %{"code" => code}) do
