@@ -226,12 +226,7 @@ defmodule Recognizer.Accounts do
 
         {:error, error} ->
           # Log the error but continue with account creation
-          # Auto-sync during login will retry the synchronization
-          Logger.error(
-            "[BigCommerce Sync] ✗ REGISTRATION SYNC FAILED for user #{user.id} (#{user.email}) - " <>
-              "Reason: #{inspect(error)} - Will retry on next login"
-          )
-
+          Logger.error("BigCommerce customer creation failed but continuing account process: #{inspect(error)}")
           {:ok, user}
       end
     else
