@@ -4,6 +4,17 @@ defmodule RecognizerWeb.OauthProvider.AuthorizeController do
   alias ExOauth2Provider.Authorization
   alias RecognizerWeb.Authentication
 
+  @one_minute 60_000
+
+  # Rate limit: 50 requests per minute per IP
+  # Protects against authorization endpoint scanning
+  plug Hammer.Plug,
+       [
+         rate_limit: {"oauth:authorize", @one_minute, 50},
+         by: {:conn, &RecognizerWeb.OauthProvider.TokenController.get_remote_ip/1}
+       ]
+       when action in [:new, :create]
+
   def show(conn, %{"code" => code}) do
     render(conn, "show.html", code: code)
   end
