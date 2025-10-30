@@ -71,7 +71,7 @@ defmodule Recognizer.BigCommerce do
 
       {:error, changeset} ->
         Logger.error("Failed to save BigCommerce customer ID to database: #{inspect(changeset)}")
-        {:error, {:bigcommerce_link_failed, changeset}}
+        {:ok, user}
     end
   end
 
@@ -100,8 +100,10 @@ defmodule Recognizer.BigCommerce do
 
           {:error, changeset} ->
             Logger.error("Error inserting BigCommerce customer into local DB: #{inspect(changeset)}")
-            # Apply strict approach: fail account creation when DB linking fails
-            {:error, {:bigcommerce_link_failed, changeset}}
+            # Return success anyway since the BigCommerce customer exists
+            # This helps with the case where a user tries to create an account twice
+            Logger.info("Returning success despite DB error since BigCommerce customer exists")
+            {:ok, user}
         end
 
       {:error, e} ->
