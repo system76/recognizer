@@ -10,8 +10,7 @@ defmodule Recognizer.MixProject do
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps(),
-      releases: releases()
+      deps: deps()
     ]
   end
 
@@ -94,16 +93,6 @@ defmodule Recognizer.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       "ecto.legacy_migrate": ["ecto.migrate --migrations-path priv/repo/_legacy_migrations"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
-    ]
-  end
-
-  defp releases do
-    [
-      recognizer: [
-        validate_compile_env: false,
-        include_executables_for: [:unix],
-        applications: [runtime_tools: :permanent]
-      ]
     ]
   end
 end
