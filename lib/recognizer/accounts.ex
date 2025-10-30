@@ -652,16 +652,8 @@ defmodule Recognizer.Accounts do
   settings.
   """
   def check_two_factor_notification_time(user) do
-    case get_new_two_factor_settings(user) do
-      {:ok, attrs} when not is_nil(attrs) ->
-        check_two_factor_notification_time(attrs, 100)
-
-      {:ok, nil} ->
-        {:error, :no_two_factor_settings}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
+    {:ok, attrs} = get_new_two_factor_settings(user)
+    check_two_factor_notification_time(attrs, 100)
   end
 
   def check_two_factor_notification_time(attrs, two_factor_issue_time) do
