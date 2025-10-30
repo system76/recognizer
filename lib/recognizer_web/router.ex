@@ -147,4 +147,13 @@ defmodule RecognizerWeb.Router do
     post "/settings/two-factor", UserSettingsController, :two_factor_confirm
     get "/setting/two-factor/resend", UserSettingsController, :resend
   end
+
+  # Catch-all route for invalid OAuth endpoints
+  # IMPORTANT: This MUST be the last route to avoid blocking legitimate OAuth routes
+  # Handles scanning attempts like /oauth/.env, /oauth/auth.json, etc.
+  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
+    pipe_through [:api]
+
+    match :*, "/oauth/*path", TokenController, :not_found
+  end
 end

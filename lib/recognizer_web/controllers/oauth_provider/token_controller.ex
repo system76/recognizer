@@ -5,22 +5,29 @@ defmodule RecognizerWeb.OauthProvider.TokenController do
 
   @one_minute 60_000
 
-  # Rate limit: 100 requests per minute per IP for token endpoint
-  # Higher limit to accommodate legitimate OAuth clients serving multiple users
+  # Rate limit: 100 requests per minute per IP+client combination
+  # Protects against brute force attacks while allowing legitimate OAuth clients
   plug Hammer.Plug,
        [
          rate_limit: {"oauth:token", @one_minute, 100},
-         by: {:conn, &__MODULE__.get_remote_ip/1}
+         by: {:conn, &__MODULE__.get_rate_limit_key/1}
        ]
        when action in [:create]
 
-  # Rate limit: 10 requests per minute per IP for invalid endpoints
+  # Rate limit: 10 requests per minute per IP for invalid OAuth paths
+  # Protects against endpoint scanning attacks (e.g., /oauth/.env, /oauth/auth.json)
   plug Hammer.Plug,
        [
          rate_limit: {"oauth:invalid", @one_minute, 10},
          by: {:conn, &__MODULE__.get_remote_ip/1}
        ]
-       when action in [:not_found, :method_not_allowed]
+       when action in [:not_found]
+
+  def get_rate_limit_key(conn) do
+    ip = get_remote_ip(conn)
+    client_id = conn.params["client_id"] || "unknown"
+    "#{ip}:#{client_id}"
+  end
 
   def get_remote_ip(conn) do
     # Get real IP from X-Forwarded-For or remote IP
@@ -53,7 +60,7 @@ defmodule RecognizerWeb.OauthProvider.TokenController do
     })
   end
 
-  # Handle non-existent OAuth endpoints
+  # Handle invalid OAuth endpoint requests (e.g., /oauth/.env, /oauth/auth.json)
   def not_found(conn, _params) do
     conn
     |> put_status(:not_found)
