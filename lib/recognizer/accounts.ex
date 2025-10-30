@@ -226,12 +226,7 @@ defmodule Recognizer.Accounts do
 
         {:error, error} ->
           # Log the error but continue with account creation
-          # Auto-sync during login will retry the synchronization
-          Logger.error(
-            "[BigCommerce Sync] ✗ REGISTRATION SYNC FAILED for user #{user.id} (#{user.email}) - " <>
-              "Reason: #{inspect(error)} - Will retry on next login"
-          )
-
+          Logger.error("BigCommerce customer creation failed but continuing account process: #{inspect(error)}")
           {:ok, user}
       end
     else
@@ -252,48 +247,30 @@ defmodule Recognizer.Accounts do
     error
   end
 
-  defp maybe_send_newsletter_after_registration({:ok, user} = previous_response, attrs) do
-    newsletter_value = normalize_newsletter_value(Map.get(attrs, "newsletter"))
-    if newsletter_value, do: start_newsletter_update_task(user, true)
+  defp maybe_send_newsletter_after_registration({:ok, user} = previous_response, %{"newsletter" => "true"}) do
+    # Process asynchronously to avoid blocking the account creation if newsletter registration fails
+    Task.start(fn ->
+      try do
+        require Logger
+        result = Recognizer.Hal.update_newsletter(user)
+        Logger.info("Newsletter registration completed for user #{user.id}: #{inspect(result)}")
+      catch
+        kind, reason ->
+          require Logger
+          Logger.error("Newsletter registration failed for user #{user.id}: #{inspect(kind)}, #{inspect(reason)}")
+          Logger.error(Exception.format_stacktrace(__STACKTRACE__))
+      end
+    end)
+
+    previous_response
+  end
+
+  defp maybe_send_newsletter_after_registration(previous_response, %{"newsletter" => false}) do
     previous_response
   end
 
   defp maybe_send_newsletter_after_registration(previous_response, _attrs) do
     previous_response
-  end
-
-  defp normalize_newsletter_value(value) when value in [true, "true"], do: true
-  defp normalize_newsletter_value(value) when value in [false, "false", nil], do: false
-  defp normalize_newsletter_value(_), do: false
-
-  defp start_newsletter_update_task(user, newsletter_value) do
-    Task.start(fn ->
-      try do
-        user_with_newsletter = Map.put(user, :newsletter, newsletter_value)
-        result = Recognizer.Hal.update_newsletter(user_with_newsletter)
-        log_newsletter_result(user.id, result)
-      catch
-        kind, reason ->
-          Logger.error("Newsletter update crashed for user #{user.id}: #{inspect(kind)}, #{inspect(reason)}")
-          Logger.error(Exception.format_stacktrace(__STACKTRACE__))
-      end
-    end)
-  end
-
-  defp log_newsletter_result(user_id, result) do
-    case result do
-      :ok ->
-        Logger.info("Newsletter update successful for user #{user_id}")
-
-      :ok_not_updated ->
-        Logger.info("Newsletter already up to date for user #{user_id}")
-
-      {:error, reason} ->
-        Logger.warn("Newsletter update failed for user #{user_id}: #{inspect(reason)}")
-
-      other ->
-        Logger.debug("Newsletter update returned: #{inspect(other)} for user #{user_id}")
-    end
   end
 
   @doc """
@@ -338,10 +315,7 @@ defmodule Recognizer.Accounts do
 
   """
   def update_user(user, attrs) do
-    if Map.has_key?(attrs, "newsletter") do
-      start_newsletter_update_task(user, normalize_newsletter_value(Map.get(attrs, "newsletter")))
-    end
-
+    if Map.has_key?(attrs, "newsletter"), do: Recognizer.Hal.update_newsletter(attrs)
     changeset = User.changeset(user, attrs)
 
     with {:ok, updated_user} <- Repo.update(changeset),
@@ -508,9 +482,6 @@ defmodule Recognizer.Accounts do
   @doc """
   Delivers the reset password email to the given user.
 
-  For security reasons, if the user account is OAuth-only (no password set),
-  we silently skip sending the email to prevent account enumeration attacks.
-
   ## Examples
 
       iex> deliver_user_reset_password_instructions(user, &Routes.user_reset_password_url(conn, :edit, &1))
@@ -519,23 +490,12 @@ defmodule Recognizer.Accounts do
   """
   def deliver_user_reset_password_instructions(%User{} = user, reset_password_url_fun)
       when is_function(reset_password_url_fun, 1) do
-    # Preload OAuth associations to check if this is an OAuth-only account
-    user_with_oauths = Repo.preload(user, :oauths)
+    {:ok, token, _claims} = Guardian.encode_and_sign(user, %{"typ" => "reset_password"})
 
-    if Enum.any?(user_with_oauths.oauths) do
-      # OAuth account - silently skip sending email for security
-      # Return success to prevent account enumeration
-      Logger.info("Password reset requested for OAuth-only account #{user.id}, skipping email")
-      {:ok, :skipped}
-    else
-      # Regular password account - send reset email
-      {:ok, token, _claims} = Guardian.encode_and_sign(user, %{"typ" => "reset_password"})
-
-      Notification.deliver_reset_password_instructions(
-        user,
-        reset_password_url_fun.(token)
-      )
-    end
+    Notification.deliver_reset_password_instructions(
+      user,
+      reset_password_url_fun.(token)
+    )
   end
 
   @doc """
@@ -692,16 +652,8 @@ defmodule Recognizer.Accounts do
   settings.
   """
   def check_two_factor_notification_time(user) do
-    case get_new_two_factor_settings(user) do
-      {:ok, attrs} when not is_nil(attrs) ->
-        check_two_factor_notification_time(attrs, 100)
-
-      {:ok, nil} ->
-        {:error, :no_two_factor_settings}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
+    {:ok, attrs} = get_new_two_factor_settings(user)
+    check_two_factor_notification_time(attrs, 100)
   end
 
   def check_two_factor_notification_time(attrs, two_factor_issue_time) do

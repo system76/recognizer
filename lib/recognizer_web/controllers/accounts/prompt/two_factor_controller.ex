@@ -25,24 +25,12 @@ defmodule RecognizerWeb.Accounts.Prompt.TwoFactorController do
 
   def edit(conn, _params) do
     user = conn.assigns.user
+    {:ok, %{two_factor_seed: seed}} = Accounts.get_new_two_factor_settings(user)
 
-    case Accounts.get_new_two_factor_settings(user) do
-      {:ok, %{two_factor_seed: seed}} ->
-        render(conn, "confirm.html",
-          barcode: Authentication.generate_totp_barcode(user, seed),
-          totp_app_url: Authentication.get_totp_app_url(user, seed)
-        )
-
-      {:ok, nil} ->
-        conn
-        |> put_flash(:error, "Two factor setup not found. Please set up two factor authentication first.")
-        |> redirect(to: Routes.prompt_two_factor_path(conn, :new))
-
-      {:error, _reason} ->
-        conn
-        |> put_flash(:error, "Error retrieving two factor settings. Please try again.")
-        |> redirect(to: Routes.prompt_two_factor_path(conn, :new))
-    end
+    render(conn, "confirm.html",
+      barcode: Authentication.generate_totp_barcode(user, seed),
+      totp_app_url: Authentication.get_totp_app_url(user, seed)
+    )
   end
 
   def update(conn, params) do

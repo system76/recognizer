@@ -7,17 +7,6 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
   alias Recognizer.{Accounts, Repo}
   alias RecognizerWeb.Authentication
 
-  @one_minute 60_000
-
-  # Rate limit: 20 requests per minute per IP for OAuth provider requests
-  # Protects against invalid provider scanning (e.g., /oauth/.env)
-  plug Hammer.Plug,
-       [
-         rate_limit: {"oauth:user_provider", @one_minute, 20},
-         by: {:conn, &RecognizerWeb.OauthProvider.TokenController.get_remote_ip/1}
-       ]
-       when action in [:request, :callback]
-
   plug Ueberauth
 
   @doc """
@@ -36,7 +25,8 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
 
       {:two_factor, user} ->
         conn
-        |> Authentication.put_two_factor_session(user)
+        |> put_session(:two_factor_user_id, user.id)
+        |> put_session(:two_factor_sent, false)
         |> redirect(to: Routes.user_two_factor_path(conn, :new))
 
       {:error, %Ecto.Changeset{} = changeset} ->
