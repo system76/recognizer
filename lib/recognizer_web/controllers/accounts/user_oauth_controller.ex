@@ -25,7 +25,8 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
 
       {:two_factor, user} ->
         conn
-        |> Authentication.put_two_factor_session(user)
+        |> put_session(:two_factor_user_id, user.id)
+        |> put_session(:two_factor_sent, false)
         |> redirect(to: Routes.user_two_factor_path(conn, :new))
 
       {:error, %Ecto.Changeset{} = changeset} ->
