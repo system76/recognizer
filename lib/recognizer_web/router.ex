@@ -65,12 +65,6 @@ defmodule RecognizerWeb.Router do
     get "/logout", Accounts.UserSessionController, :delete
   end
 
-  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
-    pipe_through [:api]
-
-    post "/oauth/token", TokenController, :create
-  end
-
   scope "/api", RecognizerWeb.Accounts.Api, as: :api do
     pipe_through [:api, :auth, :user]
 
@@ -81,15 +75,6 @@ defmodule RecognizerWeb.Router do
     put "/settings/two-factor", UserSettingsTwoFactorController, :update
     post "/settings/two-factor/send", UserSettingsTwoFactorController, :send
     post "/create-account", UserRegistrationController, :create
-  end
-
-  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
-    pipe_through [:browser, :bc, :auth, :user]
-
-    get "/oauth/authorize", AuthorizeController, :new
-    get "/oauth/authorize/:code", AuthorizeController, :show
-    post "/oauth/authorize", AuthorizeController, :create
-    delete "/oauth/authorize", AuthorizeController, :delete
   end
 
   scope "/", RecognizerWeb.Accounts do
@@ -141,5 +126,26 @@ defmodule RecognizerWeb.Router do
     get "/settings/two-factor", UserSettingsController, :two_factor_init
     post "/settings/two-factor", UserSettingsController, :two_factor_confirm
     get "/setting/two-factor/resend", UserSettingsController, :resend
+  end
+
+  # OAuth Provider endpoints (for other services using Recognizer as OAuth provider)
+  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
+    pipe_through [:browser, :bc, :auth, :user]
+
+    get "/oauth/authorize", AuthorizeController, :new
+    get "/oauth/authorize/:code", AuthorizeController, :show
+    post "/oauth/authorize", AuthorizeController, :create
+    delete "/oauth/authorize", AuthorizeController, :delete
+  end
+
+  # OAuth Provider token endpoint and catch-all for attack prevention
+  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
+    pipe_through [:api]
+
+    post "/oauth/token", TokenController, :create
+    match :*, "/oauth/token", TokenController, :method_not_allowed
+    # Catch-all for invalid OAuth provider paths (e.g. /oauth/.env, /oauth/auth.json)
+    # Note: This must come AFTER all legitimate /oauth/* routes to avoid blocking them
+    match :*, "/oauth/*path", TokenController, :not_found
   end
 end

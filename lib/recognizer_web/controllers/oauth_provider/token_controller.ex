@@ -3,6 +3,45 @@ defmodule RecognizerWeb.OauthProvider.TokenController do
 
   alias ExOauth2Provider.Token
 
+  @one_minute 60_000
+
+  # Rate limit: 100 requests per minute per IP+client combination for token endpoint
+  # This ensures different OAuth applications don't share the same rate limit bucket
+  plug Hammer.Plug,
+       [
+         rate_limit: {"oauth:token", @one_minute, 100},
+         by: {:conn, &__MODULE__.get_rate_limit_key/1}
+       ]
+       when action in [:create]
+
+  # Rate limit: 10 requests per minute per IP for invalid endpoints
+  plug Hammer.Plug,
+       [
+         rate_limit: {"oauth:invalid", @one_minute, 10},
+         by: {:conn, &__MODULE__.get_remote_ip/1}
+       ]
+       when action in [:not_found, :method_not_allowed]
+
+  def get_remote_ip(conn) do
+    # Get real IP from X-Forwarded-For or remote IP
+    case Plug.Conn.get_req_header(conn, "x-forwarded-for") do
+      [ip | _] -> ip |> String.split(",") |> List.first() |> String.trim()
+      [] -> conn.remote_ip |> :inet.ntoa() |> to_string()
+    end
+  end
+
+  def get_rate_limit_key(conn) do
+    ip = get_remote_ip(conn)
+    client_id = get_client_id_from_params(conn)
+    "#{ip}:#{client_id}"
+  end
+
+  defp get_client_id_from_params(conn) do
+    # OAuth token requests include client_id in params
+    # This allows different OAuth applications to have separate rate limit buckets
+    conn.params["client_id"] || "unknown"
+  end
+
   def create(conn, params) do
     case Token.grant(params, otp_app: :recognizer) do
       {:ok, access_token} ->
@@ -23,6 +62,16 @@ defmodule RecognizerWeb.OauthProvider.TokenController do
     |> json(%{
       "error" => "invalid_request",
       "error_description" => "The token endpoint only supports POST"
+    })
+  end
+
+  # Handle non-existent OAuth endpoints
+  def not_found(conn, _params) do
+    conn
+    |> put_status(:not_found)
+    |> json(%{
+      "error" => "invalid_request",
+      "error_description" => "The requested OAuth endpoint does not exist"
     })
   end
 end
