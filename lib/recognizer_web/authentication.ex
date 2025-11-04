@@ -90,6 +90,11 @@ defmodule RecognizerWeb.Authentication do
       get_session(conn, :bc) ->
         [external: BigCommerce.login_redirect_uri(user)]
 
+      # OAuth Provider flow: if user was trying to access /oauth/authorize, return them there
+      # This takes priority over REDIRECT_URL to preserve OAuth authorization flow
+      oauth_flow?(conn) ->
+        [to: get_session(conn, :user_return_to)]
+
       get_session(conn, :user_return_to) ->
         [to: get_session(conn, :user_return_to)]
 
@@ -98,6 +103,13 @@ defmodule RecognizerWeb.Authentication do
 
       true ->
         [to: Routes.user_settings_path(conn, :edit)]
+    end
+  end
+
+  defp oauth_flow?(conn) do
+    case get_session(conn, :user_return_to) do
+      nil -> false
+      path -> String.starts_with?(path, "/oauth/authorize")
     end
   end
 

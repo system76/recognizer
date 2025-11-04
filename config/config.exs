@@ -69,7 +69,7 @@ config :guardian, Guardian.DB,
   sweep_interval: 60
 
 config :ueberauth, Ueberauth,
-  base_path: "/oauth",
+  base_path: "/auth",
   providers: [
     github: {Ueberauth.Strategy.Github, [default_scope: "user:email", send_redirect_uri: false]},
     google: {Ueberauth.Strategy.Google, [default_scope: "email profile"]}
