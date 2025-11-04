@@ -36,32 +36,38 @@ defmodule RecognizerWeb.Accounts.UserTwoFactorController do
     current_user_id = get_session(conn, :two_factor_user_id)
     current_user = Accounts.get_user!(current_user_id)
     current_time = System.system_time(:second)
-    %{notification_preference: %{two_factor: two_factor_method}} = Accounts.load_notification_preferences(current_user)
+    current_user = Accounts.load_notification_preferences(current_user)
 
-    conn =
-      if get_session(conn, :two_factor_issue_time) == nil do
-        conn
-        |> put_session(:two_factor_issue_time, current_time)
-      else
-        conn
-      end
+    case current_user do
+      %{notification_preference: %{two_factor: two_factor_method}} ->
+        conn =
+          if get_session(conn, :two_factor_issue_time) == nil do
+            conn
+            |> put_session(:two_factor_issue_time, current_time)
+          else
+            conn
+          end
 
-    two_factor_sent = get_session(conn, :two_factor_sent)
+        two_factor_sent = get_session(conn, :two_factor_sent)
 
-    conn =
-      if two_factor_sent == false do
-        conn
-        |> maybe_send_two_factor_notification(current_user, two_factor_method)
+        conn =
+          if two_factor_sent == false do
+            conn
+            |> maybe_send_two_factor_notification(current_user, two_factor_method)
+
+            conn
+            |> put_session(:two_factor_sent, true)
+            |> put_session(:two_factor_issue_time, current_time)
+          else
+            conn
+          end
 
         conn
-        |> put_session(:two_factor_sent, true)
-        |> put_session(:two_factor_issue_time, current_time)
-      else
-        conn
-      end
+        |> render("new.html", two_factor_method: two_factor_method)
 
-    conn
-    |> render("new.html", two_factor_method: two_factor_method)
+      _ ->
+        conn.redirect(to: Routes.user_session_path(conn, :new))
+    end
   end
 
   @doc """
