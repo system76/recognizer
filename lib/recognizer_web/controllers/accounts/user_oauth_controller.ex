@@ -35,7 +35,11 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
         |> redirect(to: Routes.user_session_path(conn, :new))
 
       {:error, e} ->
-        {:error, e}
+        Logger.error("OAuth callback error: #{inspect(e)}")
+
+        conn
+        |> put_flash(:error, "An error occurred during authentication. Please try again.")
+        |> redirect(to: Routes.user_session_path(conn, :new))
     end
   end
 
@@ -77,6 +81,10 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
 
     with nil <- Accounts.get_user_by_service_guid(provider, uid) do
       register_oauth_user(user_params, provider, uid)
+    else
+      user when not is_nil(user) ->
+        # User already exists, return success with existing user
+        {:ok, user}
     end
   end
 
@@ -138,6 +146,9 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
   def request(conn, %{"provider" => _provider}) do
     # The Ueberauth plug will handle the actual redirect to the OAuth provider
     # This action is typically just a passthrough that lets Ueberauth do its work
+    # If we reach here, something went wrong with the Ueberauth plug
     conn
+    |> put_flash(:error, "OAuth request could not be processed.")
+    |> redirect(to: Routes.user_session_path(conn, :new))
   end
 end
