@@ -79,12 +79,14 @@ defmodule RecognizerWeb.Accounts.UserOAuthController do
       |> provider_params()
       |> Map.put(:newsletter, true)
 
-    with nil <- Accounts.get_user_by_service_guid(provider, uid) do
-      register_oauth_user(user_params, provider, uid)
-    else
-      user when not is_nil(user) ->
-        # User already exists, return success with existing user
-        {:ok, user}
+    case Accounts.get_user_by_service_guid(provider, uid) do
+      nil ->
+        # User doesn't exist, create new user
+        register_oauth_user(user_params, provider, uid)
+
+      result ->
+        # User already exists, result is {:ok, user} or {:two_factor, user}
+        result
     end
   end
 
