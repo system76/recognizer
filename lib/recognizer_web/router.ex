@@ -89,8 +89,8 @@ defmodule RecognizerWeb.Router do
     get "/forgot-password/:token", UserResetPasswordController, :edit
     put "/forgot-password/:token", UserResetPasswordController, :update
 
-    get "/auth/:provider", UserOAuthController, :request, as: :user_oauth
-    get "/auth/:provider/callback", UserOAuthController, :callback, as: :user_oauth
+    get "/oauth/:provider", UserOAuthController, :request, as: :user_oauth
+    get "/oauth/:provider/callback", UserOAuthController, :callback, as: :user_oauth
 
     get "/two-factor", UserTwoFactorController, :new
     post "/two-factor", UserTwoFactorController, :create
