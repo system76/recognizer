@@ -65,6 +65,17 @@ defmodule RecognizerWeb.Router do
     get "/logout", Accounts.UserSessionController, :delete
   end
 
+  # OAuth Provider endpoints (for other services using Recognizer as OAuth provider)
+  # IMPORTANT: These must come BEFORE /oauth/:provider to prevent route conflicts
+  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
+    pipe_through [:browser, :bc, :auth, :user]
+
+    get "/oauth/authorize", AuthorizeController, :new
+    get "/oauth/authorize/:code", AuthorizeController, :show
+    post "/oauth/authorize", AuthorizeController, :create
+    delete "/oauth/authorize", AuthorizeController, :delete
+  end
+
   scope "/api", RecognizerWeb.Accounts.Api, as: :api do
     pipe_through [:api, :auth, :user]
 
@@ -126,16 +137,6 @@ defmodule RecognizerWeb.Router do
     get "/settings/two-factor", UserSettingsController, :two_factor_init
     post "/settings/two-factor", UserSettingsController, :two_factor_confirm
     get "/setting/two-factor/resend", UserSettingsController, :resend
-  end
-
-  # OAuth Provider endpoints (for other services using Recognizer as OAuth provider)
-  scope "/", RecognizerWeb.OauthProvider, as: :oauth do
-    pipe_through [:browser, :bc, :auth, :user]
-
-    get "/oauth/authorize", AuthorizeController, :new
-    get "/oauth/authorize/:code", AuthorizeController, :show
-    post "/oauth/authorize", AuthorizeController, :create
-    delete "/oauth/authorize", AuthorizeController, :delete
   end
 
   # OAuth Provider token endpoint and catch-all for attack prevention
