@@ -6,7 +6,7 @@ defmodule Recognizer.Caster do
   alias Bottle.Account.V1, as: Account
 
   def cast(user) do
-    Account.User.new(
+    struct!(Account.User,
       account_type: convert_user_type(user.type),
       company_name: user.company_name,
       email: user.email,
