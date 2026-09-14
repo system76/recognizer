@@ -19,7 +19,9 @@ defmodule RecognizerWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: RecognizerWeb
+      use Phoenix.Controller, formats: [html: "View", json: "View"]
+
+      plug :put_new_layout, {RecognizerWeb.LayoutView, :app}
 
       import Plug.Conn
       import RecognizerWeb.Gettext

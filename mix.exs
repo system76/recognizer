@@ -11,7 +11,8 @@ defmodule Recognizer.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      releases: releases()
+      releases: releases(),
+      listeners: [Phoenix.CodeReloader]
     ]
   end
 
@@ -64,7 +65,7 @@ defmodule Recognizer.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_html_helpers, "~> 1.0.1"},
       {:phoenix_view, "~> 2.0.3"},
-      {:phoenix, "~> 1.7.1"},
+      {:phoenix, "~> 1.8"},
       {:plug_cowboy, "~> 2.4"},
       {:pot, "~> 1.0.2"},
       {:saxy, "~> 1.1"},
