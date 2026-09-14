@@ -29,10 +29,6 @@ config :logger, :console,
 
 config :grpc, start_server: true
 
-config :logger_json, :backend,
-  formatter: LoggerJSON.Formatters.DatadogLogger,
-  metadata: :all
-
 config :phoenix, :json_library, Jason
 
 config :recognizer, :message_queues, []
