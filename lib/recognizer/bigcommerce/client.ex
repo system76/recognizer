@@ -206,7 +206,7 @@ defmodule Recognizer.BigCommerce.Client do
         {_, retry_value} -> String.to_integer(retry_value)
       end
 
-    Logger.warn("Rate limited, sleeping for ms: #{inspect(retry_ms)}")
+    Logger.warning("Rate limited, sleeping for ms: #{inspect(retry_ms)}")
     Process.sleep(retry_ms)
   end
 end

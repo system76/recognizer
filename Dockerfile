@@ -1,7 +1,7 @@
 # -----------------------------------------------
 # 1) Build Elixir
 # -----------------------------------------------
-FROM elixir:1.13.3-slim as build-elixir
+FROM elixir:1.18.4-otp-27-slim as build-elixir
 
 # ARG is available during the build and not in the final container
 # https://vsupalov.com/docker-arg-vs-env/
