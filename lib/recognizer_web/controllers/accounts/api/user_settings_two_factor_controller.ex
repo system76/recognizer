@@ -94,11 +94,6 @@ defmodule RecognizerWeb.Accounts.Api.UserSettingsTwoFactorController do
           conn
           |> put_status(202)
           |> render("show.json", settings: settings, user: user)
-
-        {:error, reason} ->
-          conn
-          |> put_status(400)
-          |> json(%{error: reason})
       end
     end
   end
