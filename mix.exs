@@ -34,7 +34,7 @@ defmodule Recognizer.MixProject do
   defp deps do
     [
       {:argon2_elixir, "~> 2.0"},
-      {:bottle, github: "system76/bottle", ref: "1a49e7bc7d8f7bf556c5780b70e9eb60a06a8ca7"},
+      {:bottle, github: "system76/bottle", ref: "229a577bc24ce3e03278d084263fa2a4aab4d367"},
       {:cors_plug, "~> 2.0"},
       {:cowboy, "~> 2.8", override: true},
       {:cowlib, "~> 2.9.1", override: true},
@@ -68,8 +68,8 @@ defmodule Recognizer.MixProject do
       {:plug_cowboy, "~> 2.4"},
       {:pot, "~> 1.0.2"},
       {:saxy, "~> 1.1"},
-      {:spandex, "~> 3.0.3"},
-      {:spandex_datadog, "~> 1.1.0"},
+      {:spandex, "~> 3.2"},
+      {:spandex_datadog, "~> 1.4.0"},
       {:spandex_ecto, "~> 0.6.2"},
       {:spandex_phoenix, "~> 1.0.5"},
       {:telemetry_metrics, "~> 0.4"},
