@@ -8,8 +8,8 @@ config :recognizer, RecognizerWeb.Endpoint,
   server: true
 
 config :logger,
-  backends: [LoggerJSON],
-  level: :info
+  level: :info,
+  default_handler: [formatter: {LoggerJSON.Formatters.Datadog, metadata: :all}]
 
 config :recognizer, Recognizer.Repo, log: false
 
