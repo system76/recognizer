@@ -151,7 +151,6 @@ defmodule Recognizer.BigCommerce do
       %{
         "aud" => "BigCommerce",
         "iss" => config(:client_id),
-        "iat" => System.system_time(:second),
         "jti" => Ecto.UUID.generate(),
         "operation" => "customer_login",
         "store_hash" => config(:store_hash),
