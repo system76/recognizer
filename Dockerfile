@@ -1,7 +1,7 @@
 # -----------------------------------------------
 # 1) Build Elixir
 # -----------------------------------------------
-FROM elixir:1.18.4-otp-27-slim as build-elixir
+FROM hexpm/elixir:1.18.5-erlang-27.3.4.17-debian-bookworm-20260824-slim AS build-elixir
 
 # ARG is available during the build and not in the final container
 # https://vsupalov.com/docker-arg-vs-env/
@@ -10,11 +10,12 @@ ARG MIX_ENV=prod
 
 # Install dependencies
 RUN set -xe; \
-    apt-get update && apt-get install -y \
+    apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         ca-certificates \
         git \
-        libmcrypt-dev;
+        libmcrypt-dev; \
+    rm -rf /var/lib/apt/lists/*;
 
 # Use the standard /usr/local/src destination
 COPY . /usr/local/src/recognizer/
@@ -31,7 +32,7 @@ RUN set -xe; \
 # -----------------------------------------------
 # 2) Build assets (relies on Elixir dependencies)
 # -----------------------------------------------
-FROM node:16.20-alpine as build-node
+FROM node:16.20-alpine AS build-node
 
 COPY --from=build-elixir /usr/local/src/recognizer /usr/local/src/recognizer
 WORKDIR /usr/local/src/recognizer/assets
@@ -43,7 +44,7 @@ RUN set -xe; \
 # -----------------------------------------------
 # 3) Build release (combines Node & Elixir)
 # -----------------------------------------------
-FROM build-elixir as build-release
+FROM build-elixir AS build-release
 
 ARG APP_NAME=recognizer
 ARG MIX_ENV=prod
@@ -62,7 +63,7 @@ RUN set -xe; \
 # -----------------------------------------------
 # 4) Build final release image
 # -----------------------------------------------
-FROM debian:11.6-slim as release
+FROM debian:12.11-slim AS release
 
 ARG APP_NAME=recognizer
 
@@ -72,10 +73,11 @@ ARG BUILD_DATE
 ARG VERSION
 
 RUN set -xe; \
-    apt-get update && apt-get install -y \
+    apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         libmcrypt4 \
-        openssl;
+        openssl; \
+    rm -rf /var/lib/apt/lists/*;
 
 # Create a `recognizer` group & user
 # I've been told before it's generally a good practice to reserve ids < 1000 for the system
