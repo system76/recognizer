@@ -30,9 +30,6 @@ defmodule RecognizerWeb.Endpoint do
   plug Bottle.RequestIdPlug
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
-  plug LoggerJSON.Plug,
-    metadata_formatter: LoggerJSON.Plug.MetadataFormatters.DatadogLogger
-
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],

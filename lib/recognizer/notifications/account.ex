@@ -96,7 +96,7 @@ defmodule Recognizer.Notifications.Account do
   end
 
   defp create_message(user, type, args \\ []) do
-    apply(type, :new, [Keyword.merge([user: user], args)])
+    struct!(type, Keyword.merge([user: user], args))
   end
 
   if Application.compile_env(:ex_aws, :enabled) do

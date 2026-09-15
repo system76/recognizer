@@ -29,6 +29,14 @@ defmodule RecognizerWeb.Telemetry do
 
     :ok =
       :telemetry.attach(
+        "logger-json-requests",
+        [:phoenix, :endpoint, :stop],
+        &LoggerJSON.Plug.telemetry_logging_handler/4,
+        :info
+      )
+
+    :ok =
+      :telemetry.attach(
         "spandex-query-tracer-repo_name",
         [:recognizer, :repo, :query],
         &SpandexEcto.TelemetryAdapter.handle_event/4,

@@ -11,7 +11,8 @@ defmodule Recognizer.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      releases: releases()
+      releases: releases(),
+      listeners: [Phoenix.CodeReloader]
     ]
   end
 
@@ -34,10 +35,10 @@ defmodule Recognizer.MixProject do
   defp deps do
     [
       {:argon2_elixir, "~> 2.0"},
-      {:bottle, github: "system76/bottle", ref: "1a49e7bc7d8f7bf556c5780b70e9eb60a06a8ca7"},
+      {:bottle, github: "system76/bottle", ref: "f50cfdb59132ffcbf667a818cf2dd5ecef93d746"},
       {:cors_plug, "~> 2.0"},
-      {:cowboy, "~> 2.8", override: true},
-      {:cowlib, "~> 2.9.1", override: true},
+      {:cowboy, "~> 2.19", override: true},
+      {:cowlib, "~> 2.20", override: true},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:decorator, "~> 1.2"},
       {:ecto_enum, "~> 1.4"},
@@ -48,15 +49,18 @@ defmodule Recognizer.MixProject do
       {:ex_aws, "~> 2.0"},
       {:ex_oauth2_provider, "~> 0.5.6"},
       {:gettext, "~> 0.18"},
-      {:guardian, "~> 2.0"},
+      {:guardian, "~> 2.5"},
       {:guardian_db, "~> 2.1"},
+      # ex_aws_sqs's hackney dep is optional and unused (we configure HTTPoison as the ex_aws
+      # http_client); override so its stale ~> 1.9 pin doesn't block httpoison's real ~> 4.0 need
+      {:hackney, "~> 4.0", override: true},
       {:hammer, "~> 6.0"},
       {:hammer_backend_redis, "~> 6.1"},
       {:hammer_plug, "~> 3.0"},
-      {:httpoison, "~> 1.8.2"},
+      {:httpoison, "~> 3.0"},
       {:jason, "~> 1.0"},
-      {:joken, "~> 2.6.0"},
-      {:logger_json, github: "Nebo15/logger_json", ref: "8e4290a"},
+      {:joken, "~> 2.7"},
+      {:logger_json, "~> 7.0"},
       {:myxql, ">= 0.0.0"},
       {:redix, ">= 0.0.0"},
       {:phoenix_ecto, "~> 4.1"},
@@ -64,12 +68,12 @@ defmodule Recognizer.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_html_helpers, "~> 1.0.1"},
       {:phoenix_view, "~> 2.0.3"},
-      {:phoenix, "~> 1.7.1"},
-      {:plug_cowboy, "~> 2.4"},
+      {:phoenix, "~> 1.8"},
+      {:plug_cowboy, "~> 2.9"},
       {:pot, "~> 1.0.2"},
       {:saxy, "~> 1.1"},
-      {:spandex, "~> 3.0.3"},
-      {:spandex_datadog, "~> 1.1.0"},
+      {:spandex, "~> 3.2"},
+      {:spandex_datadog, "~> 1.4.0"},
       {:spandex_ecto, "~> 0.6.2"},
       {:spandex_phoenix, "~> 1.0.5"},
       {:telemetry_metrics, "~> 0.4"},
