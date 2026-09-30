@@ -353,7 +353,14 @@ defmodule Recognizer.AccountsTest do
 
   describe "reset_user_password/2" do
     setup do
-      %{user: insert(:user)}
+      user = insert(:user)
+
+      _token =
+        extract_user_token(fn url ->
+          Accounts.deliver_user_reset_password_instructions(user, url)
+        end)
+
+      %{user: user}
     end
 
     test "validates password", %{user: user} do
@@ -387,6 +394,33 @@ defmodule Recognizer.AccountsTest do
 
       {:ok, _} =
         Accounts.reset_user_password(user, %{password: @new_valid_password, password_confirmation: @new_valid_password})
+    end
+
+    test "rejects reuse of an already-consumed token", %{user: user} do
+      attrs = %{password: @new_valid_password, password_confirmation: @new_valid_password}
+
+      {:ok, _} = Accounts.reset_user_password(user, attrs)
+
+      assert Accounts.reset_user_password(user, attrs) == {:error, :token_already_used}
+    end
+
+    test "only one of two concurrent resets on the same token succeeds", %{user: user} do
+      attrs_a = %{password: "ConcurrentPassA1!", password_confirmation: "ConcurrentPassA1!"}
+      attrs_b = %{password: "ConcurrentPassB1!", password_confirmation: "ConcurrentPassB1!"}
+      parent = self()
+
+      results =
+        [attrs_a, attrs_b]
+        |> Enum.map(fn attrs ->
+          Task.async(fn ->
+            Ecto.Adapters.SQL.Sandbox.allow(Repo, parent, self())
+            Accounts.reset_user_password(user, attrs)
+          end)
+        end)
+        |> Enum.map(&Task.await/1)
+
+      assert Enum.count(results, &match?({:ok, _}, &1)) == 1
+      assert Enum.count(results, &(&1 == {:error, :token_already_used})) == 1
     end
   end
 

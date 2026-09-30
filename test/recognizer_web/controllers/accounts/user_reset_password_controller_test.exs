@@ -138,5 +138,21 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordControllerTest do
       assert redirected_to(conn) == Routes.user_reset_password_path(conn, :create)
       assert Flash.get(conn.assigns.flash, :error) =~ "Reset password link is invalid or it has expired"
     end
+
+    test "does not allow the same token to reset the password twice", %{conn: conn, token: token} do
+      params = %{
+        "user" => %{
+          "password" => "n@wvAli4dPassw!d",
+          "password_confirmation" => "n@wvAli4dPassw!d"
+        }
+      }
+
+      conn1 = put(conn, Routes.user_reset_password_path(conn, :update, token), params)
+      assert redirected_to(conn1) == Routes.user_session_path(conn1, :new)
+
+      conn2 = put(conn, Routes.user_reset_password_path(conn, :update, token), params)
+      assert redirected_to(conn2) == Routes.user_reset_password_path(conn2, :create)
+      assert Flash.get(conn2.assigns.flash, :error) =~ "Reset password link is invalid or it has expired"
+    end
   end
 end

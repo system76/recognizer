@@ -520,6 +520,15 @@ defmodule Recognizer.Accounts do
   @doc """
   Resets the user password.
 
+  Deletes the user's tokens first and only proceeds if a token was actually
+  deleted. Under InnoDB's default REPEATABLE READ isolation, a `DELETE`
+  takes a lock on matching rows and a concurrent `DELETE` for the same rows
+  blocks until the first transaction commits, then re-checks against the
+  now-committed (deleted) data. So if two requests race on the same reset
+  token, only the one whose `DELETE` commits first will have deleted any
+  rows; the other finds nothing left to delete and gets `:token_already_used`
+  instead of also updating the password.
+
   ## Examples
 
       iex> reset_user_password(user, %{password: "new long password", password_confirmation: "new long password"})
@@ -528,16 +537,23 @@ defmodule Recognizer.Accounts do
       iex> reset_user_password(user, %{password: "valid", password_confirmation: "not the same"})
       {:error, %Ecto.Changeset{}}
 
+      iex> reset_user_password(user, %{password: "new long password", password_confirmation: "new long password"})
+      {:error, :token_already_used}
+
   """
   def reset_user_password(user, attrs) do
     Ecto.Multi.new()
+    |> Ecto.Multi.delete_all(:tokens, user_and_contexts_query(user, :all))
+    |> Ecto.Multi.run(:ensure_token_not_reused, fn _repo, %{tokens: {count, _}} ->
+      if count > 0, do: {:ok, count}, else: {:error, :token_already_used}
+    end)
     |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
     |> Ecto.Multi.delete_all(:oauth, user_and_oauth_access_query(user))
-    |> Ecto.Multi.delete_all(:tokens, user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
+      {:error, :ensure_token_not_reused, :token_already_used, _} -> {:error, :token_already_used}
     end
   end
 
