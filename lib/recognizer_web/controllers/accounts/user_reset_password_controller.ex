@@ -57,6 +57,11 @@ defmodule RecognizerWeb.Accounts.UserResetPasswordController do
         |> put_flash(:info, "Password reset successfully.")
         |> redirect(to: Routes.user_session_path(conn, :new))
 
+      {:error, :token_already_used} ->
+        conn
+        |> put_flash(:error, "Reset password link is invalid or it has expired.")
+        |> redirect(to: Routes.user_reset_password_path(conn, :new))
+
       {:error, changeset} ->
         render(conn, "edit.html", changeset: changeset)
     end
